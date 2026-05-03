@@ -1,0 +1,264 @@
+{
+  "sections": {
+    "edm_hero": {
+      "type": "edm-hero",
+      "blocks": {
+        "stat_1": { "type": "stat", "settings": { "value": "4.9 ★", "label": "1.842 reviews" } },
+        "stat_2": { "type": "stat", "settings": { "value": "100%", "label": "Natural · reef-safe" } },
+        "stat_3": { "type": "stat", "settings": { "value": "Made in", "label": "Medellín · Colombia" } }
+      },
+      "block_order": ["stat_1", "stat_2", "stat_3"],
+      "settings": {
+        "eyebrow": "The Colombian Tanning Ritual",
+        "heading": "Bronceado dorado, nacido en el Caribe",
+        "heading_gold_words": "dorado,caribe",
+        "lead": "Aceites y bronceadores naturales formulados con zanahoria, coco y extractos del trópico colombiano. Un ritual solar pensado para honrar la piel y el mar.",
+        "cta_primary_label": "Comprar ritual",
+        "cta_secondary_label": "Nuestra historia",
+        "accent_text": "Est. MMXX · Medellín",
+        "featured_product_category": "Bronceador",
+        "featured_product_chip": "Best Seller",
+        "color_scheme": "scheme-2",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+
+    "edm_marquee": {
+      "type": "edm-marquee",
+      "blocks": {
+        "ph_1": { "type": "phrase", "settings": { "text": "Bronceado Natural" } },
+        "ph_2": { "type": "phrase", "settings": { "text": "Hecho en Colombia" } },
+        "ph_3": { "type": "phrase", "settings": { "text": "Certificado INVIMA" } },
+        "ph_4": { "type": "phrase", "settings": { "text": "Reef Safe" } },
+        "ph_5": { "type": "phrase", "settings": { "text": "Ingredientes Naturales" } },
+        "ph_6": { "type": "phrase", "settings": { "text": "Dermatólogo Aprobado" } }
+      },
+      "block_order": ["ph_1", "ph_2", "ph_3", "ph_4", "ph_5", "ph_6"],
+      "settings": { "padding_top": 0, "padding_bottom": 0 }
+    },
+
+    "edm_promise_bar": {
+      "type": "edm-promise-bar",
+      "blocks": {
+        "item_shipping": {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='1' y='3' width='15' height='13' rx='1'></rect><path d='M16 8h4l3 3v5h-7V8z'></path><circle cx='5.5' cy='18.5' r='2.5'></circle><circle cx='18.5' cy='18.5' r='2.5'></circle></svg>",
+            "title": "Envío gratis",
+            "subtitle": "en compras desde $80.000"
+          }
+        },
+        "item_derma": {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path><path d='M9 12l2 2 4-4'></path></svg>",
+            "title": "Sello dermatológico",
+            "subtitle": "testado y certificado"
+          }
+        },
+        "item_colombia": {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><path d='M2 12h20'></path><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>",
+            "title": "Hecho en Colombia",
+            "subtitle": "ingredientes naturales, INVIMA vigente"
+          }
+        }
+      },
+      "block_order": ["item_shipping", "item_derma", "item_colombia"],
+      "settings": {
+        "color_scheme": "scheme-3",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+
+    "edm_featured_products": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Nuestros productos",
+        "heading_size": "h2",
+        "collection": "all",
+        "products_to_show": 6,
+        "columns_desktop": 3,
+        "color_scheme": "scheme-1",
+        "show_view_all": true,
+        "swipe_on_mobile": true,
+        "image_ratio": "portrait",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": true,
+        "columns_mobile": "2",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+
+    "edm_ritual": {
+      "type": "edm-ritual",
+      "blocks": {
+        "ing_1": {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Trópico colombiano",
+            "name": "Zanahoria",
+            "description": "Rica en betacaroteno, activa la melanina y potencia el bronceado natural desde la primera aplicación.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 8v4l3 3'/></svg>"
+          }
+        },
+        "ing_2": {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Costa pacífica",
+            "name": "Aceite de coco",
+            "description": "Hidratación profunda y prolongada. Sella la humedad, prolonga el bronceado y deja la piel suave al tacto.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M2 12h20'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/></svg>"
+          }
+        },
+        "ing_3": {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Antioxidante activo",
+            "name": "Vitamina E",
+            "description": "Neutraliza los radicales libres del sol, protege la piel del envejecimiento prematuro y alarga el tono dorado.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>"
+          }
+        }
+      },
+      "block_order": ["ing_1", "ing_2", "ing_3"],
+      "settings": {
+        "eyebrow": "Formulado con propósito",
+        "title": "El poder del trópico",
+        "subtitle": "Activos seleccionados por su potencia y origen natural.",
+        "color_scheme": "scheme-2",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+
+    "edm_bundle_hero": {
+      "type": "edm-bundle-hero",
+      "blocks": {
+        "item_1": { "type": "bundle_item", "settings": { "item_name": "Bronceador Zanahoria 200ml" } },
+        "item_2": { "type": "bundle_item", "settings": { "item_name": "Crema Corporal After-Sun 150ml" } },
+        "item_3": { "type": "bundle_item", "settings": { "item_name": "Sticker Pack exclusivo" } }
+      },
+      "block_order": ["item_1", "item_2", "item_3"],
+      "settings": {
+        "eyebrow": "Bundle estrella",
+        "bundle_name": "Summer Box",
+        "description": "Todo lo que necesitas para un bronceado perfecto, duradero y saludable. Formulado con zanahoria y vitamina E.",
+        "compare_price": "$130.000",
+        "bundle_price": "$95.000",
+        "savings_label": "Ahorra $35.000",
+        "image_badge": "Más vendido",
+        "cta_label": "Quiero mi Summer Box",
+        "secondary_cta_label": "Ver contenido",
+        "show_countdown": false,
+        "color_scheme": "scheme-1",
+        "content_color_scheme": "scheme-2",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+
+    "edm_before_after": {
+      "type": "edm-before-after",
+      "blocks": {
+        "slide_1": { "type": "slide", "settings": { "client_name": "Valentina, Medellín", "result_text": "Bronceado uniforme y duradero. Lo uso cada verano.", "product_used": "Bronceador Zanahoria" } },
+        "slide_2": { "type": "slide", "settings": { "client_name": "Sofía, Cali", "result_text": "Piel más pareja, sin manchas. Mi autobronceador favorito.", "product_used": "Autobronceador" } },
+        "slide_3": { "type": "slide", "settings": { "client_name": "Mariana, Bogotá", "result_text": "El after-sun me dejó la piel como terciopelo.", "product_used": "Crema After-Sun" } },
+        "slide_4": { "type": "slide", "settings": { "client_name": "Camila, Eje Cafetero", "result_text": "Increíble para el día de piscina. No me quema.", "product_used": "Termoprotector" } }
+      },
+      "block_order": ["slide_1", "slide_2", "slide_3", "slide_4"],
+      "settings": {
+        "eyebrow": "Clientas reales",
+        "title": "Resultados que hablan solos",
+        "color_scheme": "scheme-2",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+
+    "edm_reviews_placeholder": {
+      "type": "multicolumn",
+      "blocks": {
+        "review_1": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"El mejor bronceador que he usado en mi vida. Mi piel quedó perfecta para el matrimonio de mi amiga y duró 3 semanas.\"</p><p><em>— Valentina R., Medellín</em></p>" } },
+        "review_2": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"Me lo recomendó mi dermatólogo y no lo cambio por nada. Ingredientes naturales y no me da alergia.\"</p><p><em>— Laura M., Bogotá</em></p>" } },
+        "review_3": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"El Kit See You Sun es lo mejor. Me lo llevo a cada viaje. Huele increíble y el bronceado es super natural.\"</p><p><em>— Daniela P., Cali</em></p>" } }
+      },
+      "block_order": ["review_1", "review_2", "review_3"],
+      "settings": {
+        "title": "Lo que dicen nuestras estrellas",
+        "heading_size": "h2",
+        "image_width": "third",
+        "image_ratio": "adapt",
+        "columns_desktop": 3,
+        "column_alignment": "left",
+        "background_style": "none",
+        "button_label": "Ver todas las reseñas",
+        "button_link": "#judge-me-reviews",
+        "swipe_on_mobile": true,
+        "color_scheme": "scheme-1",
+        "columns_mobile": "1",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+
+    "edm_founder_story": {
+      "type": "edm-founder-story",
+      "blocks": {
+        "stat_1": { "type": "stat", "settings": { "number": "10K+", "label": "clientas felices" } },
+        "stat_2": { "type": "stat", "settings": { "number": "100%", "label": "hecho en Colombia" } },
+        "stat_3": { "type": "stat", "settings": { "number": "4.9★", "label": "calificación promedio" } }
+      },
+      "block_order": ["stat_1", "stat_2", "stat_3"],
+      "settings": {
+        "eyebrow": "Nuestra historia",
+        "title": "Creada con propósito, hecha en Colombia",
+        "body_text": "<p>Estrella de Mar nació en Medellín, de las manos de Juliana — formuladora y apasionada del sol colombiano. Frustrada por bronceadores que maltrataban la piel, decidió crear los suyos: formulados con ingredientes naturales, certificados por el INVIMA y aprobados por dermatólogos.</p><p>Hoy, miles de colombianas los usan para brillar con confianza bajo el sol de su tierra.</p>",
+        "image_position": "left",
+        "image_badge": "Hecho con amor",
+        "cta_label": "Conoce nuestra historia",
+        "cta_url": "/pages/nuestra-historia",
+        "color_scheme": "scheme-2",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+
+    "edm_instagram": {
+      "type": "multicolumn",
+      "blocks": {
+        "ig_1": { "type": "column", "settings": { "title": "@estrellademarco" } }
+      },
+      "block_order": ["ig_1"],
+      "settings": {
+        "title": "Síguenos en Instagram",
+        "heading_size": "h2",
+        "columns_desktop": 1,
+        "column_alignment": "center",
+        "button_label": "Ver @estrellademarco",
+        "button_link": "https://www.instagram.com/estrellademarco/",
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 60
+      }
+    }
+  },
+
+  "order": [
+    "edm_hero",
+    "edm_marquee",
+    "edm_promise_bar",
+    "edm_featured_products",
+    "edm_ritual",
+    "edm_bundle_hero",
+    "edm_before_after",
+    "edm_reviews_placeholder",
+    "edm_founder_story",
+    "edm_instagram"
+  ]
+}

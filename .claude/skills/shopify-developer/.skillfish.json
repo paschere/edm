@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "shopify-developer",
+  "owner": "henkisdabro",
+  "repo": "wookstar-claude-code-plugins",
+  "path": "plugins/shopify-developer/skills/shopify-developer",
+  "branch": "main",
+  "sha": "db8796ef43bbee4f06412a715d251aed415e9143",
+  "source": "manual"
+}

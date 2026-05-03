@@ -1,0 +1,529 @@
+{%- liquid
+  assign bundle_product = all_products[section.settings.bundle_product]
+  assign show_countdown = section.settings.show_countdown
+  assign deadline       = section.settings.countdown_deadline
+-%}
+
+<section
+  class="edm-bh color-{{ section.settings.color_scheme }} gradient"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+>
+  <div class="edm-bh__inner">
+
+    <div class="edm-bh__media">
+      {%- if section.settings.image != blank -%}
+        {{
+          section.settings.image
+          | image_url: width: 1000
+          | image_tag:
+            loading: 'lazy',
+            width: 1000,
+            class: 'edm-bh__img',
+            alt: section.settings.image.alt | default: section.settings.bundle_name
+        }}
+      {%- elsif bundle_product != empty and bundle_product.featured_image -%}
+        {{
+          bundle_product.featured_image
+          | image_url: width: 1000
+          | image_tag:
+            loading: 'lazy',
+            width: 1000,
+            class: 'edm-bh__img',
+            alt: bundle_product.title
+        }}
+      {%- else -%}
+        <div class="edm-bh__placeholder" aria-hidden="true">
+          <span class="edm-bh__placeholder-txt">Summer Box</span>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.image_badge != blank -%}
+        <span class="edm-bh__badge">{{ section.settings.image_badge }}</span>
+      {%- endif -%}
+
+      <div class="edm-bh__media-wash" aria-hidden="true"></div>
+    </div>
+
+    <div class="edm-bh__copy color-{{ section.settings.content_color_scheme }} gradient">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-bh__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+
+      <h2 class="edm-bh__name">{{ section.settings.bundle_name | default: 'Bundle Estrella' }}</h2>
+
+      {%- if section.settings.description != blank -%}
+        <p class="edm-bh__desc">{{ section.settings.description }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="edm-bh__items">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'bundle_item' -%}
+              <li class="edm-bh__item" {{ block.shopify_attributes }}>
+                <span class="edm-bh__check" aria-hidden="true">
+                  <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true"><path d="M1 4.5L4 7.5L10 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                {{ block.settings.item_name }}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <div class="edm-bh__pricing">
+        {%- if section.settings.compare_price != blank -%}
+          <s class="edm-bh__compare" aria-label="Precio regular: {{ section.settings.compare_price }}">{{ section.settings.compare_price }}</s>
+        {%- endif -%}
+        <span class="edm-bh__price">{{ section.settings.bundle_price | default: '$95.000' }}</span>
+        {%- if section.settings.savings_label != blank -%}
+          <span class="edm-bh__saving">{{ section.settings.savings_label }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- if show_countdown and deadline != blank -%}
+        <div
+          class="edm-bh__countdown"
+          x-data="edmBundleCountdown('{{ deadline }}')"
+          x-init="start()"
+          aria-live="polite"
+        >
+          <span class="edm-bh__countdown-label">Oferta termina en</span>
+          <div class="edm-bh__countdown-units">
+            <div class="edm-bh__unit"><span x-text="hours">--</span><small>h</small></div>
+            <span class="edm-bh__colon">:</span>
+            <div class="edm-bh__unit"><span x-text="minutes">--</span><small>m</small></div>
+            <span class="edm-bh__colon">:</span>
+            <div class="edm-bh__unit"><span x-text="seconds">--</span><small>s</small></div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <div class="edm-bh__actions">
+        {%- if section.settings.cta_label != blank -%}
+          <a href="{{ section.settings.cta_url | default: '#' }}" class="edm-bh__btn">
+            <span>{{ section.settings.cta_label }}</span>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.secondary_cta_label != blank -%}
+          <a href="{{ section.settings.secondary_cta_url | default: '#' }}" class="edm-bh__ghost">
+            {{ section.settings.secondary_cta_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{%- if show_countdown and deadline != blank -%}
+<script>
+  function edmBundleCountdown(deadline) {
+    return {
+      hours: '--', minutes: '--', seconds: '--', interval: null,
+      start() {
+        const end = new Date(deadline).getTime();
+        const tick = () => {
+          const diff = end - Date.now();
+          if (diff <= 0) { this.hours = '00'; this.minutes = '00'; this.seconds = '00'; clearInterval(this.interval); return; }
+          this.hours   = String(Math.floor(diff / 3600000)).padStart(2, '0');
+          this.minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+          this.seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        };
+        tick(); this.interval = setInterval(tick, 1000);
+      }
+    };
+  }
+</script>
+{%- endif -%}
+
+{% stylesheet %}
+.edm-bh { overflow: hidden; }
+
+.edm-bh__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 600px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.edm-bh__media {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #c8935a, #a06030);
+}
+.edm-bh__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.edm-bh:hover .edm-bh__img { transform: scale(1.03); }
+
+.edm-bh__placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  background: linear-gradient(145deg, #d4954e 0%, #e8aa5c 30%, #c47830 65%, #7a3e10 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edm-bh__placeholder-txt {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-style: italic;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(251, 248, 241, 0.4);
+}
+
+.edm-bh__media-wash {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to right, transparent 60%, rgba(11, 8, 5, 0.15) 100%);
+}
+
+.edm-bh__badge {
+  position: absolute; top: 2.4rem; left: 2.4rem;
+  background: rgba(11, 8, 5, 0.85);
+  color: #d0b16a;
+  font-size: 1.1rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.8rem 1.6rem;
+  border-radius: 50px;
+}
+
+.edm-bh__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 6.4rem 6rem 5.6rem;
+  gap: 2.8rem;
+}
+
+.edm-bh__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0;
+}
+.edm-bh__eyebrow::before {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.edm-bh__name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4.4rem, 4.5vw, 6.4rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  color: #0b0805;
+  margin: 0;
+}
+
+.edm-bh__desc {
+  font-size: 1.65rem;
+  color: #4a3f2f;
+  line-height: 1.72;
+  margin: 0;
+  max-width: 460px;
+}
+
+.edm-bh__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.edm-bh__item {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  font-size: 1.6rem;
+  color: #0b0805;
+}
+.edm-bh__check {
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  background: rgba(157, 127, 50, 0.12);
+  border: 1px solid rgba(157, 127, 50, 0.3);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #9d7f32;
+}
+
+.edm-bh__pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  padding-top: 2.4rem;
+  border-top: 1px solid rgba(11, 8, 5, 0.1);
+}
+.edm-bh__compare {
+  font-size: 2rem;
+  color: #78695a;
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.edm-bh__price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 5rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #0b0805;
+  line-height: 1;
+}
+.edm-bh__saving {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.4rem;
+  background: rgba(157, 127, 50, 0.1);
+  border: 1px solid rgba(157, 127, 50, 0.25);
+  color: #9d7f32;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+
+.edm-bh__countdown {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+}
+.edm-bh__countdown-label { font-size: 1.3rem; color: #78695a; letter-spacing: 0.04em; }
+.edm-bh__countdown-units { display: flex; align-items: center; gap: 0.8rem; }
+.edm-bh__unit {
+  display: flex; align-items: baseline; gap: 0.4rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.6rem; font-weight: 500; color: #0b0805;
+}
+.edm-bh__unit small { font-size: 1.2rem; color: #78695a; font-family: inherit; }
+.edm-bh__colon { font-size: 2rem; color: #78695a; }
+
+.edm-bh__actions {
+  display: flex;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+}
+.edm-bh__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 1.6rem 3.2rem;
+  font-size: 1.25rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
+  border-radius: 2px; border: none; cursor: pointer; text-decoration: none;
+  position: relative; overflow: hidden;
+  background: #0b0805; color: #fbf8f1;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
+}
+.edm-bh__btn span { position: relative; z-index: 1; transition: color 0.3s; }
+.edm-bh__btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  opacity: 0; transition: opacity 0.3s;
+}
+.edm-bh__btn:hover::after { opacity: 1; }
+.edm-bh__btn:hover span { color: #0b0805; }
+.edm-bh__btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(157, 127, 50, 0.5); }
+
+.edm-bh__ghost {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 1.6rem 3.2rem;
+  font-size: 1.25rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
+  border-radius: 2px; border: 1.5px solid rgba(11, 8, 5, 0.35);
+  background: transparent; color: #0b0805; cursor: pointer; text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.edm-bh__ghost:hover { border-color: #0b0805; background: #0b0805; color: #fbf8f1; transform: translateY(-2px); }
+
+@media (max-width: 989px) {
+  .edm-bh__inner { grid-template-columns: 1fr; min-height: auto; }
+  .edm-bh__media { min-height: 56vw; }
+  .edm-bh__copy { padding: 4.8rem 3.2rem; }
+  .edm-bh__name { font-size: clamp(4rem, 8vw, 6rem); }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Bundle hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "product",
+      "id": "bundle_product",
+      "label": "Producto bundle (imagen automática)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen manual (prioridad)"
+    },
+    {
+      "type": "text",
+      "id": "image_badge",
+      "label": "Badge sobre imagen",
+      "default": "Más vendido"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Kicker",
+      "default": "Bundle estrella"
+    },
+    {
+      "type": "text",
+      "id": "bundle_name",
+      "label": "Nombre del bundle",
+      "default": "Summer Box"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción",
+      "default": "Todo lo que necesitas para un bronceado perfecto, duradero y saludable."
+    },
+    {
+      "type": "text",
+      "id": "compare_price",
+      "label": "Precio tachado",
+      "default": "$130.000"
+    },
+    {
+      "type": "text",
+      "id": "bundle_price",
+      "label": "Precio bundle",
+      "default": "$95.000"
+    },
+    {
+      "type": "text",
+      "id": "savings_label",
+      "label": "Etiqueta ahorro",
+      "default": "Ahorra $35.000"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA principal",
+      "default": "Quiero mi Summer Box"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Destino CTA"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_label",
+      "label": "CTA secundario",
+      "default": "Ver contenido"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_url",
+      "label": "Destino CTA secundario"
+    },
+    {
+      "type": "header",
+      "content": "Countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Mostrar countdown",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "countdown_deadline",
+      "label": "Fecha límite ISO (2025-12-31T23:59:59)",
+      "default": "2025-12-31T23:59:59"
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Fondo sección",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "content_color_scheme",
+      "label": "Fondo panel texto",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro" }
+      ],
+      "default": "scheme-2"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bundle_item",
+      "name": "Ítem del bundle",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "text",
+          "id": "item_name",
+          "label": "Nombre del ítem",
+          "default": "Bronceador Zanahoria 200ml"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle hero",
+      "blocks": [
+        { "type": "bundle_item", "settings": { "item_name": "Bronceador Zanahoria 200ml" } },
+        { "type": "bundle_item", "settings": { "item_name": "Crema Corporal After-Sun 150ml" } },
+        { "type": "bundle_item", "settings": { "item_name": "Sticker Pack exclusivo" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

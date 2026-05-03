@@ -1,0 +1,15 @@
+{
+  "name": "edm-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter ./apps/theme build",
+    "dev": "pnpm --filter ./apps/theme dev",
+    "dashboard": "pnpm --filter ./apps/dashboard dev",
+    "dashboard:build": "pnpm --filter ./apps/dashboard build"
+  }
+}

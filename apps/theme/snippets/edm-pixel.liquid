@@ -1,0 +1,68 @@
+<script>
+(function () {
+  var endpoint = {{ settings.edm_pixel_endpoint | json }};
+  if (!endpoint) return;
+
+  // Sesión persistente por navegador
+  var sessionId = sessionStorage.getItem('edm_sid');
+  if (!sessionId) {
+    sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sessionStorage.setItem('edm_sid', sessionId);
+  }
+
+  function track(eventType, data) {
+    var payload = JSON.stringify(
+      Object.assign({ eventType: eventType, sessionId: sessionId }, data)
+    );
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(endpoint, new Blob([payload], { type: 'application/json' }));
+    } else {
+      fetch(endpoint, { method: 'POST', body: payload, keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(function () {});
+    }
+  }
+
+  // ── Page viewed ──────────────────────────────────────────────────────────
+  track('page_viewed', { url: window.location.href });
+
+  // ── Product viewed ───────────────────────────────────────────────────────
+  {%- if template.name == 'product' -%}
+  track('product_viewed', {
+    productId: {{ product.id | json }},
+    productTitle: {{ product.title | json }},
+    url: window.location.href
+  });
+  {%- endif -%}
+
+  // ── Cart viewed ──────────────────────────────────────────────────────────
+  {%- if template.name == 'cart' -%}
+  track('cart_viewed', {
+    cartTotal: {{ cart.total_price | divided_by: 100.0 | json }},
+    url: window.location.href
+  });
+  {%- endif -%}
+
+  // ── Add to cart — intercepta el submit del formulario de producto ─────────
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (
+      form.matches('[action*="/cart/add"]') ||
+      form.id === 'product_form' ||
+      form.classList.contains('product-form')
+    ) {
+      var productIdInput = form.querySelector('[name="id"]');
+      track('product_added_to_cart', {
+        productId: productIdInput ? productIdInput.value : null,
+        url: window.location.href
+      });
+    }
+  });
+
+  // ── Checkout started — click en botón de checkout ────────────────────────
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[name="checkout"], [href*="/checkout"], .cart__checkout-button');
+    if (btn) {
+      track('checkout_started', { url: window.location.href });
+    }
+  });
+})();
+</script>

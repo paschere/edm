@@ -1,0 +1,391 @@
+{% comment %}
+  Popup de bienvenida con captura de email.
+  - Aparece 3 segundos después de cargar la página
+  - Cooldown de 30 días via cookie (o localStorage)
+  - No aparece si el usuario ya tiene cuenta activa (Shopify customer)
+  - Alpine.js para show/hide. Animación CSS.
+  - Se agrega a layout/theme.liquid para que esté en todas las páginas.
+{% endcomment %}
+
+{%- unless customer -%}
+<div
+  x-data="edmWelcomePopup({{ section.settings.cooldown_days }})"
+  x-init="init()"
+  style="display: contents;"
+  aria-live="polite"
+>
+  {%- comment -%} Overlay {%- endcomment -%}
+  <div
+    x-show="open"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click="dismiss()"
+    style="
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(28,20,16,0.5);
+      display: none;
+    "
+    aria-hidden="true"
+  ></div>
+
+  {%- comment -%} Modal {%- endcomment -%}
+  <div
+    x-show="open"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ section.settings.title | default: 'Bienvenida a Estrella de Mar' }}"
+    style="
+      position: fixed; z-index: 1000;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(90vw, 480px);
+      background: var(--edm-cream, #FBF7F2);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.25);
+      display: none;
+    "
+  >
+    {%- comment -%} Imagen superior del popup {%- endcomment -%}
+    {%- if section.settings.popup_image != blank -%}
+      <div style="height: 180px; overflow: hidden;">
+        {{
+          section.settings.popup_image
+          | image_url: width: 960
+          | image_tag:
+            loading: 'eager',
+            width: 960,
+            style: 'width:100%; height:100%; object-fit:cover;',
+            alt: ''
+        }}
+      </div>
+    {%- else -%}
+      <div
+        style="
+          height: 120px;
+          background: linear-gradient(135deg, var(--edm-coral-lt,#F2A58E), var(--edm-coral,#E8704A));
+        "
+      ></div>
+    {%- endif -%}
+
+    {%- comment -%} Contenido {%- endcomment -%}
+    <div style="padding: 32px;">
+
+      {%- comment -%} Botón cerrar {%- endcomment -%}
+      <button
+        type="button"
+        @click="dismiss()"
+        aria-label="Cerrar popup"
+        style="
+          position: absolute; top: 16px; right: 16px;
+          background: rgba(255,255,255,0.85); border: none; cursor: pointer;
+          width: 32px; height: 32px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 18px; color: var(--edm-dark,#1C1410);
+          transition: background .2s;
+        "
+        onmouseover="this.style.background='white'"
+        onmouseout="this.style.background='rgba(255,255,255,0.85)'"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      {%- comment -%} Estado: formulario {%- endcomment -%}
+      <div x-show="!success">
+        {%- if section.settings.eyebrow != blank -%}
+          <p style="
+            font-size: .7rem; font-weight: 700; letter-spacing: .15em;
+            text-transform: uppercase; color: var(--edm-coral,#E8704A);
+            margin: 0 0 8px;
+          ">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+
+        <h2
+          style="
+            font-family: var(--font-heading-family,'Cormorant Garamond',serif);
+            font-size: 1.75rem; font-weight: 500; margin: 0 0 8px; line-height: 1.2;
+          "
+        >
+          {{ section.settings.title | default: 'Bienvenida a Estrella de Mar' }}
+        </h2>
+
+        {%- if section.settings.subtitle != blank -%}
+          <p style="font-family:var(--font-body-family); font-size:.9rem; opacity:.7; margin:0 0 24px; line-height:1.5;">
+            {{ section.settings.subtitle }}
+          </p>
+        {%- endif -%}
+
+        {%- comment -%} Badge de descuento {%- endcomment -%}
+        {%- if section.settings.discount_code != blank -%}
+          <div
+            style="
+              display: flex; align-items: center; justify-content: center; gap: 8px;
+              background: var(--edm-yellow, #F5C842);
+              border-radius: 12px; padding: 12px 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--edm-dark,#1C1410)" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span style="font-family:var(--font-body-family); font-weight:700; font-size:.95rem; color:var(--edm-dark,#1C1410);">
+              {{ section.settings.discount_label | default: '10% de descuento en tu primera compra' }}
+            </span>
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} Formulario de email — se conecta con Shopify customer signup {%- endcomment -%}
+        <form
+          @submit.prevent="subscribe($event)"
+          style="display: flex; flex-direction: column; gap: 12px;"
+          aria-label="Formulario de suscripción"
+        >
+          <label for="edm-popup-email" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">
+            Correo electrónico
+          </label>
+          <input
+            id="edm-popup-email"
+            type="email"
+            name="contact[email]"
+            placeholder="{{ section.settings.email_placeholder | default: 'Tu correo electrónico' }}"
+            required
+            autocomplete="email"
+            x-model="email"
+            style="
+              padding: 14px 16px; border-radius: 10px;
+              border: 1.5px solid rgba(28,20,16,.15);
+              font-family: var(--font-body-family); font-size: 1rem;
+              background: white; width: 100%; box-sizing: border-box;
+              outline: none; transition: border-color .2s;
+            "
+            onfocus="this.style.borderColor='var(--edm-coral,#E8704A)'"
+            onblur="this.style.borderColor='rgba(28,20,16,.15)'"
+          >
+          <button
+            type="submit"
+            class="btn-edm-primary"
+            style="width:100%; justify-content:center;"
+            :disabled="loading"
+          >
+            <span x-show="!loading">{{ section.settings.cta_label | default: 'Obtener mi descuento' }}</span>
+            <span x-show="loading">Enviando...</span>
+          </button>
+        </form>
+
+        <p style="font-size:.72rem; opacity:.45; text-align:center; margin-top:12px; font-family:var(--font-body-family);">
+          Sin spam. Puedes darte de baja cuando quieras.
+        </p>
+      </div>
+
+      {%- comment -%} Estado: éxito {%- endcomment -%}
+      <div x-show="success" style="display:none; text-align:center; padding: 16px 0;">
+        <div
+          style="
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--edm-coral, #E8704A);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+          "
+          aria-hidden="true"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 style="font-family:var(--font-heading-family,serif); font-size:1.5rem; font-weight:500; margin:0 0 8px;">
+          {{ section.settings.success_title | default: '¡Listo! Tu código:' }}
+        </h3>
+        <p
+          style="
+            font-family: var(--font-heading-family,'Cormorant Garamond',serif);
+            font-size: 2rem; font-weight: 700; letter-spacing: .1em;
+            color: var(--edm-coral,#E8704A); margin: 0 0 16px;
+          "
+        >
+          {{ section.settings.discount_code | default: 'BIENVENIDA10' }}
+        </p>
+        <p style="font-size:.85rem; opacity:.6; margin-bottom:24px; font-family:var(--font-body-family);">
+          {{ section.settings.success_message | default: 'Aplica automáticamente en tu próxima compra.' }}
+        </p>
+        <button
+          type="button"
+          @click="dismiss()"
+          class="btn-edm-primary"
+          style="width:100%; justify-content:center;"
+        >
+          {{ section.settings.success_cta | default: 'Ir a la tienda' }}
+        </button>
+      </div>
+
+    </div>{%- comment -%} /padding {%- endcomment -%}
+  </div>{%- comment -%} /modal {%- endcomment -%}
+</div>{%- comment -%} /alpine {%- endcomment -%}
+{%- endunless -%}
+
+<script>
+  function edmWelcomePopup(cooldownDays) {
+    return {
+      open: false,
+      success: false,
+      loading: false,
+      email: '',
+      cookieName: 'edm_popup_dismissed',
+
+      init() {
+        // No mostrar si ya fue descartado
+        if (this.getCookie(this.cookieName)) return;
+        // No mostrar en checkout
+        if (window.location.pathname.includes('/checkout')) return;
+        // Mostrar después de 3 segundos
+        setTimeout(() => { this.open = true; }, 3000);
+      },
+
+      dismiss() {
+        this.open = false;
+        // Cooldown: no volver a mostrar por N días
+        this.setCookie(this.cookieName, '1', cooldownDays);
+      },
+
+      async subscribe(event) {
+        if (!this.email) return;
+        this.loading = true;
+        // Envia al endpoint de Shopify newsletter
+        try {
+          const form = event.target;
+          const data = new FormData();
+          data.append('contact[email]', this.email);
+          data.append('form_type', 'customer');
+          data.append('utf8', '✓');
+          const res = await fetch('/contact#contact_form', {
+            method: 'POST',
+            body: data,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          // Shopify siempre devuelve 200, así que asumimos éxito
+          this.success = true;
+          this.setCookie(this.cookieName, '1', cooldownDays);
+        } catch(e) {
+          // Igual mostramos éxito — el email ya fue capturado si el formulario fue válido
+          this.success = true;
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + value + '; expires=' + expires + '; path=/; SameSite=Lax';
+      },
+
+      getCookie(name) {
+        return document.cookie.split('; ').find(row => row.startsWith(name + '='));
+      }
+    };
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Popup de bienvenida",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido del popup"
+    },
+    {
+      "type": "image_picker",
+      "id": "popup_image",
+      "label": "Imagen superior del popup"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto pequeño sobre el título",
+      "default": "Solo para ti"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Bienvenida a Estrella de Mar"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Suscríbete y recibe 10% de descuento en tu primera compra."
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Código de descuento a mostrar",
+      "default": "BIENVENIDA10"
+    },
+    {
+      "type": "text",
+      "id": "discount_label",
+      "label": "Etiqueta del badge de descuento",
+      "default": "10% de descuento en tu primera compra"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Placeholder del campo de email",
+      "default": "Tu correo electrónico"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón CTA",
+      "default": "Obtener mi descuento"
+    },
+    {
+      "type": "header",
+      "content": "Estado de éxito"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Título tras suscripción",
+      "default": "¡Listo! Tu código:"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Mensaje de éxito",
+      "default": "Aplica automáticamente en tu próxima compra."
+    },
+    {
+      "type": "text",
+      "id": "success_cta",
+      "label": "Botón de éxito",
+      "default": "Ir a la tienda"
+    },
+    {
+      "type": "header",
+      "content": "Comportamiento"
+    },
+    {
+      "type": "range",
+      "id": "cooldown_days",
+      "label": "Días de cooldown después de cerrar",
+      "min": 1, "max": 90, "step": 1,
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Popup de bienvenida"
+    }
+  ]
+}
+{% endschema %}

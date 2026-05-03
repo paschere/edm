@@ -1,0 +1,142 @@
+{% comment %}
+  Tarjeta visual de bundle — reutilizable para mostrar bundles
+  en colecciones, upsells, secciones custom, etc.
+
+  Uso:
+    {% render 'edm-bundle-card',
+      title: 'Summer Box',
+      subtitle: '3 productos esenciales',
+      image: image_object,
+      items: 'Bronceador,Crema Corporal,Sticker Pack',
+      compare_price: '$130.000',
+      price: '$95.000',
+      savings: 'Ahorra $35.000',
+      url: '/products/summer-box',
+      badge: 'Más vendido'
+    %}
+
+  Todos los parámetros son opcionales excepto `title` y `price`.
+{% endcomment %}
+
+<article
+  class="edm-bundle-card"
+  style="
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .25s, box-shadow .25s;
+    position: relative;
+  "
+  onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 40px rgba(28,20,16,.12)';"
+  onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+>
+
+  {%- comment -%} Badge opcional {%- endcomment -%}
+  {%- if badge != blank -%}
+    <span
+      style="
+        position: absolute; top: 12px; left: 12px; z-index: 1;
+        background: var(--edm-yellow, #F5C842);
+        color: var(--edm-dark, #1C1410);
+        font-size: .7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .08em; padding: 4px 12px; border-radius: 40px;
+      "
+    >
+      {{ badge }}
+    </span>
+  {%- endif -%}
+
+  {%- comment -%} Imagen {%- endcomment -%}
+  {%- if image != blank -%}
+    <a
+      href="{{ url | default: '#' }}"
+      style="display:block; aspect-ratio:4/3; overflow:hidden;"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      {{
+        image
+        | image_url: width: 600
+        | image_tag:
+          loading: 'lazy',
+          width: 600,
+          style: 'width:100%; height:100%; object-fit:cover; transition:transform .4s;',
+          alt: title,
+          class: 'edm-bundle-card__img'
+      }}
+    </a>
+  {%- else -%}
+    <div
+      style="
+        aspect-ratio: 4/3;
+        background: linear-gradient(135deg, var(--edm-sand,#F5EDE4), var(--edm-rose,#F0C4B8));
+      "
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+
+  {%- comment -%} Contenido {%- endcomment -%}
+  <div style="padding: 20px; display:flex; flex-direction:column; gap:10px; flex:1;">
+
+    {%- if subtitle != blank -%}
+      <p style="font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--edm-coral,#E8704A); margin:0;">
+        {{ subtitle }}
+      </p>
+    {%- endif -%}
+
+    <h3 style="font-family:var(--font-heading-family,'Cormorant Garamond',serif); font-size:1.35rem; font-weight:500; margin:0; line-height:1.2;">
+      <a
+        href="{{ url | default: '#' }}"
+        style="text-decoration:none; color:inherit;"
+      >{{ title }}</a>
+    </h3>
+
+    {%- comment -%} Lista de ítems incluidos {%- endcomment -%}
+    {%- if items != blank -%}
+      {%- assign item_list = items | split: ',' -%}
+      <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:4px;">
+        {%- for item in item_list -%}
+          <li style="display:flex; align-items:center; gap:6px; font-size:.8rem; opacity:.7; font-family:var(--font-body-family);">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
+              <path d="M1 4L3.5 6.5L9 1" stroke="var(--edm-coral,#E8704A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ item | strip }}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%} Precios {%- endcomment -%}
+    <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:8px; border-top:1px solid rgba(28,20,16,.06);">
+      {%- if compare_price != blank -%}
+        <s style="font-size:.9rem; opacity:.4; font-family:var(--font-body-family);">{{ compare_price }}</s>
+      {%- endif -%}
+      <span style="font-family:var(--font-heading-family,'Cormorant Garamond',serif); font-size:1.5rem; font-weight:600; color:var(--edm-coral,#E8704A);">
+        {{ price }}
+      </span>
+      {%- if savings != blank -%}
+        <span style="background:var(--edm-yellow,#F5C842); color:var(--edm-dark,#1C1410); font-size:.65rem; font-weight:700; padding:3px 8px; border-radius:40px; text-transform:uppercase; letter-spacing:.06em;">
+          {{ savings }}
+        </span>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} CTA {%- endcomment -%}
+    <a
+      href="{{ url | default: '#' }}"
+      class="btn-edm-primary"
+      style="text-decoration:none; justify-content:center;"
+    >
+      {{ cta_label | default: 'Ver bundle' }}
+    </a>
+
+  </div>
+</article>
+
+<style>
+  .edm-bundle-card:hover .edm-bundle-card__img {
+    transform: scale(1.04);
+  }
+</style>

@@ -1,0 +1,92 @@
+{% comment %}
+  Indicador de stock bajo — muestra urgencia si queda poco inventario.
+  Solo se muestra si inventory_quantity es rastreable y está bajo el umbral.
+
+  Uso (en main-product.liquid, dentro del form de variante):
+    {% render 'edm-low-stock', product: product, variant: current_variant %}
+
+  Parámetros:
+    product         — objeto product de Shopify
+    variant         — variante actualmente seleccionada
+    threshold       — umbral de "stock bajo" (default: 5)
+{% endcomment %}
+
+{%- liquid
+  assign low_threshold = threshold | default: 5
+  assign v             = variant | default: product.selected_or_first_available_variant
+  assign qty           = v.inventory_quantity
+  assign policy        = v.inventory_policy
+  assign management    = v.inventory_management
+-%}
+
+{%- comment -%}
+  Solo mostrar si:
+  1. El inventario está siendo rastreado (management = 'shopify')
+  2. La política es 'deny' (no se permite seguir vendiendo sin stock)
+  3. La cantidad está entre 1 y el umbral
+{%- endcomment -%}
+
+{%- if management == 'shopify' and policy == 'deny' and qty > 0 and qty <= low_threshold -%}
+  <div
+    class="edm-low-stock"
+    aria-live="polite"
+    aria-label="{{ qty }} unidades disponibles"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-body-family);
+      font-size: .8rem;
+      font-weight: 600;
+      color: #B54708;
+      margin-top: 8px;
+    "
+  >
+    {%- comment -%} Indicador visual de urgencia {%- endcomment -%}
+    <span
+      style="
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #F59E0B;
+        animation: edmPulse 1.5s ease-in-out infinite;
+        flex-shrink: 0;
+      "
+      aria-hidden="true"
+    ></span>
+
+    {%- if qty == 1 -%}
+      ¡Última unidad disponible!
+    {%- elsif qty <= 3 -%}
+      ¡Solo {{ qty }} unidades disponibles!
+    {%- else -%}
+      Quedan {{ qty }} unidades — ¡no te quedes sin el tuyo!
+    {%- endif -%}
+  </div>
+
+  <style>
+    @keyframes edmPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(1.3); }
+    }
+  </style>
+
+{%- elsif management == 'shopify' and policy == 'deny' and qty <= 0 -%}
+  {%- comment -%} Producto agotado — mostrar mensaje diferente {%- endcomment -%}
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-body-family);
+      font-size: .8rem;
+      font-weight: 600;
+      color: #6B7280;
+      margin-top: 8px;
+    "
+    aria-label="Producto agotado"
+  >
+    <span style="width:8px; height:8px; border-radius:50%; background:#9CA3AF; display:inline-block;" aria-hidden="true"></span>
+    Temporalmente agotado
+  </div>
+{%- endif -%}

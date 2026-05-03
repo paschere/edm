@@ -1,0 +1,19 @@
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.shopify
+
+# Vite build output — compiled bundles are not committed
+assets/*.js
+assets/*.css
+# Keep Vite manifest — vite-tag snippet needs it at runtime
+!assets/.vite/manifest.json
+
+# Node tooling
+node_modules/

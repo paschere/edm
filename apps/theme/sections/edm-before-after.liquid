@@ -1,0 +1,380 @@
+{% comment %}
+  Carrusel de antes/después — swipe móvil con CSS scroll-snap.
+  Cada slide: foto clienta, nombre, resultado, hashtag.
+  Desktop: 3 cards visibles. Móvil: 1.2 cards (peek del siguiente).
+{% endcomment %}
+
+<section
+  class="edm-before-after color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  aria-label="Transformaciones de clientas"
+>
+
+  {%- comment -%} Encabezado {%- endcomment -%}
+  <div
+    class="page-width"
+    style="
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 32px;
+    "
+  >
+    <div>
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="section-eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 class="section-title" style="margin: 0;">
+        {{ section.settings.title | default: 'Resultados reales' }}
+      </h2>
+    </div>
+
+    {%- comment -%} Flechas desktop {%- endcomment -%}
+    <div
+      class="edm-ba-arrows"
+      style="display: flex; gap: 8px;"
+      aria-label="Navegación del carrusel"
+    >
+      <button
+        type="button"
+        aria-label="Anterior"
+        onclick="edmBAScroll('{{ section.id }}', -1)"
+        style="
+          width: 44px; height: 44px; border-radius: 50%;
+          border: 1.5px solid rgba(28,20,16,.2); background: white;
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          transition: all .2s;
+        "
+        onmouseover="this.style.background='var(--edm-coral,#E8704A)'; this.style.borderColor='var(--edm-coral,#E8704A)'; this.style.color='white';"
+        onmouseout="this.style.background='white'; this.style.borderColor='rgba(28,20,16,.2)'; this.style.color='inherit';"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        aria-label="Siguiente"
+        onclick="edmBAScroll('{{ section.id }}', 1)"
+        style="
+          width: 44px; height: 44px; border-radius: 50%;
+          border: 1.5px solid rgba(28,20,16,.2); background: white;
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          transition: all .2s;
+        "
+        onmouseover="this.style.background='var(--edm-coral,#E8704A)'; this.style.borderColor='var(--edm-coral,#E8704A)'; this.style.color='white';"
+        onmouseout="this.style.background='white'; this.style.borderColor='rgba(28,20,16,.2)'; this.style.color='inherit';"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {%- comment -%} Track del carrusel {%- endcomment -%}
+  <div
+    id="edm-ba-track-{{ section.id }}"
+    style="
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 max(16px, calc((100vw - {{ settings.page_width }}px) / 2 + 16px));
+      padding-bottom: 4px;
+    "
+    role="list"
+    aria-label="Transformaciones"
+  >
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'slide' -%}
+        <article
+          class="edm-ba-card"
+          style="
+            flex: 0 0 calc(33.333% - 12px);
+            min-width: 280px;
+            scroll-snap-align: start;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+          "
+          role="listitem"
+          {{ block.shopify_attributes }}
+        >
+          {%- comment -%} Imágenes antes/después side-by-side {%- endcomment -%}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; position: relative;">
+
+            {%- if block.settings.before_image != blank -%}
+              <div style="position: relative; aspect-ratio: 3/4; overflow: hidden;">
+                {{
+                  block.settings.before_image
+                  | image_url: width: 400
+                  | image_tag:
+                    loading: 'lazy',
+                    width: 400,
+                    style: 'width:100%; height:100%; object-fit:cover;',
+                    alt: 'Antes — ' | append: block.settings.client_name
+                }}
+                <span
+                  style="
+                    position: absolute; bottom: 8px; left: 8px;
+                    background: rgba(28,20,16,.5); color: white;
+                    font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+                    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+                  "
+                >Antes</span>
+              </div>
+            {%- else -%}
+              <div
+                style="
+                  aspect-ratio: 3/4;
+                  background: linear-gradient(135deg, #F5EDE4, #E0D5CB);
+                  display: flex; align-items: center; justify-content: center;
+                "
+              >
+                <span style="font-size:.75rem; opacity:.4;">Foto antes</span>
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.after_image != blank -%}
+              <div style="position: relative; aspect-ratio: 3/4; overflow: hidden;">
+                {{
+                  block.settings.after_image
+                  | image_url: width: 400
+                  | image_tag:
+                    loading: 'lazy',
+                    width: 400,
+                    style: 'width:100%; height:100%; object-fit:cover;',
+                    alt: 'Después — ' | append: block.settings.client_name
+                }}
+                <span
+                  style="
+                    position: absolute; bottom: 8px; right: 8px;
+                    background: var(--edm-coral, #E8704A); color: white;
+                    font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+                    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+                  "
+                >Después</span>
+              </div>
+            {%- else -%}
+              <div
+                style="
+                  aspect-ratio: 3/4;
+                  background: linear-gradient(135deg, #F2A58E, #E8704A);
+                  display: flex; align-items: center; justify-content: center;
+                "
+              >
+                <span style="font-size:.75rem; color:white; opacity:.7;">Foto después</span>
+              </div>
+            {%- endif -%}
+
+          </div>{%- comment -%} /imágenes {%- endcomment -%}
+
+          {%- comment -%} Texto del slide {%- endcomment -%}
+          <div style="padding: 20px;">
+            {%- if block.settings.client_name != blank -%}
+              <p
+                style="
+                  font-family: var(--font-heading-family, 'Cormorant Garamond', serif);
+                  font-size: 1.25rem; font-weight: 500; margin: 0 0 4px;
+                "
+              >
+                {{ block.settings.client_name }}
+              </p>
+            {%- endif -%}
+            {%- if block.settings.result_text != blank -%}
+              <p
+                style="
+                  font-family: var(--font-body-family); font-size: .85rem;
+                  opacity: .7; margin: 0 0 8px; line-height: 1.5;
+                "
+              >
+                {{ block.settings.result_text }}
+              </p>
+            {%- endif -%}
+            {%- if block.settings.product_used != blank -%}
+              <span
+                style="
+                  display: inline-block;
+                  background: var(--edm-sand, #F5EDE4);
+                  font-size: .75rem; font-family: var(--font-body-family);
+                  padding: 4px 10px; border-radius: 40px;
+                  color: var(--edm-brown, #6B4E3D);
+                "
+              >
+                {{ block.settings.product_used }}
+              </span>
+            {%- endif -%}
+          </div>
+
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%} Dots de navegación (visibles en móvil) {%- endcomment -%}
+  {%- if section.blocks.size > 1 -%}
+    <div
+      style="
+        display: flex; justify-content: center; gap: 6px;
+        margin-top: 20px;
+      "
+      aria-hidden="true"
+    >
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'slide' -%}
+          <div
+            style="
+              width: 6px; height: 6px; border-radius: 50%;
+              background: {%- if forloop.first %}var(--edm-coral,#E8704A){%- else %}rgba(28,20,16,.2){%- endif %};
+              transition: background .2s;
+            "
+            id="edm-ba-dot-{{ section.id }}-{{ forloop.index0 }}"
+          ></div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+</section>
+
+<style>
+  /* Ocultar scrollbar en todos los browsers */
+  #edm-ba-track-{{ section.id }}::-webkit-scrollbar { display: none; }
+
+  /* En móvil: cards más grandes + peek del siguiente */
+  @media (max-width: 749px) {
+    .edm-ba-card {
+      flex: 0 0 calc(85vw - 32px) !important;
+    }
+    /* Ocultar flechas en móvil (swipe nativo) */
+    .edm-ba-arrows { display: none !important; }
+  }
+</style>
+
+<script>
+  function edmBAScroll(id, direction) {
+    var track = document.getElementById('edm-ba-track-' + id);
+    if (!track) return;
+    var card = track.querySelector('.edm-ba-card');
+    var cardWidth = card ? card.offsetWidth + 16 : 300;
+    track.scrollBy({ left: direction * cardWidth * 1, behavior: 'smooth' });
+  }
+
+  // Actualizar dots al hacer scroll
+  (function() {
+    document.addEventListener('DOMContentLoaded', function() {
+      var track = document.getElementById('edm-ba-track-{{ section.id }}');
+      if (!track) return;
+      track.addEventListener('scroll', function() {
+        var cards = track.querySelectorAll('.edm-ba-card');
+        var scrollLeft = track.scrollLeft;
+        var closest = 0;
+        var minDist = Infinity;
+        cards.forEach(function(card, i) {
+          var dist = Math.abs(card.offsetLeft - track.offsetLeft - scrollLeft);
+          if (dist < minDist) { minDist = dist; closest = i; }
+        });
+        document.querySelectorAll('[id^="edm-ba-dot-{{ section.id }}-"]').forEach(function(dot, i) {
+          dot.style.background = i === closest
+            ? 'var(--edm-coral, #E8704A)'
+            : 'rgba(28,20,16,.2)';
+        });
+      }, { passive: true });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Antes / Después",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto pequeño sobre el título",
+      "default": "Clientas reales"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título de la sección",
+      "default": "Resultados que hablan solos"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Crema" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro editorial" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Transformación",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "before_image",
+          "label": "Foto Antes"
+        },
+        {
+          "type": "image_picker",
+          "id": "after_image",
+          "label": "Foto Después"
+        },
+        {
+          "type": "text",
+          "id": "client_name",
+          "label": "Nombre de la clienta",
+          "default": "Valentina, Medellín"
+        },
+        {
+          "type": "text",
+          "id": "result_text",
+          "label": "Descripción del resultado",
+          "default": "Bronceado duradero por 2 semanas sin manchas"
+        },
+        {
+          "type": "text",
+          "id": "product_used",
+          "label": "Producto usado (etiqueta)",
+          "default": "Bronceador Zanahoria"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Antes / Después",
+      "blocks": [
+        { "type": "slide", "settings": { "client_name": "Valentina, Medellín", "result_text": "Bronceado duradero 2 semanas", "product_used": "Bronceador Zanahoria" } },
+        { "type": "slide", "settings": { "client_name": "Sofía, Cali", "result_text": "Tono natural sin manchas", "product_used": "Autobronceador" } },
+        { "type": "slide", "settings": { "client_name": "Mariana, Bogotá", "result_text": "Piel hidratada todo el día", "product_used": "After-Sun" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

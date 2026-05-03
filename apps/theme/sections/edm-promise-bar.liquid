@@ -1,0 +1,212 @@
+{% comment %}
+  Barra de promesa de marca — 3 íconos + título + subtítulo
+  Se usa debajo del hero. Configurable desde el editor de Shopify.
+{% endcomment %}
+
+<section
+  class="edm-promise-bar"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  aria-label="Promesas de la marca"
+>
+  <div class="edm-promise-bar__inner page-width">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'item' -%}
+        <div class="edm-promise-bar__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon_svg != blank -%}
+            <div class="edm-promise-bar__medal" aria-hidden="true">
+              {{ block.settings.icon_svg }}
+            </div>
+          {%- endif -%}
+          <div class="edm-promise-bar__text">
+            {%- if block.settings.title != blank -%}
+              <span class="edm-promise-bar__ttl">{{ block.settings.title }}</span>
+            {%- endif -%}
+            {%- if block.settings.subtitle != blank -%}
+              <span class="edm-promise-bar__sub">{{ block.settings.subtitle }}</span>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+  .edm-promise-bar {
+    background: var(--edm-ink, #0b0805);
+    color: var(--bone-50, #fbf8f1);
+    position: relative;
+    overflow: hidden;
+  }
+  .edm-promise-bar::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(208,177,106,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 100%, rgba(157,127,50,0.07) 0%, transparent 55%);
+  }
+  .edm-promise-bar::after {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--edm-gold-400, #bb9a4c), transparent);
+  }
+
+  .edm-promise-bar__inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    position: relative;
+  }
+
+  .edm-promise-bar__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    transition: all 0.25s;
+    cursor: default;
+  }
+  .edm-promise-bar__item + .edm-promise-bar__item {
+    border-left: 1px solid rgba(251,248,241,0.06);
+  }
+
+  .edm-promise-bar__medal {
+    width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(251,248,241,0.06);
+    border: 1px solid rgba(208,177,106,0.25);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--edm-gold-300, #d0b16a);
+    transition: all 0.3s;
+  }
+  .edm-promise-bar__medal svg {
+    width: 20px; height: 20px;
+    stroke: currentColor; stroke-width: 1.5;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .edm-promise-bar__item:hover .edm-promise-bar__medal {
+    background: linear-gradient(135deg, var(--edm-gold-300, #d0b16a), var(--edm-gold-500, #9d7f32));
+    border-color: transparent;
+    color: var(--edm-ink, #0b0805);
+    box-shadow: 0 0 20px rgba(208,177,106,0.35);
+  }
+
+  .edm-promise-bar__text {
+    display: flex; flex-direction: column; gap: 0.15rem;
+  }
+  .edm-promise-bar__ttl {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--bone-50, #fbf8f1);
+    letter-spacing: 0.01em;
+  }
+  .edm-promise-bar__sub {
+    font-size: 0.7rem;
+    color: rgba(251,248,241,0.5);
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 749px) {
+    .edm-promise-bar__inner { grid-template-columns: 1fr; gap: 0; }
+    .edm-promise-bar__item + .edm-promise-bar__item {
+      border-left: none;
+      border-top: 1px solid rgba(251,248,241,0.06);
+    }
+    .edm-promise-bar__item { padding: 1rem 1.25rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Barra de promesa",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Crema" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro editorial" },
+        { "value": "scheme-4", "label": "Coral" },
+        { "value": "scheme-5", "label": "Azul Caribe" }
+      ],
+      "default": "scheme-2"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Ítem de promesa",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "SVG del ícono (pegar código SVG completo)",
+          "default": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='1' y='3' width='15' height='13' rx='1'></rect><path d='M16 8h4l3 3v5h-7V8z'></path><circle cx='5.5' cy='18.5' r='2.5'></circle><circle cx='18.5' cy='18.5' r='2.5'></circle></svg>"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Envío gratis"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtítulo",
+          "default": "en compras desde $80.000"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra de promesa",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='1' y='3' width='15' height='13' rx='1'></rect><path d='M16 8h4l3 3v5h-7V8z'></path><circle cx='5.5' cy='18.5' r='2.5'></circle><circle cx='18.5' cy='18.5' r='2.5'></circle></svg>",
+            "title": "Envío gratis",
+            "subtitle": "en compras desde $80.000"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path><path d='M9 12l2 2 4-4'></path></svg>",
+            "title": "Sello dermatológico",
+            "subtitle": "testado y certificado"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><path d='M2 12h20'></path><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>",
+            "title": "Hecho en Colombia",
+            "subtitle": "ingredientes naturales"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

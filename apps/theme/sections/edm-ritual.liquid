@@ -1,0 +1,300 @@
+<section
+  class="edm-ritual color-{{ section.settings.color_scheme }} gradient"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+>
+  <div class="edm-ritual__hd page-width">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="edm-ritual__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    {%- if section.settings.title != blank -%}
+      <h2 class="edm-ritual__h2">{{ section.settings.title }}</h2>
+    {%- endif -%}
+    {%- if section.settings.subtitle != blank -%}
+      <p class="edm-ritual__sub">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="edm-ritual__grid page-width">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'ingredient' -%}
+        <article class="edm-ritual__card" {{ block.shopify_attributes }}>
+          <div class="edm-ritual__num" aria-hidden="true">0{{ forloop.index }}</div>
+          {%- if block.settings.icon_svg != blank -%}
+            <div class="edm-ritual__icon" aria-hidden="true">{{ block.settings.icon_svg }}</div>
+          {%- endif -%}
+          <div class="edm-ritual__body">
+            {%- if block.settings.tag != blank -%}
+              <span class="edm-ritual__tag">{{ block.settings.tag }}</span>
+            {%- endif -%}
+            <h3 class="edm-ritual__name">{{ block.settings.name }}</h3>
+            <p class="edm-ritual__desc">{{ block.settings.description }}</p>
+          </div>
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-ritual { overflow: hidden; }
+
+.edm-ritual__hd {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 7rem;
+}
+
+.edm-ritual__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 2.4rem;
+}
+.edm-ritual__eyebrow::before,
+.edm-ritual__eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.edm-ritual__h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4.4rem, 5vw, 7.2rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  color: #0b0805;
+  margin: 0 0 2.4rem;
+}
+
+.edm-ritual__sub {
+  font-size: 1.7rem;
+  color: #4a3f2f;
+  line-height: 1.72;
+  margin: 0;
+}
+
+.edm-ritual__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(11, 8, 5, 0.08);
+}
+
+.edm-ritual__card {
+  position: relative;
+  padding: 5.6rem 4.4rem;
+  border-right: 1px solid rgba(11, 8, 5, 0.08);
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+.edm-ritual__card:last-child { border-right: none; }
+.edm-ritual__card:hover { background: rgba(208, 177, 106, 0.05); }
+
+.edm-ritual__num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 12rem;
+  font-weight: 400;
+  color: rgba(208, 177, 106, 0.13);
+  line-height: 1;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  pointer-events: none;
+  user-select: none;
+  transition: color 0.5s ease;
+}
+.edm-ritual__card:hover .edm-ritual__num { color: rgba(208, 177, 106, 0.26); }
+
+.edm-ritual__icon {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: rgba(208, 177, 106, 0.1);
+  border: 1px solid rgba(208, 177, 106, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3.2rem;
+  flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.edm-ritual__icon svg {
+  width: 2.8rem;
+  height: 2.8rem;
+  stroke: #9d7f32;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.4s;
+}
+.edm-ritual__card:hover .edm-ritual__icon {
+  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  border-color: transparent;
+  box-shadow: 0 8px 24px -6px rgba(157, 127, 50, 0.4);
+}
+.edm-ritual__card:hover .edm-ritual__icon svg { stroke: #fbf8f1; }
+
+.edm-ritual__body { position: relative; z-index: 1; }
+
+.edm-ritual__tag {
+  display: inline-block;
+  font-size: 1.1rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #9d7f32;
+  margin-bottom: 1.2rem;
+}
+
+.edm-ritual__name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 3.6rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #0b0805;
+  line-height: 1.08;
+  margin: 0 0 2rem;
+}
+
+.edm-ritual__desc {
+  font-size: 1.6rem;
+  color: #4a3f2f;
+  line-height: 1.72;
+  margin: 0;
+}
+
+@media (max-width: 989px) {
+  .edm-ritual__grid { grid-template-columns: 1fr; }
+  .edm-ritual__card { border-right: none; border-bottom: 1px solid rgba(11, 8, 5, 0.08); padding: 4rem 3rem; }
+  .edm-ritual__card:last-child { border-bottom: none; }
+  .edm-ritual__num { font-size: 9rem; }
+  .edm-ritual__hd { margin-bottom: 4rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Ingredientes del ritual",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto sobre el título",
+      "default": "Formulado con propósito"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "El poder del trópico"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Activos seleccionados por su potencia y origen natural."
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingrediente",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Origen",
+          "default": "Activo estrella"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nombre",
+          "default": "Zanahoria"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Beneficio",
+          "default": "Rica en betacaroteno, potencia el bronceado natural y protege la piel del daño oxidativo."
+        },
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "SVG del ícono",
+          "default": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 8v4l3 3'/></svg>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ingredientes del ritual",
+      "blocks": [
+        {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Trópico colombiano",
+            "name": "Zanahoria",
+            "description": "Rica en betacaroteno, activa la melanina y potencia el bronceado natural desde la primera aplicación.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 8v4l3 3'/></svg>"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Costa pacífica",
+            "name": "Aceite de coco",
+            "description": "Hidratación profunda y prolongada. Sella la humedad, prolonga el bronceado y deja la piel suave al tacto.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M2 12h20'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/></svg>"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "tag": "Antioxidante activo",
+            "name": "Vitamina E",
+            "description": "Neutraliza los radicales libres del sol, protege la piel del envejecimiento prematuro y alarga el tono dorado.",
+            "icon_svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,22 @@
+{
+  "name": "@edm/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "shopify:dev": "shopify theme dev --store=${SHOPIFY_STORE}",
+    "shopify:push": "shopify theme push --store=${SHOPIFY_STORE}",
+    "start": "concurrently \"vite\" \"shopify theme dev --store=${SHOPIFY_STORE}\""
+  },
+  "devDependencies": {
+    "@shopify/cli": "^3.94.3",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^3.4.19",
+    "vite": "^6.0.0",
+    "vite-plugin-shopify": "^4.1.2"
+  }
+}

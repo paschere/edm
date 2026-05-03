@@ -1,0 +1,116 @@
+{% comment %}
+  Barra de progreso de envío gratis.
+  Muestra cuánto le falta al carrito para llegar al mínimo de envío gratis.
+
+  Uso (en cart-drawer.liquid o en el drawer del carrito):
+    {% render 'edm-free-shipping-bar' %}
+
+  La barra se actualiza vía JS cuando cambia el carrito (event 'cart:updated').
+{% endcomment %}
+
+{%- liquid
+  assign threshold      = section.settings.free_shipping_threshold | default: 80000
+  assign cart_total     = cart.total_price
+  assign remaining      = threshold | minus: cart_total
+  assign pct_raw        = cart_total | times: 100.0 | divided_by: threshold
+  assign pct            = pct_raw | at_most: 100 | round
+  assign threshold_fmt  = threshold | money_without_trailing_zeros
+  assign remaining_fmt  = remaining | money_without_trailing_zeros
+-%}
+
+<div
+  class="edm-shipping-bar"
+  data-threshold="{{ threshold }}"
+  style="
+    padding: 12px 16px;
+    background: var(--edm-sand, #F5EDE4);
+    border-radius: 8px;
+    font-family: var(--font-body-family);
+  "
+  aria-live="polite"
+  aria-label="Progreso hacia envío gratis"
+>
+  <p
+    class="edm-shipping-bar__message"
+    style="font-size: .8rem; text-align: center; margin: 0 0 8px; line-height: 1.4;"
+  >
+    {%- if cart_total >= threshold -%}
+      <span style="color: #2E7D5B; font-weight: 600;">
+        🎉 ¡Tienes envío gratis!
+      </span>
+    {%- elsif cart_total == 0 -%}
+      Agrega <strong>{{ threshold_fmt }}</strong> para envío gratis
+    {%- else -%}
+      Te faltan <strong style="color: var(--edm-coral,#E8704A);">{{ remaining_fmt }}</strong>
+      para envío gratis
+    {%- endif -%}
+  </p>
+
+  <div
+    style="
+      height: 4px;
+      background: rgba(28,20,16,.1);
+      border-radius: 4px;
+      overflow: hidden;
+    "
+    role="progressbar"
+    aria-valuenow="{{ pct }}"
+    aria-valuemin="0"
+    aria-valuemax="100"
+  >
+    <div
+      class="edm-shipping-bar__fill"
+      style="
+        height: 100%;
+        width: {{ pct }}%;
+        border-radius: 4px;
+        background: {{ cart_total >= threshold ? '#2E7D5B' : 'var(--edm-coral,#E8704A)' }};
+        transition: width .5s ease;
+      "
+    ></div>
+  </div>
+</div>
+
+<script>
+  // Actualiza la barra cuando cambia el carrito (compatible con Dawn cart events)
+  (function() {
+    function updateShippingBar() {
+      fetch('/cart.js')
+        .then(function(r) { return r.json(); })
+        .then(function(cart) {
+          var bars = document.querySelectorAll('.edm-shipping-bar');
+          bars.forEach(function(bar) {
+            var threshold = parseInt(bar.dataset.threshold, 10);
+            var total = cart.total_price;
+            var remaining = threshold - total;
+            var pct = Math.min(Math.round((total / threshold) * 100), 100);
+
+            var fill = bar.querySelector('.edm-shipping-bar__fill');
+            var msg  = bar.querySelector('.edm-shipping-bar__message');
+            if (fill) {
+              fill.style.width = pct + '%';
+              fill.style.background = total >= threshold ? '#2E7D5B' : 'var(--edm-coral,#E8704A)';
+            }
+            if (msg) {
+              if (total >= threshold) {
+                msg.innerHTML = '<span style="color:#2E7D5B;font-weight:600;">🎉 ¡Tienes envío gratis!</span>';
+              } else if (total === 0) {
+                msg.innerHTML = 'Agrega <strong>' + formatMoney(threshold) + '</strong> para envío gratis';
+              } else {
+                msg.innerHTML = 'Te faltan <strong style="color:var(--edm-coral,#E8704A);">' + formatMoney(remaining) + '</strong> para envío gratis';
+              }
+            }
+            bar.setAttribute('aria-valuenow', pct);
+          });
+        });
+    }
+
+    function formatMoney(cents) {
+      return '$' + (cents / 100).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+    }
+
+    // Escuchar eventos de Dawn
+    document.addEventListener('cart:updated', updateShippingBar);
+    document.addEventListener('cart:refresh', updateShippingBar);
+  })();
+</script>

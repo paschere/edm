@@ -1,0 +1,78 @@
+{% comment %}
+  Badge de sello dermatológico — solo se renderiza si el producto
+  tiene el tag 'dermatologico'.
+
+  Uso:
+    {% render 'edm-derma-badge', product: product %}
+    {% render 'edm-derma-badge', product: product, size: 'sm' %}
+
+  Parámetros:
+    product  — objeto Shopify product (requerido)
+    size     — 'sm' | 'md' (default 'md')
+    style    — 'badge' | 'inline' (default 'badge')
+{% endcomment %}
+
+{%- if product.tags contains 'dermatologico' -%}
+
+  {%- liquid
+    assign badge_size = size | default: 'md'
+    assign badge_style = style | default: 'badge'
+  -%}
+
+  {%- if badge_style == 'badge' -%}
+    <span
+      class="edm-derma-badge edm-derma-badge--{{ badge_size }}"
+      aria-label="Testado y aprobado dermatológicamente"
+      title="Testado y aprobado dermatológicamente"
+      style="
+        display: inline-flex; align-items: center; gap: 6px;
+        background: white;
+        border: 1.5px solid rgba(59,174,197,.4);
+        border-radius: 40px;
+        padding: {{ badge_size == 'sm' ? '4px 10px' : '6px 14px' }};
+        font-family: var(--font-body-family);
+        font-size: {{ badge_size == 'sm' ? '.7rem' : '.75rem' }};
+        font-weight: 600;
+        color: #1A7A8C;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      "
+    >
+      {%- comment -%} Ícono de escudo/aprobación {%- endcomment -%}
+      <svg
+        width="{{ badge_size == 'sm' ? '12' : '14' }}"
+        height="{{ badge_size == 'sm' ? '12' : '14' }}"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      Sello dermatológico
+    </span>
+
+  {%- elsif badge_style == 'inline' -%}
+    {%- comment -%} Versión inline: solo ícono + texto pequeño, para usar dentro de párrafos {%- endcomment -%}
+    <span
+      aria-label="Aprobado dermatológicamente"
+      style="
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: .8em; color: #1A7A8C; font-weight: 600;
+        vertical-align: middle;
+      "
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      Dermatológico
+    </span>
+  {%- endif -%}
+
+{%- endif -%}

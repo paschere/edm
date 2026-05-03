@@ -1,0 +1,453 @@
+{% comment %}
+  Quiz interactivo "¿Qué bronceador es para ti?" — Alpine.js
+  3 preguntas single-select → recomienda 1 producto al final.
+  Toda la lógica de recomendación es declarativa en el schema.
+  Mobile-first: columna única, botones de pantalla completa.
+{% endcomment %}
+
+{%- liquid
+  assign q1 = section.blocks | where: 'type', 'question' | first
+  assign questions = section.blocks | where: 'type', 'question'
+  assign results = section.blocks | where: 'type', 'result'
+-%}
+
+<section
+  class="edm-quiz color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  aria-label="Quiz de recomendación de producto"
+>
+  <div class="page-width" style="max-width: 680px;">
+
+    {%- comment -%} Encabezado {%- endcomment -%}
+    <div style="text-align: center; margin-bottom: 40px;">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="section-eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 class="section-title">{{ section.settings.title | default: '¿Qué bronceador es para ti?' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="section-subhead" style="margin: 12px auto 0; text-align: center;">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      Alpine.js maneja el estado del quiz.
+      - step: índice de la pregunta actual (0-based) o 'result'
+      - answers: array de índices de respuesta seleccionados
+      - Recomendación: basada en la combinación de respuestas
+    {%- endcomment -%}
+    <div
+      x-data="edmQuiz()"
+      x-init="init()"
+      role="form"
+      aria-live="polite"
+    >
+
+      {%- comment -%} Barra de progreso {%- endcomment -%}
+      <div
+        x-show="step !== 'result'"
+        style="
+          background: rgba(28,20,16,.1); border-radius: 40px;
+          height: 4px; margin-bottom: 32px; overflow: hidden;
+        "
+        role="progressbar"
+        :aria-valuenow="(step + 1)"
+        aria-valuemin="1"
+        aria-valuemax="{{ questions.size }}"
+      >
+        <div
+          style="
+            height: 100%; background: var(--edm-coral, #E8704A);
+            border-radius: 40px; transition: width .4s ease;
+          "
+          :style="'width:' + Math.round(((step + 1) / {{ questions.size }}) * 100) + '%'"
+        ></div>
+      </div>
+
+      {%- comment -%} Contador de pregunta {%- endcomment -%}
+      <p
+        x-show="step !== 'result'"
+        style="text-align:center; font-size:.8rem; opacity:.5; margin-bottom:12px;"
+      >
+        Pregunta <span x-text="step + 1">1</span> de {{ questions.size }}
+      </p>
+
+      {%- comment -%} ── Preguntas ─ {%- endcomment -%}
+      {%- for block in questions -%}
+        {%- assign q_index = forloop.index0 -%}
+        {%- assign options = block.settings.options | split: '|' -%}
+
+        <div
+          x-show="step === {{ q_index }}"
+          x-transition:enter="animate-fade-up"
+          style="display: none;"
+          {{ block.shopify_attributes }}
+        >
+          <h3
+            style="
+              font-family: var(--font-heading-family, 'Cormorant Garamond', serif);
+              font-size: clamp(1.5rem, 4vw, 2rem);
+              text-align: center; margin-bottom: 28px; font-weight: 500;
+            "
+          >
+            {{ block.settings.question }}
+          </h3>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat({{ options.size | at_most: 2 }}, 1fr);
+              gap: 12px;
+            "
+          >
+            {%- for option in options -%}
+              {%- assign parts = option | split: ':' -%}
+              {%- assign opt_label = parts[0] | strip -%}
+              {%- assign opt_key = parts[1] | strip | default: parts[0] | strip | handleize -%}
+
+              <button
+                type="button"
+                @click="selectAnswer({{ q_index }}, '{{ opt_key }}')"
+                :class="{ 'edm-quiz__option--selected': answers[{{ q_index }}] === '{{ opt_key }}' }"
+                class="edm-quiz__option"
+                style="
+                  padding: 16px 20px; border-radius: 12px;
+                  border: 1.5px solid rgba(28,20,16,.15);
+                  background: white; cursor: pointer;
+                  font-family: var(--font-body-family); font-size: .95rem;
+                  transition: all .2s; text-align: left;
+                  width: 100%;
+                "
+              >
+                <span style="display:block; font-weight:600; margin-bottom:2px;">{{ opt_label }}</span>
+                {%- if parts[2] != blank -%}
+                  <span style="display:block; font-size:.8rem; opacity:.6;">{{ parts[2] | strip }}</span>
+                {%- endif -%}
+              </button>
+            {%- endfor -%}
+          </div>
+
+          {%- comment -%} Botón siguiente solo activo si hay respuesta {%- endcomment -%}
+          <div style="text-align:center; margin-top:24px;">
+            {%- if forloop.last -%}
+              <button
+                type="button"
+                @click="getResult()"
+                :disabled="answers[{{ q_index }}] === undefined"
+                class="btn-edm-primary"
+                style="opacity:1; transition:opacity .2s;"
+                :style="answers[{{ q_index }}] === undefined ? 'opacity:.4; cursor:not-allowed' : ''"
+              >
+                Ver mi resultado →
+              </button>
+            {%- else -%}
+              <button
+                type="button"
+                @click="nextStep()"
+                :disabled="answers[{{ q_index }}] === undefined"
+                class="btn-edm-primary"
+                :style="answers[{{ q_index }}] === undefined ? 'opacity:.4; cursor:not-allowed' : ''"
+              >
+                Siguiente →
+              </button>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+
+      {%- comment -%} ── Pantalla de resultado ─ {%- endcomment -%}
+      <div
+        x-show="step === 'result'"
+        x-transition:enter="animate-fade-up"
+        style="display: none; text-align: center;"
+      >
+        <p style="font-size:.8rem; opacity:.5; margin-bottom:8px; text-transform:uppercase; letter-spacing:.12em;">
+          Tu recomendación
+        </p>
+
+        {%- comment -%}
+          Iteramos los bloques de resultado. Cada resultado tiene una "clave de coincidencia"
+          que es una combinación de respuestas (ej: "seca,bajo,suave"). Se muestra el primer
+          resultado cuya clave coincida con las respuestas del usuario.
+        {%- endcomment -%}
+        {%- for block in results -%}
+          <div
+            x-show="resultKey === '{{ block.settings.match_key | strip }}'"
+            x-transition:enter="animate-fade-up"
+            style="display:none;"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.product != blank -%}
+              {%- assign rec_product = all_products[block.settings.product] -%}
+              {%- if rec_product != empty -%}
+                {%- if rec_product.featured_image -%}
+                  <div style="margin: 0 auto 24px; max-width: 200px;">
+                    {{
+                      rec_product.featured_image
+                      | image_url: width: 400
+                      | image_tag:
+                        loading: 'lazy',
+                        width: 200,
+                        style: 'width:100%; border-radius:12px;',
+                        alt: rec_product.title
+                    }}
+                  </div>
+                {%- endif -%}
+                <h3
+                  style="
+                    font-family: var(--font-heading-family, 'Cormorant Garamond', serif);
+                    font-size: 2rem; font-weight: 500; margin-bottom: 8px;
+                  "
+                >
+                  {{ rec_product.title }}
+                </h3>
+                <p style="font-family:var(--font-body-family); font-size:1rem; opacity:.7; margin-bottom:20px;">
+                  {{ block.settings.reason | default: rec_product.description | strip_html | truncate: 120 }}
+                </p>
+                <p
+                  style="
+                    font-family: var(--font-heading-family, 'Cormorant Garamond', serif);
+                    font-size: 1.75rem; font-weight: 600;
+                    color: var(--edm-coral, #E8704A); margin-bottom: 24px;
+                  "
+                >
+                  {{ rec_product.price | money }}
+                </p>
+                <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                  <a href="{{ rec_product.url }}" class="btn-edm-primary" style="text-decoration:none;">
+                    Ver producto
+                  </a>
+                  <button
+                    type="button"
+                    @click="reset()"
+                    class="btn-edm-secondary"
+                  >
+                    Volver a empezar
+                  </button>
+                </div>
+              {%- endif -%}
+            {%- else -%}
+              {%- comment -%} Fallback si no hay producto asignado {%- endcomment -%}
+              <h3 style="font-family:var(--font-heading-family,serif); font-size:2rem; font-weight:500; margin-bottom:12px;">
+                {{ block.settings.result_title | default: 'Tu producto ideal' }}
+              </h3>
+              <p style="opacity:.7; margin-bottom:24px;">{{ block.settings.reason }}</p>
+              <button type="button" @click="reset()" class="btn-edm-secondary">Volver a empezar</button>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+
+        {%- comment -%} Fallback si ningún resultado coincide {%- endcomment -%}
+        <div x-show="resultKey === '__fallback__'" style="display:none;">
+          <h3 style="font-family:var(--font-heading-family,serif); font-size:1.75rem; font-weight:500; margin-bottom:12px;">
+            ¡Te quedan bien todos!
+          </h3>
+          <p style="opacity:.7; margin-bottom:24px;">Descubre toda la línea y encuentra el tuyo.</p>
+          <div style="display:flex; gap:12px; justify-content:center;">
+            <a href="{{ section.settings.fallback_url | default: '/collections/all' }}" class="btn-edm-primary" style="text-decoration:none;">
+              Ver todos los productos
+            </a>
+            <button type="button" @click="reset()" class="btn-edm-secondary">Intentar de nuevo</button>
+          </div>
+        </div>
+
+      </div>{%- comment -%} /result {%- endcomment -%}
+    </div>{%- comment -%} /Alpine {%- endcomment -%}
+  </div>
+</section>
+
+<style>
+  .edm-quiz__option:hover {
+    border-color: var(--edm-coral, #E8704A) !important;
+    background: #FFF8F5 !important;
+  }
+  .edm-quiz__option--selected {
+    border-color: var(--edm-coral, #E8704A) !important;
+    background: #FFF8F5 !important;
+    color: var(--edm-coral, #E8704A);
+  }
+  @media (max-width: 480px) {
+    /* Opciones en columna única en móvil muy pequeño */
+    .edm-quiz__option { font-size: .875rem !important; }
+  }
+</style>
+
+{%- comment -%}
+  Lógica Alpine del quiz.
+  getResult() toma las 3 respuestas, las une con ',' y busca un bloque resultado cuyo
+  match_key coincida. Si no hay coincidencia, muestra el fallback.
+{%- endcomment -%}
+<script>
+  function edmQuiz() {
+    return {
+      step: 0,
+      answers: [],
+      resultKey: '',
+
+      init() { this.answers = []; this.step = 0; },
+
+      selectAnswer(index, key) {
+        this.answers[index] = key;
+        this.answers = [...this.answers]; // trigger Alpine reactivity
+      },
+
+      nextStep() {
+        if (this.answers[this.step] !== undefined) this.step++;
+      },
+
+      getResult() {
+        if (this.answers[this.step] === undefined) return;
+        // Construye la clave de resultado combinando todas las respuestas
+        this.resultKey = this.answers.join(',');
+        this.step = 'result';
+        // Scroll suave al resultado
+        this.$nextTick(() => {
+          this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      },
+
+      reset() {
+        this.answers = [];
+        this.resultKey = '';
+        this.step = 0;
+      }
+    };
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Quiz de producto",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto pequeño sobre el título",
+      "default": "Encuentra tu match"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título del quiz",
+      "default": "¿Qué bronceador es para ti?"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "3 preguntas para encontrar tu bronceador ideal."
+    },
+    {
+      "type": "url",
+      "id": "fallback_url",
+      "label": "URL fallback si ningún resultado coincide",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Crema" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Pregunta",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Pregunta",
+          "default": "¿Cuál es tu tipo de piel?"
+        },
+        {
+          "type": "textarea",
+          "id": "options",
+          "label": "Opciones (Etiqueta:clave:descripción, sep. por |)",
+          "info": "Ej: Seca:seca:Me reseca | Grasa:grasa | Mixta:mixta:Combinación",
+          "default": "Seca:seca:Se reseca con facilidad | Grasa:grasa:Brilla durante el día | Mixta:mixta:Zona T grasa, mejillas secas"
+        }
+      ]
+    },
+    {
+      "type": "result",
+      "name": "Resultado",
+      "settings": [
+        {
+          "type": "text",
+          "id": "match_key",
+          "label": "Clave de coincidencia (respuestas separadas por coma)",
+          "info": "Debe coincidir exactamente con la combinación de claves de respuesta. Ej: seca,bajo,suave",
+          "default": "seca,bajo,suave"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Producto recomendado"
+        },
+        {
+          "type": "text",
+          "id": "result_title",
+          "label": "Título del resultado (si no hay producto)",
+          "default": "Tu producto ideal"
+        },
+        {
+          "type": "textarea",
+          "id": "reason",
+          "label": "Razón de la recomendación",
+          "default": "Tu piel necesita hidratación profunda y un bronceado duradero sin resecar."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quiz de producto",
+      "blocks": [
+        {
+          "type": "question",
+          "settings": {
+            "question": "¿Cuál es tu tipo de piel?",
+            "options": "Seca:seca:Se reseca con facilidad | Grasa:grasa:Brilla durante el día | Mixta:mixta:Zona T grasa, mejillas secas"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "¿Con qué frecuencia te expones al sol?",
+            "options": "Poco:poco:1-2 veces por semana | Frecuente:frecuente:Casi todos los días | Mucho:mucho:Trabajo o deportes al aire libre"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "¿Qué resultado buscas?",
+            "options": "Bronceado suave:suave:Natural y gradual | Bronceado intenso:intenso:Tono marcado rápido | Autobronceado:auto:Sin exposición al sol"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

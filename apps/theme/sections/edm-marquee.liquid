@@ -1,0 +1,113 @@
+<div
+  class="edm-mq"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  aria-label="Compromisos de marca"
+>
+  <div class="edm-mq__track">
+    <div class="edm-mq__inner">
+      {%- for block in section.blocks -%}
+        <span class="edm-mq__item" {{ block.shopify_attributes }}>
+          <span class="edm-mq__gem" aria-hidden="true">✦</span>
+          <span class="edm-mq__txt">{{ block.settings.text }}</span>
+        </span>
+      {%- endfor -%}
+      {%- for block in section.blocks -%}
+        <span class="edm-mq__item" aria-hidden="true">
+          <span class="edm-mq__gem">✦</span>
+          <span class="edm-mq__txt">{{ block.settings.text }}</span>
+        </span>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+.edm-mq {
+  overflow: hidden;
+  background: #0b0805;
+  border-top: 1px solid rgba(208, 177, 106, 0.18);
+  border-bottom: 1px solid rgba(208, 177, 106, 0.18);
+}
+.edm-mq__track { overflow: hidden; }
+.edm-mq__inner {
+  display: flex;
+  width: max-content;
+  animation: edmMqScroll 34s linear infinite;
+}
+.edm-mq:hover .edm-mq__inner { animation-play-state: paused; }
+@keyframes edmMqScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.edm-mq__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.4rem;
+  padding: 1.9rem 3.4rem;
+  white-space: nowrap;
+}
+.edm-mq__gem {
+  color: #d0b16a;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.edm-mq__txt {
+  font-size: 1.3rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(251, 248, 241, 0.58);
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Marquee de marca",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 40, "step": 4, "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 40, "step": 4, "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "phrase",
+      "name": "Frase",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto",
+          "default": "Bronceado Natural"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee de marca",
+      "blocks": [
+        { "type": "phrase", "settings": { "text": "Bronceado Natural" } },
+        { "type": "phrase", "settings": { "text": "Hecho en Colombia" } },
+        { "type": "phrase", "settings": { "text": "Certificado INVIMA" } },
+        { "type": "phrase", "settings": { "text": "Reef Safe" } },
+        { "type": "phrase", "settings": { "text": "Ingredientes Naturales" } },
+        { "type": "phrase", "settings": { "text": "Dermatólogo Aprobado" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
