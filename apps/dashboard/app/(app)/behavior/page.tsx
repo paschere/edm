@@ -6,21 +6,46 @@ import { sql, gte, and, inArray, desc, isNotNull } from "drizzle-orm";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PeriodSelector } from "@/components/widgets/period-selector";
-import { Eye, ShoppingCart, CheckCircle, Percent, Search, TrendingDown, MapPin, Clock, BarChart2, Globe, Zap } from "lucide-react";
+import {
+  Eye,
+  ShoppingCart,
+  CheckCircle,
+  Percent,
+  Search,
+  TrendingDown,
+  MapPin,
+  Clock,
+  BarChart2,
+  Globe,
+  Zap,
+} from "lucide-react";
 
 const FUNNEL_STEPS = [
-  { key: "page_viewed",             label: "Páginas vistas",      color: "#bb9a4c" },
-  { key: "product_viewed",          label: "Producto visto",       color: "#c4904a" },
-  { key: "product_added_to_cart",   label: "Añadido al carrito",   color: "#b07a30" },
-  { key: "checkout_started",        label: "Checkout iniciado",    color: "#7a9a5a" },
-  { key: "checkout_completed",      label: "Compra realizada",     color: "#4f7a3e" },
+  { key: "page_viewed", label: "Páginas vistas", color: "#bb9a4c" },
+  { key: "product_viewed", label: "Producto visto", color: "#c4904a" },
+  {
+    key: "product_added_to_cart",
+    label: "Añadido al carrito",
+    color: "#b07a30",
+  },
+  { key: "checkout_started", label: "Checkout iniciado", color: "#7a9a5a" },
+  { key: "checkout_completed", label: "Compra realizada", color: "#4f7a3e" },
 ];
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div
       className="rounded-xl border border-border p-5"
-      style={{ background: "var(--card)", boxShadow: "0 1px 3px rgba(11,8,5,0.05)" }}
+      style={{
+        background: "var(--card)",
+        boxShadow: "0 1px 3px rgba(11,8,5,0.05)",
+      }}
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-4">
         {title}
@@ -43,38 +68,64 @@ function JourneyFlow({
       {steps.map((step, i) => {
         const pct = top > 0 ? Math.min((step.sessions / top) * 100, 100) : 0;
         const prev = steps[i - 1];
-        const dropOff = prev && prev.sessions > step.sessions ? prev.sessions - step.sessions : 0;
-        const dropPct = prev && prev.sessions > 0 ? (dropOff / prev.sessions) * 100 : 0;
-        const contPct = prev && prev.sessions > 0
-          ? (Math.min(step.sessions, prev.sessions) / prev.sessions) * 100
-          : null;
+        const dropOff =
+          prev && prev.sessions > step.sessions
+            ? prev.sessions - step.sessions
+            : 0;
+        const dropPct =
+          prev && prev.sessions > 0 ? (dropOff / prev.sessions) * 100 : 0;
+        const contPct =
+          prev && prev.sessions > 0
+            ? (Math.min(step.sessions, prev.sessions) / prev.sessions) * 100
+            : null;
         const isEmpty = step.sessions === 0;
 
         return (
           <div key={step.key}>
             {/* Connector between steps */}
             {i > 0 && (
-              <div className="flex items-stretch gap-3 my-0" style={{ paddingLeft: "11px" }}>
+              <div
+                className="flex items-stretch gap-3 my-0"
+                style={{ paddingLeft: "11px" }}
+              >
                 {/* Vertical line */}
-                <div style={{ width: "2px", background: "var(--border)", borderRadius: "1px", minHeight: "28px", flexShrink: 0 }} />
+                <div
+                  style={{
+                    width: "2px",
+                    background: "var(--border)",
+                    borderRadius: "1px",
+                    minHeight: "28px",
+                    flexShrink: 0,
+                  }}
+                />
                 {/* Drop-off info */}
                 <div className="flex items-center gap-2 py-1">
                   {dropOff > 0 ? (
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full tabular-nums"
-                      style={{ background: "rgba(180,60,40,0.08)", color: "#b43c28", border: "1px solid rgba(180,60,40,0.15)" }}
+                      style={{
+                        background: "rgba(180,60,40,0.08)",
+                        color: "#b43c28",
+                        border: "1px solid rgba(180,60,40,0.15)",
+                      }}
                     >
                       ↓ {dropOff} no continúan · {dropPct.toFixed(0)}%
                     </span>
                   ) : contPct !== null && step.sessions > 0 ? (
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full tabular-nums"
-                      style={{ background: "rgba(79,122,62,0.08)", color: "#4f7a3e", border: "1px solid rgba(79,122,62,0.15)" }}
+                      style={{
+                        background: "rgba(79,122,62,0.08)",
+                        color: "#4f7a3e",
+                        border: "1px solid rgba(79,122,62,0.15)",
+                      }}
                     >
                       ✓ todos continúan
                     </span>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground px-2">sin datos</span>
+                    <span className="text-[10px] text-muted-foreground px-2">
+                      sin datos
+                    </span>
                   )}
                 </div>
               </div>
@@ -99,7 +150,11 @@ function JourneyFlow({
                 <div className="flex items-center justify-between mb-1.5 gap-3">
                   <span
                     className="text-[12px] font-medium"
-                    style={{ color: isEmpty ? "var(--muted-foreground)" : "var(--foreground)" }}
+                    style={{
+                      color: isEmpty
+                        ? "var(--muted-foreground)"
+                        : "var(--foreground)",
+                    }}
                   >
                     {step.label}
                   </span>
@@ -120,7 +175,14 @@ function JourneyFlow({
                     </span>
                   </div>
                 </div>
-                <div style={{ height: "6px", background: "var(--border)", borderRadius: "3px", overflow: "hidden" }}>
+                <div
+                  style={{
+                    height: "6px",
+                    background: "var(--border)",
+                    borderRadius: "3px",
+                    overflow: "hidden",
+                  }}
+                >
                   <div
                     style={{
                       width: `${Math.max(pct, isEmpty ? 0 : 0.5)}%`,
@@ -151,7 +213,11 @@ function ProductFunnel({
   carted: { title: string; count: number }[];
 }) {
   if (!viewed.length) {
-    return <p className="text-[13px] text-muted-foreground">Sin datos de productos aún</p>;
+    return (
+      <p className="text-[13px] text-muted-foreground">
+        Sin datos de productos aún
+      </p>
+    );
   }
 
   const cartMap = new Map(carted.map((c) => [c.title, c.count]));
@@ -167,7 +233,9 @@ function ProductFunnel({
         return (
           <div key={p.title}>
             <div className="flex items-baseline justify-between mb-1 gap-2">
-              <span className="text-[12px] text-foreground truncate max-w-[55%]">{p.title}</span>
+              <span className="text-[12px] text-foreground truncate max-w-[55%]">
+                {p.title}
+              </span>
               <div className="flex items-baseline gap-2 shrink-0">
                 <span className="text-[11px] text-muted-foreground">
                   {p.count.toLocaleString("es-MX")} vistas
@@ -221,11 +289,17 @@ function ProductFunnel({
       })}
       <div className="flex items-center gap-4 pt-1">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm" style={{ background: "rgba(187,154,76,0.35)" }} />
+          <div
+            className="w-3 h-2 rounded-sm"
+            style={{ background: "rgba(187,154,76,0.35)" }}
+          />
           <span className="text-[10px] text-muted-foreground">Vistas</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm" style={{ background: "rgba(79,122,62,0.75)" }} />
+          <div
+            className="w-3 h-2 rounded-sm"
+            style={{ background: "rgba(79,122,62,0.75)" }}
+          />
           <span className="text-[10px] text-muted-foreground">Add to cart</span>
         </div>
       </div>
@@ -237,10 +311,19 @@ function ProductFunnel({
 function UtmAttribution({
   rows,
 }: {
-  rows: { source: string | null; medium: string | null; campaign: string | null; purchases: number }[];
+  rows: {
+    source: string | null;
+    medium: string | null;
+    campaign: string | null;
+    purchases: number;
+  }[];
 }) {
   if (!rows.length) {
-    return <p className="text-[13px] text-muted-foreground">Sin compras atribuidas aún</p>;
+    return (
+      <p className="text-[13px] text-muted-foreground">
+        Sin compras atribuidas aún
+      </p>
+    );
   }
 
   const max = rows[0]?.purchases ?? 1;
@@ -267,12 +350,24 @@ function UtmAttribution({
               </div>
               <span
                 className="tabular-nums font-semibold shrink-0"
-                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "#4f7a3e", letterSpacing: "-0.02em" }}
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1rem",
+                  color: "#4f7a3e",
+                  letterSpacing: "-0.02em",
+                }}
               >
                 {r.purchases}
               </span>
             </div>
-            <div style={{ height: "4px", background: "var(--border)", borderRadius: "2px", overflow: "hidden" }}>
+            <div
+              style={{
+                height: "4px",
+                background: "var(--border)",
+                borderRadius: "2px",
+                overflow: "hidden",
+              }}
+            >
               <div
                 style={{
                   width: `${pct}%`,
@@ -332,7 +427,10 @@ function AbandonmentSection({
           >
             <div
               className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}
+              style={{
+                background: `${s.color}18`,
+                border: `1px solid ${s.color}30`,
+              }}
             >
               <span
                 style={{
@@ -347,8 +445,13 @@ function AbandonmentSection({
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-[12px] font-medium text-foreground">{s.label}</p>
-              <p className="text-[10px] mt-0.5" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>
+              <p className="text-[12px] font-medium text-foreground">
+                {s.label}
+              </p>
+              <p
+                className="text-[10px] mt-0.5"
+                style={{ color: "var(--muted-foreground)", opacity: 0.8 }}
+              >
                 {s.sub}
               </p>
             </div>
@@ -373,7 +476,9 @@ function AbandonmentSection({
                       <span className="text-[10px] font-medium text-muted-foreground shrink-0 w-3.5 text-right">
                         {i + 1}
                       </span>
-                      <span className="text-[12px] text-foreground truncate">{p.title}</span>
+                      <span className="text-[12px] text-foreground truncate">
+                        {p.title}
+                      </span>
                     </div>
                     <span
                       className="tabular-nums font-semibold shrink-0 text-[11px]"
@@ -382,7 +487,14 @@ function AbandonmentSection({
                       {p.count} {p.count === 1 ? "vez" : "veces"}
                     </span>
                   </div>
-                  <div style={{ height: "4px", background: "var(--border)", borderRadius: "2px", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      height: "4px",
+                      background: "var(--border)",
+                      borderRadius: "2px",
+                      overflow: "hidden",
+                    }}
+                  >
                     <div
                       style={{
                         width: `${pct}%`,
@@ -426,7 +538,11 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
   ];
 
   if (totalEvents === 0) {
-    return <p className="text-[13px] text-muted-foreground">Sin datos de actividad aún</p>;
+    return (
+      <p className="text-[13px] text-muted-foreground">
+        Sin datos de actividad aún
+      </p>
+    );
   }
 
   return (
@@ -446,8 +562,8 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
                 background: isPeak
                   ? "#bb9a4c"
                   : h.count > 0
-                  ? `rgba(187,154,76,${0.15 + (h.count / max) * 0.55})`
-                  : "var(--border)",
+                    ? `rgba(187,154,76,${0.15 + (h.count / max) * 0.55})`
+                    : "var(--border)",
                 transition: "height 0.4s ease",
               }}
               title={`${h.hour}:00 — ${h.count} eventos`}
@@ -456,7 +572,10 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
         })}
       </div>
       {/* Hour labels */}
-      <div className="flex justify-between text-[9px] mb-3" style={{ color: "var(--muted-foreground)", opacity: 0.5 }}>
+      <div
+        className="flex justify-between text-[9px] mb-3"
+        style={{ color: "var(--muted-foreground)", opacity: 0.5 }}
+      >
         {[0, 3, 6, 9, 12, 15, 18, 21, 23].map((h) => (
           <span key={h}>{h}h</span>
         ))}
@@ -466,18 +585,26 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
         {blocks.map((b) => {
           const blockHours = hours.slice(b.start, b.start + 6);
           const total = blockHours.reduce((a, h) => a + h.count, 0);
-          const pct = totalEvents > 0 ? ((total / totalEvents) * 100).toFixed(0) : "0";
-          const isPeakBlock = blockHours.some((h) => h.hour === peakHour.hour && peakHour.count > 0);
+          const pct =
+            totalEvents > 0 ? ((total / totalEvents) * 100).toFixed(0) : "0";
+          const isPeakBlock = blockHours.some(
+            (h) => h.hour === peakHour.hour && peakHour.count > 0,
+          );
           return (
             <div
               key={b.label}
               className="rounded-lg p-2.5 text-center"
               style={{
-                background: isPeakBlock ? "rgba(187,154,76,0.08)" : "transparent",
+                background: isPeakBlock
+                  ? "rgba(187,154,76,0.08)"
+                  : "transparent",
                 border: `1px solid ${isPeakBlock ? "rgba(187,154,76,0.2)" : "var(--border)"}`,
               }}
             >
-              <p className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "var(--muted-foreground)", opacity: 0.6 }}>
+              <p
+                className="text-[9px] uppercase tracking-wider mb-0.5"
+                style={{ color: "var(--muted-foreground)", opacity: 0.6 }}
+              >
                 {b.label}
               </p>
               <p
@@ -486,7 +613,10 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
               >
                 {pct}%
               </p>
-              <p className="text-[9px] tabular-nums" style={{ color: "var(--muted-foreground)", opacity: 0.7 }}>
+              <p
+                className="text-[9px] tabular-nums"
+                style={{ color: "var(--muted-foreground)", opacity: 0.7 }}
+              >
                 {total} eventos
               </p>
             </div>
@@ -494,7 +624,10 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
         })}
       </div>
       {peakHour.count > 0 && (
-        <p className="text-[11px] mt-3" style={{ color: "var(--muted-foreground)" }}>
+        <p
+          className="text-[11px] mt-3"
+          style={{ color: "var(--muted-foreground)" }}
+        >
           Hora pico:{" "}
           <span style={{ color: "#bb9a4c", fontWeight: 600 }}>
             {peakHour.hour}:00–{peakHour.hour + 1}:00
@@ -510,19 +643,34 @@ function HourlyActivity({ data }: { data: { hour: number; count: number }[] }) {
 function ChannelPerformance({
   rows,
 }: {
-  rows: { source: string; sessions: number; cartRate: number; convRate: number }[];
+  rows: {
+    source: string;
+    sessions: number;
+    cartRate: number;
+    convRate: number;
+  }[];
 }) {
   if (!rows.length) {
-    return <p className="text-[13px] text-muted-foreground">Sin datos de canales aún</p>;
+    return (
+      <p className="text-[13px] text-muted-foreground">
+        Sin datos de canales aún
+      </p>
+    );
   }
 
   const maxSessions = rows[0]?.sessions ?? 1;
 
   return (
     <div className="space-y-0">
-      <div className="grid grid-cols-4 gap-2 pb-2 mb-1" style={{ borderBottom: "1px solid rgba(11,8,5,0.08)" }}>
+      <div
+        className="grid grid-cols-4 gap-2 pb-2 mb-1"
+        style={{ borderBottom: "1px solid rgba(11,8,5,0.08)" }}
+      >
         {["Canal", "Sesiones", "Tasa carrito", "Conversión"].map((h) => (
-          <p key={h} className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground last:text-right">
+          <p
+            key={h}
+            className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground last:text-right"
+          >
             {h}
           </p>
         ))}
@@ -534,7 +682,9 @@ function ChannelPerformance({
           style={{ borderBottom: "1px solid rgba(11,8,5,0.04)" }}
         >
           <div className="min-w-0">
-            <p className="text-[12px] font-medium text-foreground truncate capitalize">{r.source}</p>
+            <p className="text-[12px] font-medium text-foreground truncate capitalize">
+              {r.source}
+            </p>
             <div
               className="mt-1 rounded-sm"
               style={{
@@ -563,8 +713,8 @@ function ChannelPerformance({
                 r.cartRate >= 10
                   ? "#4f7a3e"
                   : r.cartRate >= 4
-                  ? "#bb9a4c"
-                  : "var(--muted-foreground)",
+                    ? "#bb9a4c"
+                    : "var(--muted-foreground)",
             }}
           >
             {r.cartRate.toFixed(1)}%
@@ -574,7 +724,12 @@ function ChannelPerformance({
             style={{
               fontFamily: "var(--font-display)",
               letterSpacing: "-0.02em",
-              color: r.convRate >= 2 ? "#4f7a3e" : r.convRate >= 0.5 ? "#bb9a4c" : "#b43c28",
+              color:
+                r.convRate >= 2
+                  ? "#4f7a3e"
+                  : r.convRate >= 0.5
+                    ? "#bb9a4c"
+                    : "#b43c28",
             }}
           >
             {r.convRate.toFixed(1)}%
@@ -582,7 +737,8 @@ function ChannelPerformance({
         </div>
       ))}
       <p className="text-[10px] text-muted-foreground/50 pt-2">
-        Sesiones únicas por canal · tasa carrito = añadieron al carrito / sesiones · conversión = compras / sesiones
+        Sesiones únicas por canal · tasa carrito = añadieron al carrito /
+        sesiones · conversión = compras / sesiones
       </p>
     </div>
   );
@@ -599,21 +755,43 @@ async function BehaviorContent({ days }: { days: number }) {
   let funnelMap = new Map<string, number>();
   let topViewed: { title: string; count: number }[] = [];
   let topCarted: { title: string; count: number }[] = [];
-  let utmRows: { source: string | null; medium: string | null; campaign: string | null; purchases: number }[] = [];
+  let utmRows: {
+    source: string | null;
+    medium: string | null;
+    campaign: string | null;
+    purchases: number;
+  }[] = [];
   let searchRows: { query: string; count: number }[] = [];
   let topPages: { url: string; count: number }[] = [];
   let abandonedProducts: { title: string; count: number }[] = [];
   let hourlyActivity: { hour: number; count: number }[] = [];
   let avgDepth = 0;
   let bounceRate = 0;
-  let channelPerfData: { source: string; sessions: number; cartRate: number; convRate: number }[] = [];
+  let channelPerfData: {
+    source: string;
+    sessions: number;
+    cartRate: number;
+    convRate: number;
+  }[] = [];
   let avgCartValue: number | null = null;
   let dbAvailable = true;
 
   try {
     const db = getDb();
 
-    const [funnel, viewed, carted, utms, searches, pages, abandoned, hourly, sessionDepths, channelRows, avgCartRows] = await Promise.all([
+    const [
+      funnel,
+      viewed,
+      carted,
+      utms,
+      searches,
+      pages,
+      abandoned,
+      hourly,
+      sessionDepths,
+      channelRows,
+      avgCartRows,
+    ] = await Promise.all([
       // Session-based funnel (unique sessions per step)
       db
         .select({
@@ -626,7 +804,7 @@ async function BehaviorContent({ days }: { days: number }) {
             gte(pixelEvents.createdAt, since),
             inArray(pixelEvents.eventType, funnelKeys),
             isNotNull(pixelEvents.sessionId),
-          )
+          ),
         )
         .groupBy(pixelEvents.eventType),
 
@@ -642,7 +820,7 @@ async function BehaviorContent({ days }: { days: number }) {
             gte(pixelEvents.createdAt, since),
             sql`${pixelEvents.eventType} = 'product_viewed'`,
             isNotNull(pixelEvents.productTitle),
-          )
+          ),
         )
         .groupBy(pixelEvents.productTitle)
         .orderBy(desc(sql`count(*)`))
@@ -660,7 +838,7 @@ async function BehaviorContent({ days }: { days: number }) {
             gte(pixelEvents.createdAt, since),
             sql`${pixelEvents.eventType} = 'product_added_to_cart'`,
             isNotNull(pixelEvents.productTitle),
-          )
+          ),
         )
         .groupBy(pixelEvents.productTitle)
         .orderBy(desc(sql`count(*)`))
@@ -679,9 +857,13 @@ async function BehaviorContent({ days }: { days: number }) {
           and(
             gte(pixelEvents.createdAt, since),
             sql`${pixelEvents.eventType} = 'checkout_completed'`,
-          )
+          ),
         )
-        .groupBy(pixelEvents.utmSource, pixelEvents.utmMedium, pixelEvents.utmCampaign)
+        .groupBy(
+          pixelEvents.utmSource,
+          pixelEvents.utmMedium,
+          pixelEvents.utmCampaign,
+        )
         .orderBy(desc(sql`count(*)`))
         .limit(8),
 
@@ -697,7 +879,7 @@ async function BehaviorContent({ days }: { days: number }) {
             gte(pixelEvents.createdAt, since),
             sql`${pixelEvents.eventType} = 'search_submitted'`,
             isNotNull(pixelEvents.searchQuery),
-          )
+          ),
         )
         .groupBy(pixelEvents.searchQuery)
         .orderBy(desc(sql`count(*)`))
@@ -715,7 +897,7 @@ async function BehaviorContent({ days }: { days: number }) {
             gte(pixelEvents.createdAt, since),
             sql`${pixelEvents.eventType} = 'page_viewed'`,
             isNotNull(pixelEvents.pageUrl),
-          )
+          ),
         )
         .groupBy(pixelEvents.pageUrl)
         .orderBy(desc(sql`count(*)`))
@@ -792,25 +974,44 @@ async function BehaviorContent({ days }: { days: number }) {
     topCarted = carted.map((r) => ({ title: r.title!, count: r.count }));
     utmRows = utms;
     searchRows = searches.map((r) => ({ query: r.query!, count: r.count }));
-    topPages = pages.filter((p) => p.url).map((p) => ({ url: p.url!, count: p.count }));
-    abandonedProducts = (abandoned.rows as { product_title: string; ct: number }[])
-      .map((r) => ({ title: r.product_title, count: r.ct }));
+    topPages = pages
+      .filter((p) => p.url)
+      .map((p) => ({ url: p.url!, count: p.count }));
+    abandonedProducts = (
+      abandoned.rows as { product_title: string; ct: number }[]
+    ).map((r) => ({ title: r.product_title, count: r.ct }));
 
-    hourlyActivity = (hourly.rows as { hr: number; ct: number }[])
-      .map((r) => ({ hour: r.hr, count: r.ct }));
+    hourlyActivity = (hourly.rows as { hr: number; ct: number }[]).map((r) => ({
+      hour: r.hr,
+      count: r.ct,
+    }));
 
-    const depths = (sessionDepths.rows as { evt_count: number }[]).map((r) => r.evt_count);
-    avgDepth = depths.length > 0 ? depths.reduce((a, b) => a + b, 0) / depths.length : 0;
-    bounceRate = depths.length > 0 ? (depths.filter((d) => d <= 1).length / depths.length) * 100 : 0;
+    const depths = (sessionDepths.rows as { evt_count: number }[]).map(
+      (r) => r.evt_count,
+    );
+    avgDepth =
+      depths.length > 0 ? depths.reduce((a, b) => a + b, 0) / depths.length : 0;
+    bounceRate =
+      depths.length > 0
+        ? (depths.filter((d) => d <= 1).length / depths.length) * 100
+        : 0;
 
-    channelPerfData = (channelRows.rows as { src: string; sessions: number; carts: number; purchases: number }[]).map((r) => ({
+    channelPerfData = (
+      channelRows.rows as {
+        src: string;
+        sessions: number;
+        carts: number;
+        purchases: number;
+      }[]
+    ).map((r) => ({
       source: r.src,
       sessions: r.sessions,
       cartRate: r.sessions > 0 ? (r.carts / r.sessions) * 100 : 0,
       convRate: r.sessions > 0 ? (r.purchases / r.sessions) * 100 : 0,
     }));
 
-    avgCartValue = (avgCartRows.rows as { avg_val: number | null }[])[0]?.avg_val ?? null;
+    avgCartValue =
+      (avgCartRows.rows as { avg_val: number | null }[])[0]?.avg_val ?? null;
   } catch {
     dbAvailable = false;
   }
@@ -825,22 +1026,29 @@ async function BehaviorContent({ days }: { days: number }) {
   const checkoutStarted = funnelSteps[3]?.sessions ?? 0;
   const purchases = funnelSteps[4]?.sessions ?? 0;
   const convRate = totalSessions > 0 ? (purchases / totalSessions) * 100 : 0;
-  const cartAbandonment = addToCart > 0 ? ((addToCart - purchases) / addToCart) * 100 : 0;
+  const cartAbandonment =
+    addToCart > 0 ? ((addToCart - purchases) / addToCart) * 100 : 0;
   const cartNoCheckout = Math.max(0, addToCart - checkoutStarted);
   const checkoutNoPurchase = Math.max(0, checkoutStarted - purchases);
 
-  const peakHour = hourlyActivity.length > 0
-    ? hourlyActivity.reduce((a, b) => (a.count >= b.count ? a : b))
-    : null;
+  const peakHour =
+    hourlyActivity.length > 0
+      ? hourlyActivity.reduce((a, b) => (a.count >= b.count ? a : b))
+      : null;
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+      maximumFractionDigits: 0,
+    }).format(n);
 
   return (
     <div className="space-y-4">
       {!dbAvailable && (
         <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4 text-[13px] text-amber-400">
-          Base de datos no disponible. Configura DATABASE_URL para ver datos del Web Pixel.
+          Base de datos no disponible. Configura DATABASE_URL para ver datos del
+          Web Pixel.
         </div>
       )}
 
@@ -891,9 +1099,21 @@ async function BehaviorContent({ days }: { days: number }) {
           value={bounceRate > 0 ? `${bounceRate.toFixed(1)}%` : "—"}
           description="Sesiones con 1 solo evento"
           icon={<Zap size={14} />}
-          iconColor={bounceRate >= 50 ? "#b43c28" : bounceRate >= 30 ? "#b07a30" : "#4f7a3e"}
+          iconColor={
+            bounceRate >= 50
+              ? "#b43c28"
+              : bounceRate >= 30
+                ? "#b07a30"
+                : "#4f7a3e"
+          }
           changePositive={bounceRate < 40}
-          change={bounceRate >= 50 ? "Alta — revisar landing" : bounceRate < 20 ? "Excelente engagement" : undefined}
+          change={
+            bounceRate >= 50
+              ? "Alta — revisar landing"
+              : bounceRate < 20
+                ? "Excelente engagement"
+                : undefined
+          }
         />
         <KpiCard
           title="Carrito promedio"
@@ -905,7 +1125,9 @@ async function BehaviorContent({ days }: { days: number }) {
         <KpiCard
           title="Hora pico"
           value={peakHour !== null ? `${peakHour.hour}:00` : "—"}
-          description={peakHour !== null ? `${peakHour.count} eventos` : "Sin datos"}
+          description={
+            peakHour !== null ? `${peakHour.count} eventos` : "Sin datos"
+          }
           icon={<Clock size={14} />}
           iconColor="#4f7a3e"
         />
@@ -917,9 +1139,12 @@ async function BehaviorContent({ days }: { days: number }) {
           <JourneyFlow steps={funnelSteps} />
         ) : (
           <div className="py-8 text-center">
-            <p className="text-[13px] text-muted-foreground">Sin sesiones registradas aún.</p>
+            <p className="text-[13px] text-muted-foreground">
+              Sin sesiones registradas aún.
+            </p>
             <p className="text-[11px] text-muted-foreground mt-1 opacity-70">
-              Activa el pixel en Shopify Customer Events para empezar a capturar datos.
+              Activa el pixel en Shopify Customer Events para empezar a capturar
+              datos.
             </p>
           </div>
         )}
@@ -936,7 +1161,7 @@ async function BehaviorContent({ days }: { days: number }) {
 
       {/* Hourly + Channel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SectionCard title={`Actividad por hora · ${days}d · hora local MX`}>
+        <SectionCard title={`Actividad por hora · ${days}d · hora local CO`}>
           <HourlyActivity data={hourlyActivity} />
         </SectionCard>
 
@@ -962,19 +1187,29 @@ async function BehaviorContent({ days }: { days: number }) {
           {searchRows.length > 0 ? (
             <div className="space-y-2">
               {searchRows.map((s, i) => (
-                <div key={i} className="flex items-center justify-between gap-3">
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3"
+                >
                   <div className="flex items-center gap-2 min-w-0">
                     <Search size={11} className="shrink-0 opacity-40" />
-                    <span className="text-[12px] text-foreground truncate">{s.query}</span>
+                    <span className="text-[12px] text-foreground truncate">
+                      {s.query}
+                    </span>
                   </div>
-                  <span className="tabular-nums text-[12px] font-semibold shrink-0" style={{ color: "#bb9a4c" }}>
+                  <span
+                    className="tabular-nums text-[12px] font-semibold shrink-0"
+                    style={{ color: "#bb9a4c" }}
+                  >
                     {s.count}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-muted-foreground">Sin búsquedas registradas aún</p>
+            <p className="text-[13px] text-muted-foreground">
+              Sin búsquedas registradas aún
+            </p>
           )}
         </SectionCard>
 
@@ -988,15 +1223,28 @@ async function BehaviorContent({ days }: { days: number }) {
                     if (raw.startsWith("/checkouts/")) return "/checkouts/…";
                     if (raw.startsWith("/cart/")) return "/cart/…";
                     return raw;
-                  } catch { return p.url; }
+                  } catch {
+                    return p.url;
+                  }
                 })();
                 return (
-                  <div key={i} className="flex items-center justify-between gap-3">
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3"
+                  >
                     <div className="flex items-center gap-2 min-w-0">
                       <MapPin size={11} className="shrink-0 opacity-40" />
-                      <span className="text-[12px] text-foreground truncate" title={p.url}>{path}</span>
+                      <span
+                        className="text-[12px] text-foreground truncate"
+                        title={p.url}
+                      >
+                        {path}
+                      </span>
                     </div>
-                    <span className="tabular-nums text-[12px] font-semibold shrink-0" style={{ color: "#bb9a4c" }}>
+                    <span
+                      className="tabular-nums text-[12px] font-semibold shrink-0"
+                      style={{ color: "#bb9a4c" }}
+                    >
                       {p.count.toLocaleString("es-MX")}
                     </span>
                   </div>
@@ -1004,7 +1252,9 @@ async function BehaviorContent({ days }: { days: number }) {
               })}
             </div>
           ) : (
-            <p className="text-[13px] text-muted-foreground">Sin páginas registradas aún</p>
+            <p className="text-[13px] text-muted-foreground">
+              Sin páginas registradas aún
+            </p>
           )}
         </SectionCard>
       </div>

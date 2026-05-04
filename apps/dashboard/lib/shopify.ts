@@ -76,6 +76,7 @@ export interface DiscountCodeMetric {
   code: string;
   count: number;
   totalDiscount: number;
+  revenue: number;
 }
 
 export interface TopCustomer {
@@ -277,9 +278,10 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
     // Discount codes
     for (const dc of o.discount_codes ?? []) {
       const code = dc.code.toUpperCase();
-      const existing = discountMap.get(code) ?? { code, count: 0, totalDiscount: 0 };
+      const existing = discountMap.get(code) ?? { code, count: 0, totalDiscount: 0, revenue: 0 };
       existing.count++;
       existing.totalDiscount += parseFloat(dc.amount);
+      existing.revenue += revenue;
       discountMap.set(code, existing);
     }
 

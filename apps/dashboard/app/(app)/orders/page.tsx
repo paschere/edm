@@ -321,44 +321,9 @@ async function OrdersContent({ days }: { days: number }) {
         </div>
       )}
 
-      {/* Setup instructions */}
       {rows.length === 0 && dbAvailable && (
-        <div
-          className="rounded-xl border border-border p-5 space-y-3"
-          style={{ background: "var(--card)" }}
-        >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Configuración del webhook
-          </p>
-          <p className="text-[13px] text-foreground">
-            Para recibir pedidos, registra el webhook en Shopify Admin:
-          </p>
-          <ol className="space-y-2 text-[12px] text-muted-foreground list-decimal list-inside">
-            <li>
-              Ve a <strong className="text-foreground">Shopify Admin → Settings → Notifications → Webhooks</strong>
-            </li>
-            <li>
-              Crea webhooks para: <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">orders/create</code>,{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">orders/updated</code>,{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">orders/paid</code>,{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">orders/fulfilled</code>,{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">orders/cancelled</code>
-            </li>
-            <li>
-              URL del webhook:{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded text-foreground">
-                https://edmco.vercel.app/api/webhooks/shopify
-              </code>
-            </li>
-            <li>
-              Copia el <strong className="text-foreground">Signing Secret</strong> y agrégalo como{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">SHOPIFY_WEBHOOK_SECRET</code> en Vercel
-            </li>
-            <li>
-              Agrega <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">RESEND_API_KEY</code> e{" "}
-              <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">INTERNAL_NOTIFICATION_EMAIL</code> en Vercel
-            </li>
-          </ol>
+        <div className="py-8 text-center">
+          <p className="text-[13px] text-muted-foreground">Sin pedidos registrados en este período.</p>
         </div>
       )}
     </div>

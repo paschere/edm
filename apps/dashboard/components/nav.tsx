@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Bell,
   LogOut,
+  Tag,
 } from "lucide-react";
 
 const links = [
@@ -24,6 +25,7 @@ const links = [
   { href: "/customers", label: "Clientes",         icon: Users },
   { href: "/inventory", label: "Inventario",       icon: Package },
   { href: "/orders",    label: "Órdenes",          icon: ClipboardList },
+  { href: "/discounts", label: "Descuentos",       icon: Tag },
 ];
 
 const GOLD = "#bb9a4c";
