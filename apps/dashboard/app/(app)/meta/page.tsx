@@ -124,16 +124,24 @@ async function MetaContent({ days }: { days: number }) {
           value={fmt(meta.totalSpend)}
           icon={<DollarSign size={14} />}
           iconColor="#b07a30"
+          description={meta.prevSpend > 0 ? `Ant. ${fmt(meta.prevSpend)}` : undefined}
           sparklineData={spendValues.length >= 2 ? spendValues : undefined}
-          trendPct={spendTrend}
+          trendPct={meta.prevSpend > 0
+            ? ((meta.totalSpend - meta.prevSpend) / meta.prevSpend) * 100
+            : spendTrend}
         />
         <KpiCard
           title="ROAS promedio"
           value={meta.totalRoas > 0 ? `${meta.totalRoas.toFixed(2)}x` : "—"}
-          description="Reportado por Meta"
-          changePositive={meta.totalRoas >= 2}
+          description={meta.prevRoas > 0 ? `Ant. ${meta.prevRoas.toFixed(2)}x` : "Reportado por Meta"}
+          trendPct={meta.prevRoas > 0 && meta.totalRoas > 0
+            ? ((meta.totalRoas - meta.prevRoas) / meta.prevRoas) * 100
+            : undefined}
+          changePositive={meta.prevRoas > 0 ? meta.totalRoas >= meta.prevRoas : meta.totalRoas >= 2}
           change={
-            meta.totalRoas > 0
+            meta.prevRoas > 0
+              ? undefined
+              : meta.totalRoas > 0
               ? meta.totalRoas >= 2
                 ? "Rentable"
                 : "Bajo objetivo"

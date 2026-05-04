@@ -71,6 +71,8 @@ export interface MetaStats {
   instagram: MetaInstagramInsights;
   pixel: MetaPixelStats;
   dailySpend: MetaDailySpend[];
+  prevSpend: number;
+  prevRoas: number;
 }
 
 function toDatePreset(days: number): string {
@@ -79,8 +81,16 @@ function toDatePreset(days: number): string {
   return "last_30d";
 }
 
+function toTimeRange(offsetDays: number, days: number): string {
+  const until = new Date(Date.now() - offsetDays * 86400000);
+  const since = new Date(until.getTime() - days * 86400000);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return JSON.stringify({ since: fmt(since), until: fmt(until) });
+}
+
 export async function getMetaStats(days = 30): Promise<MetaStats> {
   const preset = toDatePreset(days);
+  const prevTimeRange = toTimeRange(days, days); // previous period
 
   const results = await Promise.allSettled([
     metaFetch<{ data: RawCampaign[] }>(`/${AD_ACCOUNT_ID}/campaigns`, {
@@ -112,6 +122,15 @@ export async function getMetaStats(days = 30): Promise<MetaStats> {
         level: "account",
       }
     ),
+    // Previous period account-level spend + ROAS for comparison
+    metaFetch<{ data: { spend: string; purchase_roas?: { value: string }[] }[] }>(
+      `/${AD_ACCOUNT_ID}/insights`,
+      {
+        time_range: prevTimeRange,
+        fields: "spend,purchase_roas",
+        level: "account",
+      }
+    ),
   ]);
 
   const campaigns = results[0].status === "fulfilled"
@@ -123,6 +142,11 @@ export async function getMetaStats(days = 30): Promise<MetaStats> {
   const igInfo = results[3].status === "fulfilled" ? results[3].value : null;
   const igInsights = results[4].status === "fulfilled" ? results[4].value.data : [];
   const rawDailySpend = results[5].status === "fulfilled" ? results[5].value.data : [];
+  const prevInsights  = results[6].status === "fulfilled" ? results[6].value.data : [];
+  const prevSpend = prevInsights.reduce((s, r) => s + parseFloat(r.spend ?? "0"), 0);
+  const prevRoas  = prevInsights[0]?.purchase_roas?.[0]?.value
+    ? parseFloat(prevInsights[0].purchase_roas[0].value)
+    : 0;
 
   const page: MetaPageInsights = {
     impressions: sumInsight(pageInsights, "page_impressions"),
@@ -177,6 +201,8 @@ export async function getMetaStats(days = 30): Promise<MetaStats> {
     instagram,
     pixel: { pageViews: 0, addToCart: 0, initiateCheckout: 0, purchases: 0 },
     dailySpend,
+    prevSpend,
+    prevRoas,
   };
 }
 

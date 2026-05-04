@@ -2,9 +2,12 @@ import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getInventoryData } from "@/lib/shopify";
 import type { InventoryItem } from "@/lib/shopify";
+import { getDb } from "@/lib/db";
+import { orders } from "@/lib/db/schema";
+import { sql, gte } from "drizzle-orm";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, AlertTriangle, XCircle, CheckCircle } from "lucide-react";
+import { Package, AlertTriangle, XCircle, CheckCircle, Flame } from "lucide-react";
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -46,7 +49,7 @@ function StockBadge({ qty }: { qty: number }) {
   return null;
 }
 
-function InventoryRow({ item }: { item: InventoryItem }) {
+function InventoryRow({ item, daysLeft }: { item: InventoryItem; daysLeft: number | null }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
@@ -80,6 +83,7 @@ function InventoryRow({ item }: { item: InventoryItem }) {
       </td>
       <td className="py-2.5 text-right">
         <div className="flex items-center justify-end gap-2">
+          <StockoutBadge daysLeft={daysLeft} />
           <StockBadge qty={item.inventoryQuantity} />
           <span
             style={{
@@ -150,10 +154,69 @@ function InventoryAlertsList({ items }: { items: InventoryItem[] }) {
   );
 }
 
+// ─── Stockout prediction ──────────────────────────────────────────────────────
+function StockoutBadge({ daysLeft }: { daysLeft: number | null }) {
+  if (daysLeft === null) return null;
+  if (daysLeft <= 7) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+        style={{ background: "rgba(180,60,40,0.1)", color: "#b43c28", border: "1px solid rgba(180,60,40,0.2)" }}
+      >
+        <Flame size={9} />
+        ~{daysLeft}d
+      </span>
+    );
+  }
+  if (daysLeft <= 21) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+        style={{ background: "rgba(176,122,48,0.1)", color: "#b07a30", border: "1px solid rgba(176,122,48,0.2)" }}
+      >
+        ~{daysLeft}d
+      </span>
+    );
+  }
+  return null;
+}
+
 async function InventoryContent() {
   "use cache";
   cacheLife({ stale: 30, revalidate: 30, expire: 60 });
-  const items = await getInventoryData().catch(() => null);
+
+  // Fetch inventory + sold quantities in parallel
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const [items, soldRows] = await Promise.all([
+    getInventoryData().catch(() => null),
+    getDb()
+      .execute(sql`
+        SELECT
+          item->>'title' AS product_title,
+          sum((item->>'quantity')::int)::int AS units_sold
+        FROM ${orders}, jsonb_array_elements(line_items) AS item
+        WHERE ${orders.createdAt} >= ${thirtyDaysAgo}
+        GROUP BY item->>'title'
+      `)
+      .catch(() => ({ rows: [] })),
+  ]);
+
+  // Map title → units sold (last 30 days)
+  const soldMap = new Map<string, number>(
+    (soldRows.rows as { product_title: string; units_sold: number }[]).map((r) => [
+      r.product_title.toLowerCase(),
+      r.units_sold,
+    ])
+  );
+
+  // Calculate days until stockout (velocity = units_sold / 30 days)
+  const daysUntilStockout = (item: InventoryItem): number | null => {
+    if (item.inventoryQuantity <= 0) return 0;
+    const sold = soldMap.get(item.productTitle.toLowerCase()) ?? 0;
+    if (sold === 0) return null; // no sales data
+    const velocity = sold / 30; // units per day
+    return Math.round(item.inventoryQuantity / velocity);
+  };
 
   if (!items) {
     return (
@@ -223,12 +286,13 @@ async function InventoryContent() {
                   <th className="text-left pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Producto</th>
                   <th className="text-left pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">SKU</th>
                   <th className="text-right pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Precio</th>
+                  <th className="text-right pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Agotamiento</th>
                   <th className="text-right pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Stock</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <InventoryRow key={item.variantId} item={item} />
+                  <InventoryRow key={item.variantId} item={item} daysLeft={daysUntilStockout(item)} />
                 ))}
               </tbody>
             </table>

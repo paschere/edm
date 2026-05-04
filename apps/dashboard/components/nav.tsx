@@ -11,17 +11,19 @@ import {
   Users,
   Package,
   ClipboardList,
+  Bell,
   LogOut,
 } from "lucide-react";
 
 const links = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/shopify", label: "Shopify", icon: ShoppingBag },
-  { href: "/meta", label: "Meta / Facebook", icon: Share2 },
-  { href: "/behavior", label: "Comportamiento", icon: Activity },
-  { href: "/customers", label: "Clientes", icon: Users },
-  { href: "/inventory", label: "Inventario", icon: Package },
-  { href: "/orders", label: "Órdenes", icon: ClipboardList },
+  { href: "/alerts",    label: "Alertas",         icon: Bell },
+  { href: "/",          label: "Overview",         icon: LayoutDashboard },
+  { href: "/shopify",   label: "Shopify",          icon: ShoppingBag },
+  { href: "/meta",      label: "Meta / Facebook",  icon: Share2 },
+  { href: "/behavior",  label: "Comportamiento",   icon: Activity },
+  { href: "/customers", label: "Clientes",         icon: Users },
+  { href: "/inventory", label: "Inventario",       icon: Package },
+  { href: "/orders",    label: "Órdenes",          icon: ClipboardList },
 ];
 
 const GOLD = "#bb9a4c";
@@ -55,7 +57,7 @@ export function Nav() {
       {/* Nav links */}
       <nav className="flex flex-col gap-0.5 p-2 flex-1 pt-3">
         {links.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+          const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}

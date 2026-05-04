@@ -54,6 +54,39 @@ function FulfillmentBadge({ status }: { status: string | null }) {
   );
 }
 
+// ─── Geographic map ───────────────────────────────────────────────────────────
+function GeoMap({ rows }: { rows: { province: string; orderCount: number; revenue: number }[] }) {
+  if (!rows.length) return <p className="text-[13px] text-muted-foreground">Sin datos de dirección de envío aún</p>;
+  const maxCount = rows[0]?.orderCount ?? 1;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n);
+
+  return (
+    <div className="space-y-2.5">
+      {rows.map((r, i) => {
+        const pct = (r.orderCount / maxCount) * 100;
+        return (
+          <div key={r.province}>
+            <div className="flex items-baseline justify-between mb-1 gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-medium text-muted-foreground w-4 text-right shrink-0">{i + 1}</span>
+                <span className="text-[12px] font-medium text-foreground truncate">{r.province || "Sin especificar"}</span>
+              </div>
+              <div className="flex items-baseline gap-3 shrink-0">
+                <span className="text-[11px] text-muted-foreground tabular-nums">{r.orderCount} pedidos</span>
+                <span className="text-[12px] font-semibold tabular-nums" style={{ color: "#bb9a4c" }}>{fmt(r.revenue)}</span>
+              </div>
+            </div>
+            <div style={{ height: "5px", background: "var(--border)", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: `rgba(187,154,76,${0.35 + (pct / 100) * 0.45})`, borderRadius: "3px" }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Line items summary ───────────────────────────────────────────────────────
 function LineItemsSummary({ items }: { items: unknown }) {
   if (!Array.isArray(items) || !items.length) return <span className="text-[12px] text-muted-foreground">—</span>;
@@ -79,6 +112,7 @@ async function OrdersContent({ days }: { days: number }) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
   let rows: typeof orders.$inferSelect[] = [];
+  let geoRows: { province: string; orderCount: number; revenue: number }[] = [];
   let totalRevenue = 0;
   let avgOrderValue = 0;
   let pendingCount = 0;
@@ -86,14 +120,30 @@ async function OrdersContent({ days }: { days: number }) {
 
   try {
     const db = getDb();
-    rows = await db
-      .select()
-      .from(orders)
-      .where(gte(orders.createdAt, since))
-      .orderBy(desc(orders.shopifyCreatedAt))
-      .limit(100);
+    const [ordersResult, geoResult] = await Promise.all([
+      db.select().from(orders).where(gte(orders.createdAt, since)).orderBy(desc(orders.shopifyCreatedAt)).limit(100),
+      db.execute(sql`
+        SELECT
+          shipping_address->>'province' AS province,
+          count(*)::int AS order_count,
+          sum(total_price::numeric)::float AS revenue
+        FROM ${orders}
+        WHERE created_at >= ${since}
+          AND shipping_address IS NOT NULL
+          AND shipping_address->>'province' IS NOT NULL
+        GROUP BY province
+        ORDER BY order_count DESC
+        LIMIT 15
+      `).catch(() => ({ rows: [] })),
+    ]);
+    rows = ordersResult;
+    geoRows = (geoResult.rows as { province: string; order_count: number; revenue: number }[]).map((r) => ({
+      province: r.province,
+      orderCount: r.order_count,
+      revenue: r.revenue,
+    }));
 
-    totalRevenue = rows
+    totalRevenue = ordersResult
       .filter((r) => r.financialStatus === "paid")
       .reduce((acc, r) => acc + Number(r.totalPrice ?? 0), 0);
 
@@ -257,6 +307,19 @@ async function OrdersContent({ days }: { days: number }) {
           </div>
         )}
       </div>
+
+      {/* Geographic map */}
+      {geoRows.length > 0 && (
+        <div
+          className="rounded-xl border border-border p-5"
+          style={{ background: "var(--card)", boxShadow: "0 1px 3px rgba(11,8,5,0.05)" }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Distribución geográfica · {days}d — por estado de envío
+          </p>
+          <GeoMap rows={geoRows} />
+        </div>
+      )}
 
       {/* Setup instructions */}
       {rows.length === 0 && dbAvailable && (
