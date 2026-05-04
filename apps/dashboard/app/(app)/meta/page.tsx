@@ -5,6 +5,7 @@ import { KpiCard } from "@/components/widgets/kpi-card";
 import { MetaCampaignTable } from "@/components/charts/meta-campaign-table";
 import { CorrelationChart } from "@/components/charts/correlation-chart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PeriodSelector } from "@/components/widgets/period-selector";
 import { DollarSign, TrendingUp, Users, ImageIcon, Target, Layers, Eye } from "lucide-react";
 
 function SectionCard({
@@ -60,11 +61,11 @@ function MetricPill({ label, value, color }: { label: string; value: string; col
   );
 }
 
-async function MetaContent() {
+async function MetaContent({ days }: { days: number }) {
   "use cache";
   const [meta, shopify] = await Promise.all([
-    getMetaStats().catch(() => null),
-    getShopifyStats(30).catch(() => null),
+    getMetaStats(days).catch(() => null),
+    getShopifyStats(days).catch(() => null),
   ]);
 
   const fmt = (n: number) =>
@@ -117,7 +118,7 @@ async function MetaContent() {
       {/* Row 1: Primary KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
-          title="Gasto Meta 30d"
+          title={`Gasto Meta ${days}d`}
           value={fmt(meta.totalSpend)}
           icon={<DollarSign size={14} />}
           iconColor="#b07a30"
@@ -158,7 +159,7 @@ async function MetaContent() {
       {/* Row 2: Secondary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
-          title="Impresiones 30d"
+          title={`Impresiones ${days}d`}
           value={meta.totalImpressions > 0 ? meta.totalImpressions.toLocaleString("es-MX") : "—"}
           icon={<Eye size={14} />}
           iconColor="#78695a"
@@ -189,7 +190,7 @@ async function MetaContent() {
 
       {/* Row 3: Cruce Meta vs Shopify */}
       {correlationData.length >= 2 && (
-        <SectionCard title="Revenue Shopify vs Gasto Meta · 30d — Cruce de canales">
+        <SectionCard title={`Revenue Shopify vs Gasto Meta · ${days}d — Cruce de canales`}>
           <div className="flex items-center gap-6 mb-4 flex-wrap">
             {estimatedRoas !== null && (
               <MetricPill
@@ -218,7 +219,7 @@ async function MetaContent() {
       )}
 
       {/* Row 4: Campaigns table */}
-      <SectionCard title="Campañas 30d">
+      <SectionCard title={`Campañas ${days}d`}>
         <MetaCampaignTable campaigns={meta.campaigns} />
       </SectionCard>
 
@@ -247,28 +248,47 @@ async function MetaContent() {
   );
 }
 
-export default function MetaPage() {
+async function MetaContentWrapper({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
+  const { days: d } = await searchParams;
+  const days = [7, 30, 90].includes(Number(d)) ? Number(d) : 30;
+  return <MetaContent days={days} />;
+}
+
+export default function MetaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
   return (
     <div className="p-6 max-w-7xl">
-      <div className="mb-6">
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "2rem",
-            fontWeight: 500,
-            lineHeight: 1,
-            letterSpacing: "-0.01em",
-            color: "var(--foreground)",
-          }}
-        >
-          Meta / Facebook
-        </h1>
-        <p className="text-[12px] text-muted-foreground mt-1">
-          Ads · Página · Instagram · Cruce con Shopify · Últimos 30 días
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "2rem",
+              fontWeight: 500,
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+              color: "var(--foreground)",
+            }}
+          >
+            Meta / Facebook
+          </h1>
+          <p className="text-[12px] text-muted-foreground mt-1">
+            Ads · Página · Instagram · Cruce con Shopify
+          </p>
+        </div>
+        <Suspense fallback={null}>
+          <PeriodSelector />
+        </Suspense>
       </div>
       <Suspense fallback={<Skeleton className="h-96 rounded-lg" />}>
-        <MetaContent />
+        <MetaContentWrapper searchParams={searchParams} />
       </Suspense>
     </div>
   );

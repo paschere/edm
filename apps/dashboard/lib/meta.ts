@@ -73,17 +73,25 @@ export interface MetaStats {
   dailySpend: MetaDailySpend[];
 }
 
-export async function getMetaStats(): Promise<MetaStats> {
+function toDatePreset(days: number): string {
+  if (days === 7) return "last_7d";
+  if (days === 90) return "last_90d";
+  return "last_30d";
+}
+
+export async function getMetaStats(days = 30): Promise<MetaStats> {
+  const preset = toDatePreset(days);
+
   const results = await Promise.allSettled([
     metaFetch<{ data: RawCampaign[] }>(`/${AD_ACCOUNT_ID}/campaigns`, {
-      fields: "id,name,status,insights.date_preset(last_30d){spend,impressions,clicks,ctr,cpc,cpm,frequency,purchase_roas,reach,actions}",
+      fields: `id,name,status,insights.date_preset(${preset}){spend,impressions,clicks,ctr,cpc,cpm,frequency,purchase_roas,reach,actions}`,
       effective_status: '["ACTIVE","PAUSED"]',
       limit: "50",
     }),
     metaFetch<{ data: RawInsight[] }>(`/${PAGE_ID}/insights`, {
       metric: "page_impressions,page_reach,page_engaged_users,page_views_total",
       period: "day",
-      date_preset: "last_30d",
+      date_preset: preset,
     }),
     metaFetch<{ followers_count: number; name: string }>(`/${PAGE_ID}`, {
       fields: "followers_count",
@@ -99,7 +107,7 @@ export async function getMetaStats(): Promise<MetaStats> {
       `/${AD_ACCOUNT_ID}/insights`,
       {
         time_increment: "1",
-        date_preset: "last_30d",
+        date_preset: preset,
         fields: "date_start,spend",
         level: "account",
       }
