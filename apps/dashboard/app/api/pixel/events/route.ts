@@ -2,13 +2,19 @@ import { getDb } from "@/lib/db";
 import { pixelEvents } from "@/lib/db/schema";
 import type { NextRequest } from "next/server";
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 export async function POST(req: NextRequest) {
   try {
     const pixelSecret = process.env.PIXEL_SECRET;
     if (pixelSecret) {
       const token = req.nextUrl.searchParams.get("token");
       if (token !== pixelSecret) {
-        return Response.json({ error: "Unauthorized" }, { status: 401 });
+        return Response.json({ error: "Unauthorized" }, { status: 401, headers: CORS });
       }
     }
 
@@ -20,7 +26,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!eventType) {
-      return Response.json({ error: "eventType required" }, { status: 400 });
+      return Response.json({ error: "eventType required" }, { status: 400, headers: CORS });
     }
 
     const db = getDb();
@@ -42,19 +48,13 @@ export async function POST(req: NextRequest) {
       metadata: metadata ?? null,
     });
 
-    return Response.json({ ok: true });
-  } catch {
-    return Response.json({ error: "Internal error" }, { status: 500 });
+    return Response.json({ ok: true }, { headers: CORS });
+  } catch (err) {
+    console.error("[pixel/events] error:", err);
+    return Response.json({ error: "Internal error" }, { status: 500, headers: CORS });
   }
 }
 
 export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+  return new Response(null, { status: 204, headers: CORS });
 }
