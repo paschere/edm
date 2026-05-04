@@ -1,0 +1,684 @@
+{%- liquid
+  assign has_header = false
+  if section.settings.eyebrow != blank or section.settings.title != blank or section.settings.subtitle != blank
+    assign has_header = true
+  endif
+  assign item_blocks = section.blocks | where: 'type', 'item'
+  assign cols = section.settings.max_columns | default: 3
+  assign layout = section.settings.layout_style | default: 'uniform'
+-%}
+
+<section
+  class="edm-lb color-{{ section.settings.color_scheme }} gradient"
+  role="region"
+  aria-label="{{ section.settings.title | default: 'Lookbook' | escape }}"
+  x-data="{ active: null }"
+  @keydown.escape.window="active = null"
+>
+  <div class="edm-lb__inner page-width" style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;">
+
+    {%- if has_header -%}
+      <header class="edm-lb__header">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="edm-lb__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        {%- if section.settings.title != blank -%}
+          <h2 class="edm-lb__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subtitle != blank -%}
+          <p class="edm-lb__subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    {%- if item_blocks.size > 0 -%}
+      <div class="edm-lb__grid edm-lb__grid--{{ layout }} edm-lb__grid--cols-{{ cols }}">
+        {%- for block in item_blocks -%}
+          {%- assign block_index = forloop.index0 -%}
+          {%- assign p1 = block.settings.product_1 -%}
+          {%- assign p2 = block.settings.product_2 -%}
+          {%- assign has_products = false -%}
+          {%- if p1 != blank or p2 != blank -%}
+            {%- assign has_products = true -%}
+          {%- endif -%}
+
+          <div
+            class="edm-lb__item{% if layout == 'asymmetric' and forloop.index0 == 0 %} edm-lb__item--large{% endif %}"
+            {{ block.shopify_attributes }}
+            x-data="{}"
+            @click="active === {{ block_index }} ? active = null : active = {{ block_index }}"
+            @mouseenter="active = {{ block_index }}"
+            @mouseleave="active = null"
+            role="group"
+            aria-label="{% if block.settings.caption != blank %}{{ block.settings.caption | escape }}{% else %}Imagen {{ forloop.index }}{% endif %}"
+          >
+
+            <div class="edm-lb__img-wrap">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    width: 1200,
+                    class: 'edm-lb__img',
+                    alt: ''
+                }}
+              {%- else -%}
+                <div class="edm-lb__img-placeholder" aria-hidden="true">
+                  <span>Estrella de Mar</span>
+                </div>
+              {%- endif -%}
+
+              {%- if has_products -%}
+                <div
+                  class="edm-lb__overlay"
+                  x-show="active === {{ block_index }}"
+                  x-transition:enter="edm-lb__fade-enter"
+                  x-transition:enter-start="edm-lb__fade-start"
+                  x-transition:enter-end="edm-lb__fade-end"
+                  x-transition:leave="edm-lb__fade-enter"
+                  x-transition:leave-start="edm-lb__fade-end"
+                  x-transition:leave-end="edm-lb__fade-start"
+                  aria-hidden="true"
+                >
+                  <div class="edm-lb__overlay-inner">
+                    {%- if block.settings.caption != blank -%}
+                      <p class="edm-lb__caption">{{ block.settings.caption }}</p>
+                    {%- endif -%}
+
+                    <div class="edm-lb__products">
+                      {%- if p1 != blank -%}
+                        <div class="edm-lb__product">
+                          <div class="edm-lb__product-info">
+                            <span class="edm-lb__product-name">{{ p1.title }}</span>
+                            <span class="edm-lb__product-price">{{ p1.price | money_without_trailing_zeros }}</span>
+                          </div>
+                          <a
+                            href="{{ p1.url }}"
+                            class="edm-lb__product-btn"
+                            aria-label="Ver producto: {{ p1.title | escape }}"
+                            @click.stop
+                          >
+                            Ver producto
+                          </a>
+                        </div>
+                      {%- endif -%}
+
+                      {%- if p2 != blank -%}
+                        <div class="edm-lb__product">
+                          <div class="edm-lb__product-info">
+                            <span class="edm-lb__product-name">{{ p2.title }}</span>
+                            <span class="edm-lb__product-price">{{ p2.price | money_without_trailing_zeros }}</span>
+                          </div>
+                          <a
+                            href="{{ p2.url }}"
+                            class="edm-lb__product-btn"
+                            aria-label="Ver producto: {{ p2.title | escape }}"
+                            @click.stop
+                          >
+                            Ver producto
+                          </a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- if has_products -%}
+                <button
+                  class="edm-lb__trigger"
+                  aria-label="Ver productos etiquetados{% if block.settings.caption != blank %}: {{ block.settings.caption | escape }}{% endif %}"
+                  aria-expanded="false"
+                  :aria-expanded="active === {{ block_index }} ? 'true' : 'false'"
+                  @click.stop="active === {{ block_index }} ? active = null : active = {{ block_index }}"
+                >
+                  <span class="edm-lb__trigger-icon" aria-hidden="true">+</span>
+                </button>
+              {%- endif -%}
+            </div>
+
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div class="edm-lb__empty" aria-hidden="true">
+        <p>Agrega bloques tipo "Item" para construir el lookbook.</p>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+
+/* ─── Base ─────────────────────────────────────────── */
+.edm-lb {
+  overflow: hidden;
+}
+
+.edm-lb__inner {
+  padding-top: var(--pt, 80px);
+  padding-bottom: var(--pb, 80px);
+}
+
+/* ─── Header ────────────────────────────────────────── */
+.edm-lb__header {
+  text-align: center;
+  max-width: 72rem;
+  margin: 0 auto 5.6rem;
+}
+
+.edm-lb__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 2.4rem;
+}
+.edm-lb__eyebrow::before,
+.edm-lb__eyebrow::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.edm-lb__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4.5vw, 6.4rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #0b0805;
+  margin: 0 0 2rem;
+}
+
+.edm-lb__subtitle {
+  font-size: 1.7rem;
+  line-height: 1.7;
+  color: #78695a;
+  margin: 0;
+}
+
+/* ─── Grid: uniform ─────────────────────────────────── */
+.edm-lb__grid--uniform.edm-lb__grid--cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.edm-lb__grid--uniform.edm-lb__grid--cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+.edm-lb__grid--uniform.edm-lb__grid--cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+/* ─── Grid: asymmetric ──────────────────────────────── */
+/*
+  Pattern: first item = large (spans 2 rows + 2 cols on a 3-col base),
+  remaining items fill the rest.
+  We use a named-area approach for up to 5 items, then fall back to auto.
+*/
+.edm-lb__grid--asymmetric {
+  display: grid;
+  gap: 2px;
+}
+
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-2 {
+  grid-template-columns: 2fr 1fr;
+}
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-2 .edm-lb__item--large {
+  grid-row: span 2;
+}
+
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-3 {
+  grid-template-columns: 2fr 1fr 1fr;
+}
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-3 .edm-lb__item--large {
+  grid-row: span 2;
+  grid-column: 1;
+}
+
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-4 {
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+}
+.edm-lb__grid--asymmetric.edm-lb__grid--cols-4 .edm-lb__item--large {
+  grid-row: span 2;
+  grid-column: 1;
+}
+
+/* ─── Item ──────────────────────────────────────────── */
+.edm-lb__item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* ─── Image wrapper ─────────────────────────────────── */
+.edm-lb__img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 36rem;
+  overflow: hidden;
+}
+
+.edm-lb__item--large .edm-lb__img-wrap {
+  min-height: 72rem;
+}
+
+.edm-lb__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.edm-lb__item:hover .edm-lb__img,
+.edm-lb__item:focus-within .edm-lb__img {
+  transform: scale(1.04);
+}
+
+/* maintain aspect ratio for the wrapper */
+.edm-lb__img-wrap::before {
+  content: '';
+  display: block;
+  padding-top: 125%;
+}
+
+.edm-lb__item--large .edm-lb__img-wrap::before {
+  padding-top: 125%;
+}
+
+.edm-lb__img-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #ece3cf, #d0b16a 60%, #a07830);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edm-lb__img-placeholder span {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-style: italic;
+  letter-spacing: 0.15em;
+  color: rgba(251, 248, 241, 0.5);
+}
+
+/* ─── Overlay ───────────────────────────────────────── */
+.edm-lb__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(11, 8, 5, 0.82) 0%,
+    rgba(11, 8, 5, 0.45) 50%,
+    rgba(11, 8, 5, 0.1) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  padding: 3.2rem 2.4rem 2.8rem;
+  z-index: 2;
+}
+
+/* Alpine transition classes — used via x-transition attribute names */
+.edm-lb__fade-enter {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.edm-lb__fade-start {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.edm-lb__fade-end {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fallback for Alpine's built-in x-transition when no classes are supplied */
+[x-cloak] { display: none !important; }
+
+.edm-lb__overlay-inner {
+  width: 100%;
+}
+
+/* ─── Caption ───────────────────────────────────────── */
+.edm-lb__caption {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.55rem;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: rgba(251, 248, 241, 0.65);
+  margin: 0 0 1.6rem;
+  text-transform: uppercase;
+}
+
+/* ─── Products inside overlay ───────────────────────── */
+.edm-lb__products {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.edm-lb__product {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  padding: 1.4rem 1.6rem;
+  background: rgba(251, 248, 241, 0.07);
+  border: 1px solid rgba(208, 177, 106, 0.25);
+  border-radius: 2px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.edm-lb__product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.edm-lb__product-name {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fbf8f1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edm-lb__product-price {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem;
+  font-style: italic;
+  color: #d0b16a;
+}
+
+.edm-lb__product-btn {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0.8rem 1.6rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #0b0805;
+  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.edm-lb__product-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+.edm-lb__product-btn:focus-visible {
+  outline: 2px solid #d0b16a;
+  outline-offset: 2px;
+}
+
+/* ─── Trigger button (mobile / always-visible indicator) */
+.edm-lb__trigger {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  z-index: 3;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(208, 177, 106, 0.7);
+  background: rgba(11, 8, 5, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.edm-lb__trigger:hover,
+.edm-lb__trigger:focus-visible {
+  background: rgba(208, 177, 106, 0.25);
+  border-color: #d0b16a;
+}
+.edm-lb__trigger:focus-visible {
+  outline: 2px solid #d0b16a;
+  outline-offset: 2px;
+}
+.edm-lb__trigger-icon {
+  font-size: 2rem;
+  line-height: 1;
+  color: #d0b16a;
+  font-weight: 300;
+  user-select: none;
+}
+
+/* ─── Empty state ───────────────────────────────────── */
+.edm-lb__empty {
+  padding: 6rem 0;
+  text-align: center;
+  color: #78695a;
+  font-style: italic;
+  font-size: 1.6rem;
+  border: 1px dashed rgba(120, 105, 90, 0.3);
+  border-radius: 4px;
+}
+
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 989px) {
+  .edm-lb__grid--uniform.edm-lb__grid--cols-4,
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-4 .edm-lb__item--large {
+    grid-column: 1 / -1;
+    grid-row: span 1;
+  }
+  .edm-lb__grid--uniform.edm-lb__grid--cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-3 {
+    grid-template-columns: 3fr 2fr;
+  }
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-3 .edm-lb__item--large {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .edm-lb__grid--uniform.edm-lb__grid--cols-2,
+  .edm-lb__grid--uniform.edm-lb__grid--cols-3,
+  .edm-lb__grid--uniform.edm-lb__grid--cols-4,
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-2,
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-3,
+  .edm-lb__grid--asymmetric.edm-lb__grid--cols-4 {
+    grid-template-columns: 1fr;
+  }
+  .edm-lb__grid--asymmetric .edm-lb__item--large {
+    grid-column: 1;
+    grid-row: span 1;
+  }
+  .edm-lb__item--large .edm-lb__img-wrap {
+    min-height: 44rem;
+  }
+  /* On mobile always show overlay (products tap-accessible via trigger) */
+  .edm-lb__overlay {
+    /* stays controlled by Alpine; trigger button provides tap access */
+  }
+  .edm-lb__header {
+    margin-bottom: 3.6rem;
+  }
+  .edm-lb__product {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .edm-lb__product-btn {
+    align-self: flex-end;
+  }
+}
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Lookbook",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Encabezado"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Kicker (eyebrow)",
+      "default": "Colección editorial"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "El Lookbook"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Descubre los looks de la temporada y los productos que los hacen posibles."
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Estilo de grid",
+      "options": [
+        { "value": "uniform",     "label": "Uniforme" },
+        { "value": "asymmetric",  "label": "Asimétrico (primera imagen grande)" }
+      ],
+      "default": "asymmetric"
+    },
+    {
+      "type": "select",
+      "id": "max_columns",
+      "label": "Columnas máximas (desktop)",
+      "options": [
+        { "value": "2", "label": "2 columnas" },
+        { "value": "3", "label": "3 columnas" },
+        { "value": "4", "label": "4 columnas" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "header",
+      "content": "Apariencia"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone (claro)" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Imagen del lookbook",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagen editorial"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption / nombre del look",
+          "info": "Aparece sobre el overlay al hacer hover."
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Producto etiquetado 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Producto etiquetado 2"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook",
+      "settings": {
+        "eyebrow": "Colección editorial",
+        "title": "El Lookbook",
+        "subtitle": "Descubre los looks de la temporada y los productos que los hacen posibles.",
+        "layout_style": "asymmetric",
+        "max_columns": "3"
+      },
+      "blocks": [
+        { "type": "item", "settings": { "caption": "Dorado caribeño" } },
+        { "type": "item", "settings": { "caption": "Atardecer en Cartagena" } },
+        { "type": "item", "settings": { "caption": "Tarde de sol" } },
+        { "type": "item", "settings": { "caption": "Brillo natural" } },
+        { "type": "item", "settings": { "caption": "Esencia del trópico" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

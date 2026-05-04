@@ -35,6 +35,7 @@
     {% endif %}
 
     {% render 'meta-tags' %}
+    {%- render 'edm-jsonld' -%}
 
     <script src="{{ 'constants.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'pubsub.js' | asset_url }}" defer="defer"></script>
@@ -307,6 +308,7 @@
 
     {%- render 'vite-tag' with 'theme.css' -%}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.12/dist/cdn.min.js"></script>
+    <style>@view-transition{navigation:auto}</style>
   </head>
 
   <body class="gradient template-{{ request.page_type }}{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
@@ -390,8 +392,5 @@
     {%- render 'edm-whatsapp-float' -%}
     {%- section 'edm-welcome-popup' -%}
 
-    {%- if settings.edm_pixel_endpoint != blank -%}
-      {%- render 'edm-pixel' -%}
-    {%- endif -%}
   </body>
 </html>

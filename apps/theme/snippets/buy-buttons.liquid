@@ -94,11 +94,114 @@
             {%- render 'loading-spinner' -%}
           </button>
           {%- if show_dynamic_checkout -%}
-            {{ form | payment_button }}
+            <div class="edm-buynow-wrapper" data-cedula="{{ cart.attributes['Cedula NIT'] | escape }}">
+              {{ form | payment_button }}
+            </div>
           {%- endif -%}
         </div>
       {%- endform -%}
     </product-form>
+
+    {%- if show_dynamic_checkout -%}
+      {%- unless cart.attributes['Cedula NIT'] != blank -%}
+        <div id="edm-cedula-modal" class="edm-cedula-modal" hidden aria-modal="true" role="dialog">
+          <div class="edm-cedula-modal__backdrop"></div>
+          <div class="edm-cedula-modal__box">
+            <p class="edm-cedula-modal__title">Cédula / NIT para factura electrónica</p>
+            <p class="edm-cedula-modal__sub">Requerido antes de continuar con el pago</p>
+            <input
+              type="text"
+              id="edm-cedula-modal-input"
+              class="edm-cedula-modal__input"
+              placeholder="Ej. 1234567890"
+              autocomplete="off"
+            >
+            <p class="edm-cedula-modal__error" hidden>Ingresa tu cédula o NIT para continuar</p>
+            <div class="edm-cedula-modal__actions">
+              <button type="button" class="edm-cedula-modal__cancel">Cancelar</button>
+              <button type="button" class="edm-cedula-modal__confirm">Continuar al pago</button>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .edm-cedula-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+          .edm-cedula-modal[hidden] { display: none; }
+          .edm-cedula-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+          .edm-cedula-modal__box { position: relative; background: #fff; border-radius: 12px; padding: 28px 24px 20px; max-width: 360px; width: 90%; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
+          .edm-cedula-modal__title { font-size: 16px; font-weight: 600; margin: 0 0 4px; color: #1a1a1a; }
+          .edm-cedula-modal__sub { font-size: 13px; color: #666; margin: 0 0 16px; }
+          .edm-cedula-modal__input { width: 100%; box-sizing: border-box; border: 1.5px solid #d0d0d0; border-radius: 8px; padding: 10px 12px; font-size: 15px; outline: none; }
+          .edm-cedula-modal__input:focus { border-color: #1a1a1a; }
+          .edm-cedula-modal__error { font-size: 12px; color: #c0392b; margin: 6px 0 0; }
+          .edm-cedula-modal__error[hidden] { display: none; }
+          .edm-cedula-modal__actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+          .edm-cedula-modal__cancel { background: none; border: 1.5px solid #d0d0d0; border-radius: 8px; padding: 9px 18px; font-size: 14px; cursor: pointer; color: #555; }
+          .edm-cedula-modal__confirm { background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+          .edm-cedula-modal__confirm:disabled { opacity: 0.6; cursor: wait; }
+        </style>
+
+        <script>
+          (function () {
+            var ATTR_KEY = 'Cedula NIT';
+
+            function openModal(onConfirm) {
+              var modal = document.getElementById('edm-cedula-modal');
+              var input = document.getElementById('edm-cedula-modal-input');
+              var error = modal.querySelector('.edm-cedula-modal__error');
+              var confirmBtn = modal.querySelector('.edm-cedula-modal__confirm');
+              var cancelBtn = modal.querySelector('.edm-cedula-modal__cancel');
+
+              modal.removeAttribute('hidden');
+              input.focus();
+
+              function close() {
+                modal.setAttribute('hidden', '');
+              }
+
+              confirmBtn.onclick = function () {
+                var val = input.value.trim();
+                if (!val) { error.removeAttribute('hidden'); return; }
+                error.setAttribute('hidden', '');
+                confirmBtn.disabled = true;
+                fetch('/cart/update.js', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ attributes: { [ATTR_KEY]: val } })
+                })
+                .then(function () { close(); onConfirm(); })
+                .catch(function () { close(); onConfirm(); });
+              };
+
+              cancelBtn.onclick = close;
+              modal.querySelector('.edm-cedula-modal__backdrop').onclick = close;
+
+              input.onkeydown = function (e) {
+                if (e.key === 'Enter') confirmBtn.click();
+              };
+            }
+
+            document.addEventListener('click', function (e) {
+              var wrapper = e.target.closest('.edm-buynow-wrapper');
+              if (!wrapper) return;
+
+              var savedCedula = wrapper.dataset.cedula;
+              if (savedCedula && savedCedula.trim()) return;
+
+              var payBtn = e.target.closest('[data-shopify="payment-button"], .shopify-payment-button__button');
+              if (!payBtn) return;
+
+              e.stopImmediatePropagation();
+              e.preventDefault();
+
+              openModal(function () {
+                payBtn.click();
+              });
+            }, true);
+          })();
+        </script>
+      {%- endunless -%}
+    {%- endif -%}
   {%- else -%}
     <div class="product-form">
       <div class="product-form__buttons form">

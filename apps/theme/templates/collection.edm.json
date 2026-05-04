@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "edm-collection": {
+      "type": "edm-collection",
+      "settings": {}
+    }
+  },
+  "order": ["edm-collection"]
+}

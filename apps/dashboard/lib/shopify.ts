@@ -17,9 +17,16 @@ export interface ShopifyOrder {
   id: number;
   created_at: string;
   total_price: string;
+  total_discounts?: string;
   financial_status: string;
   fulfillment_status: string | null;
-  customer?: { id: number; orders_count: number };
+  customer?: {
+    id: number;
+    orders_count: number;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+  };
   shipping_address?: { province: string; province_code: string };
   line_items: {
     product_id: number;
@@ -29,6 +36,7 @@ export interface ShopifyOrder {
     vendor?: string;
     product_type?: string;
   }[];
+  discount_codes?: { code: string; amount: string; type: string }[];
 }
 
 export interface DailyMetric {
@@ -64,6 +72,30 @@ export interface ProductTypeMetric {
   count: number;
 }
 
+export interface DiscountCodeMetric {
+  code: string;
+  count: number;
+  totalDiscount: number;
+}
+
+export interface TopCustomer {
+  id: number;
+  email: string;
+  name: string;
+  ordersCount: number;
+  totalSpent: number;
+}
+
+export interface InventoryItem {
+  productId: number;
+  productTitle: string;
+  variantId: number;
+  variantTitle: string;
+  sku: string;
+  price: number;
+  inventoryQuantity: number;
+}
+
 export interface ShopifyStats {
   totalRevenue: number;
   totalOrders: number;
@@ -79,6 +111,13 @@ export interface ShopifyStats {
   ordersByProvince: ProvinceMetric[];
   statusBreakdown: StatusBreakdown;
   byProductType: ProductTypeMetric[];
+  // New metrics
+  ltv: number;
+  repeatRate: number;
+  discountCodes: DiscountCodeMetric[];
+  topCustomers: TopCustomer[];
+  prevRevenue: number;
+  prevOrders: number;
 }
 
 function daysAgo(n: number) {
@@ -108,23 +147,35 @@ function parseLocalTime(isoString: string): { hour: number; dow: number } {
   return { hour: d.getUTCHours(), dow: d.getUTCDay() };
 }
 
+const ORDER_FIELDS =
+  "id,created_at,total_price,total_discounts,financial_status,fulfillment_status,customer,shipping_address,line_items,discount_codes";
+
 export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
   const since = daysAgo(days);
+  const prevEnd = daysAgo(days);
+  const prevStart = daysAgo(days * 2);
 
-  const [ordersRes, customersRes, newCustomersRes] = await Promise.all([
+  const [ordersRes, customersRes, newCustomersRes, prevOrdersRes] = await Promise.all([
     shopifyFetch<{ orders: ShopifyOrder[] }>(
-      `/orders.json?created_at_min=${since}&status=any&limit=250&fields=id,created_at,total_price,financial_status,fulfillment_status,customer,shipping_address,line_items`
+      `/orders.json?created_at_min=${since}&status=any&limit=250&fields=${ORDER_FIELDS}`
     ),
     shopifyFetch<{ count: number }>(`/customers/count.json`),
-    // Customers created in the period = "new customers acquired"
     shopifyFetch<{ customers: { id: number }[] }>(
       `/customers.json?created_at_min=${since}&limit=250&fields=id`
+    ),
+    shopifyFetch<{ orders: { total_price: string; financial_status: string }[] }>(
+      `/orders.json?created_at_min=${prevStart}&created_at_max=${prevEnd}&status=any&limit=250&fields=id,total_price,financial_status`
     ),
   ]);
 
   const orders = ordersRes.orders;
   const paidOrders = orders.filter((o) => o.financial_status === "paid");
   const newCustomerIds = new Set(newCustomersRes.customers.map((c) => c.id));
+
+  // Previous period
+  const prevPaidOrders = prevOrdersRes.orders.filter((o) => o.financial_status === "paid");
+  const prevRevenue = prevPaidOrders.reduce((s, o) => s + parseFloat(o.total_price), 0);
+  const prevOrders = prevPaidOrders.length;
 
   const totalRevenue = paidOrders.reduce(
     (s, o) => s + parseFloat(o.total_price),
@@ -149,7 +200,7 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
   // Geographic
   const provinceMap = new Map<string, { count: number; revenue: number }>();
 
-  // Status breakdown (financial from ALL orders, fulfillment from paid)
+  // Status breakdown
   const statusBreakdown: StatusBreakdown = {
     fulfilled: 0,
     unfulfilled: 0,
@@ -162,8 +213,16 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
   // Product type metrics
   const typeMap = new Map<string, ProductTypeMetric>();
 
+  // Discount codes
+  const discountMap = new Map<string, DiscountCodeMetric>();
+
+  // Top customers
+  const customerMap = new Map<
+    number,
+    { id: number; email: string; name: string; ordersCount: number; totalSpent: number }
+  >();
+
   for (const o of orders) {
-    // Financial status from all orders
     if (o.financial_status === "paid") statusBreakdown.paid++;
     else if (o.financial_status === "pending") statusBreakdown.pending++;
     else if (
@@ -183,7 +242,7 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
     const { hour, dow } = parseLocalTime(o.created_at);
     heatmap[dow][hour]++;
 
-    // New vs returning (dedupe by customer id)
+    // New vs returning
     if (o.customer?.id) {
       purchasingCustomerIds.add(o.customer.id);
     } else {
@@ -214,15 +273,47 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
       t.count += item.quantity;
       typeMap.set(type, t);
     }
+
+    // Discount codes
+    for (const dc of o.discount_codes ?? []) {
+      const code = dc.code.toUpperCase();
+      const existing = discountMap.get(code) ?? { code, count: 0, totalDiscount: 0 };
+      existing.count++;
+      existing.totalDiscount += parseFloat(dc.amount);
+      discountMap.set(code, existing);
+    }
+
+    // Top customers
+    if (o.customer?.id) {
+      const cid = o.customer.id;
+      const existing = customerMap.get(cid) ?? {
+        id: cid,
+        email: o.customer.email ?? "",
+        name: [o.customer.first_name, o.customer.last_name].filter(Boolean).join(" ") || `Cliente #${cid}`,
+        ordersCount: 0,
+        totalSpent: 0,
+      };
+      existing.ordersCount++;
+      existing.totalSpent += revenue;
+      customerMap.set(cid, existing);
+    }
   }
 
-  // Classify new vs returning by customer id
+  // Classify new vs returning
   let newCustomers = 0;
   let returningCustomers = 0;
   for (const id of purchasingCustomerIds) {
     if (newCustomerIds.has(id)) newCustomers++;
     else returningCustomers++;
   }
+
+  // LTV: avg revenue per purchasing customer
+  const uniquePurchasing = purchasingCustomerIds.size + guestOrders;
+  const ltv = uniquePurchasing > 0 ? totalRevenue / uniquePurchasing : 0;
+
+  // Repeat rate: % of purchasing customers who are returning (have previous orders)
+  const totalPurchasing = newCustomers + returningCustomers;
+  const repeatRate = totalPurchasing > 0 ? (returningCustomers / totalPurchasing) * 100 : 0;
 
   // Top products
   const productMap = new Map<number, TopProduct>();
@@ -271,5 +362,48 @@ export async function getShopifyStats(days = 30): Promise<ShopifyStats> {
     byProductType: Array.from(typeMap.values())
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 8),
+    ltv,
+    repeatRate,
+    discountCodes: Array.from(discountMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20),
+    topCustomers: Array.from(customerMap.values())
+      .sort((a, b) => b.totalSpent - a.totalSpent)
+      .slice(0, 20),
+    prevRevenue,
+    prevOrders,
   };
+}
+
+export async function getInventoryData(): Promise<InventoryItem[]> {
+  const res = await shopifyFetch<{
+    products: {
+      id: number;
+      title: string;
+      status: string;
+      variants: {
+        id: number;
+        title: string;
+        sku: string;
+        price: string;
+        inventory_quantity: number;
+      }[];
+    }[];
+  }>(`/products.json?limit=250&fields=id,title,status,variants&status=active`);
+
+  const items: InventoryItem[] = [];
+  for (const product of res.products) {
+    for (const variant of product.variants) {
+      items.push({
+        productId: product.id,
+        productTitle: product.title,
+        variantId: variant.id,
+        variantTitle: variant.title === "Default Title" ? "" : variant.title,
+        sku: variant.sku ?? "",
+        price: parseFloat(variant.price),
+        inventoryQuantity: variant.inventory_quantity,
+      });
+    }
+  }
+  return items.sort((a, b) => a.inventoryQuantity - b.inventoryQuantity);
 }

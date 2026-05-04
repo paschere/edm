@@ -49,6 +49,7 @@
           if (typeof mi !== 'undefined') this.activeIdx = mi;
         }
       },
+      productId: {{ product.id }},
       addToCart: async function() {
         if (this.loading) return;
         var variantId = this.selectedVariantId;
@@ -87,9 +88,10 @@
         if (parsedState && parsedState.sections && typeof el.renderContents === 'function') {
           try {
             el.renderContents(parsedState);
-            console.log('[EDM] renderContents OK');
+            var pid = self.productId;
+            if (pid) sessionStorage.setItem('edm_last_pid', pid);
+            document.dispatchEvent(new CustomEvent('edm:cart:opened', { detail: { productId: pid } }));
           } catch(e) {
-            console.log('[EDM] renderContents error:', e.message);
             setTimeout(function() {
               el.classList.add('animate', 'active');
               document.body.classList.add('overflow-hidden');
@@ -181,6 +183,14 @@
         <del class="edm-pdp__was" x-show="selectedVariant && selectedVariant.compare_at_price > selectedVariant.price" x-cloak x-text="fmtMoney(selectedVariant ? selectedVariant.compare_at_price : 0)"></del>
         <span class="edm-pdp__sale" x-show="selectedVariant && selectedVariant.compare_at_price > selectedVariant.price" x-cloak>Oferta</span>
       </div>
+
+      {%- if section.settings.show_cuotas -%}
+        <p class="edm-pdp__cuotas" x-show="selectedVariant" x-cloak>
+          <strong class="edm-pdp__cuotas-n">{{ section.settings.cuotas_count }}x</strong>
+          <span>{{ section.settings.cuotas_label | default: 'cuotas sin interés de' }}</span>
+          <strong class="edm-pdp__cuotas-price" x-text="fmtMoney(selectedVariant ? Math.ceil(selectedVariant.price / {{ section.settings.cuotas_count }}) : 0)"></strong>
+        </p>
+      {%- endif -%}
 
       <p
         class="edm-pdp__low-stock"
@@ -637,6 +647,18 @@
 .edm-pdp__rte li { margin-bottom: 0.4rem; }
 .edm-pdp__rte a { color: #9d7f32; }
 
+.edm-pdp__cuotas {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.35rem;
+  color: #9d7f32;
+  margin: 0.6rem 0 2rem;
+  flex-wrap: wrap;
+}
+.edm-pdp__cuotas-n,
+.edm-pdp__cuotas-price { font-weight: 700; }
+
 .edm-pdp__low-stock {
   font-size: 1.3rem;
   font-weight: 700;
@@ -746,9 +768,9 @@
   }
   .edm-pdp__thumb { width: 68px; height: 68px; }
   .edm-pdp__main { aspect-ratio: 1/1; }
-  .edm-pdp__add-row { flex-direction: column; }
-  .edm-pdp__qty-wrap { width: 100%; justify-content: space-between; }
-  .edm-pdp__atc { width: 100%; }
+  .edm-pdp__qty-wrap { height: 5.2rem; }
+  .edm-pdp__qbtn { width: 4.2rem; }
+  .edm-pdp__atc { height: 5.2rem; font-size: 1.3rem; padding: 0 2rem; }
   .edm-pdp__trust { gap: 1.6rem; }
   .edm-pdp__sticky-title { max-width: 12rem; }
   .edm-pdp__sticky-atc { padding: 0 2rem; font-size: 1.2rem; }
@@ -796,6 +818,25 @@
         { "value": "scheme-3", "label": "Oscuro" }
       ],
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cuotas",
+      "label": "Mostrar cuotas",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cuotas_count",
+      "label": "Número de cuotas",
+      "min": 2, "max": 36, "step": 1,
+      "default": 12
+    },
+    {
+      "type": "text",
+      "id": "cuotas_label",
+      "label": "Texto cuotas",
+      "default": "cuotas sin interés de"
     },
     {
       "type": "range",

@@ -1,0 +1,13 @@
+api_version = "2025-07"
+uid = "9aeb1a26-309d-5617-e579-92a8f6c679842c8109ee"
+
+[[extensions]]
+type = "web_pixel_extension"
+name = "EDM Analytics Pixel"
+handle = "edm-pixel"
+runtime_context = "strict"
+
+  [extensions.settings]
+  type = "object"
+
+    [extensions.settings.fields]

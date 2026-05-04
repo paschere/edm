@@ -1474,20 +1474,5 @@
         "default": true
       }
     ]
-  },
-  {
-    "name": "EDM Analytics",
-    "settings": [
-      {
-        "type": "header",
-        "content": "Pixel de comportamiento"
-      },
-      {
-        "type": "text",
-        "id": "edm_pixel_endpoint",
-        "label": "URL del endpoint de analytics",
-        "info": "Ej: https://tu-dashboard.vercel.app/api/pixel/events — déjalo vacío para desactivar el tracking."
-      }
-    ]
   }
 ]

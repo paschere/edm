@@ -2,8 +2,7 @@ const META_TOKEN = process.env.META_ACCESS_TOKEN!;
 const AD_ACCOUNT_ID = process.env.META_AD_ACCOUNT_ID!;
 const PAGE_ID = process.env.META_PAGE_ID!;
 const INSTAGRAM_ID = process.env.META_INSTAGRAM_ACCOUNT_ID!;
-const PIXEL_ID = process.env.META_PIXEL_ID!;
-const GRAPH_BASE = "https://graph.facebook.com/v21.0";
+const GRAPH_BASE = "https://graph.facebook.com/v25.0";
 
 async function metaFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
   const url = new URL(`${GRAPH_BASE}${path}`);
@@ -24,8 +23,12 @@ export interface MetaCampaign {
   clicks: number;
   ctr: number;
   cpc: number;
+  cpm: number;
+  frequency: number;
   roas: number;
   reach: number;
+  purchases: number;
+  cpa: number;
 }
 
 export interface MetaPageInsights {
@@ -60,6 +63,10 @@ export interface MetaStats {
   totalSpend: number;
   totalRoas: number;
   totalReach: number;
+  totalImpressions: number;
+  totalPurchases: number;
+  avgCPM: number;
+  avgFrequency: number;
   page: MetaPageInsights;
   instagram: MetaInstagramInsights;
   pixel: MetaPixelStats;
@@ -69,7 +76,7 @@ export interface MetaStats {
 export async function getMetaStats(): Promise<MetaStats> {
   const results = await Promise.allSettled([
     metaFetch<{ data: RawCampaign[] }>(`/${AD_ACCOUNT_ID}/campaigns`, {
-      fields: "id,name,status,insights.date_preset(last_30d){spend,impressions,clicks,ctr,cpc,purchase_roas,reach}",
+      fields: "id,name,status,insights.date_preset(last_30d){spend,impressions,clicks,ctr,cpc,cpm,frequency,purchase_roas,reach,actions}",
       effective_status: '["ACTIVE","PAUSED"]',
       limit: "50",
     }),
@@ -124,12 +131,26 @@ export async function getMetaStats(): Promise<MetaStats> {
     profileViews: sumInsight(igInsights, "profile_views"),
   };
 
+  const activeCampaigns = campaigns.filter((c) => c.spend > 0);
   const totalSpend = campaigns.reduce((s, c) => s + c.spend, 0);
   const totalReach = campaigns.reduce((s, c) => s + c.reach, 0);
-  const totalRoas =
-    campaigns.length > 0
-      ? campaigns.reduce((s, c) => s + c.roas, 0) / campaigns.filter((c) => c.roas > 0).length
-      : 0;
+  const totalImpressions = campaigns.reduce((s, c) => s + c.impressions, 0);
+  const totalPurchases = campaigns.reduce((s, c) => s + c.purchases, 0);
+
+  const roasCampaigns = campaigns.filter((c) => c.roas > 0);
+  const totalRoas = roasCampaigns.length > 0
+    ? roasCampaigns.reduce((s, c) => s + c.roas, 0) / roasCampaigns.length
+    : 0;
+
+  const cpmCampaigns = activeCampaigns.filter((c) => c.cpm > 0);
+  const avgCPM = cpmCampaigns.length > 0
+    ? cpmCampaigns.reduce((s, c) => s + c.cpm, 0) / cpmCampaigns.length
+    : 0;
+
+  const freqCampaigns = activeCampaigns.filter((c) => c.frequency > 0);
+  const avgFrequency = freqCampaigns.length > 0
+    ? freqCampaigns.reduce((s, c) => s + c.frequency, 0) / freqCampaigns.length
+    : 0;
 
   const dailySpend: MetaDailySpend[] = rawDailySpend
     .map((d) => ({ date: d.date_start, value: parseFloat(d.spend) }))
@@ -140,6 +161,10 @@ export async function getMetaStats(): Promise<MetaStats> {
     totalSpend,
     totalRoas: isFinite(totalRoas) ? totalRoas : 0,
     totalReach,
+    totalImpressions,
+    totalPurchases,
+    avgCPM: isFinite(avgCPM) ? avgCPM : 0,
+    avgFrequency: isFinite(avgFrequency) ? avgFrequency : 0,
     page,
     instagram,
     pixel: { pageViews: 0, addToCart: 0, initiateCheckout: 0, purchases: 0 },
@@ -160,8 +185,11 @@ interface RawCampaignInsights {
   clicks: string;
   ctr: string;
   cpc: string;
+  cpm: string;
+  frequency: string;
   purchase_roas?: { action_type: string; value: string }[];
   reach: string;
+  actions?: { action_type: string; value: string }[];
 }
 
 interface RawInsight {
@@ -173,17 +201,27 @@ function parseCampaigns(raw: RawCampaign[]): MetaCampaign[] {
   return raw.map((c) => {
     const i = c.insights?.data[0];
     const roasEntry = i?.purchase_roas?.find((r) => r.action_type === "omni_purchase");
+    const purchaseAction = i?.actions?.find(
+      (a) => a.action_type === "purchase" || a.action_type === "offsite_conversion.fb_pixel_purchase"
+    );
+    const purchases = parseInt(purchaseAction?.value ?? "0");
+    const spend = parseFloat(i?.spend ?? "0");
+    const cpa = purchases > 0 ? spend / purchases : 0;
     return {
       id: c.id,
       name: c.name,
       status: c.status,
-      spend: parseFloat(i?.spend ?? "0"),
+      spend,
       impressions: parseInt(i?.impressions ?? "0"),
       clicks: parseInt(i?.clicks ?? "0"),
       ctr: parseFloat(i?.ctr ?? "0"),
       cpc: parseFloat(i?.cpc ?? "0"),
+      cpm: parseFloat(i?.cpm ?? "0"),
+      frequency: parseFloat(i?.frequency ?? "0"),
       roas: parseFloat(roasEntry?.value ?? "0"),
       reach: parseInt(i?.reach ?? "0"),
+      purchases,
+      cpa,
     };
   });
 }

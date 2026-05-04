@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getShopifyStats } from "@/lib/shopify";
-import type { StatusBreakdown, ProductTypeMetric } from "@/lib/shopify";
+import type { StatusBreakdown, ProductTypeMetric, DiscountCodeMetric } from "@/lib/shopify";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { OrdersChart } from "@/components/charts/orders-chart";
@@ -9,7 +9,8 @@ import { OrdersHeatmap } from "@/components/charts/orders-heatmap";
 import { NewVsReturning } from "@/components/charts/new-vs-returning";
 import { ProvinceBars } from "@/components/charts/province-bars";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, ShoppingCart, CreditCard, Users } from "lucide-react";
+import { PeriodSelector } from "@/components/widgets/period-selector";
+import { DollarSign, ShoppingCart, CreditCard, Users, Repeat, TrendingUp } from "lucide-react";
 
 function SectionCard({
   title,
@@ -38,6 +39,11 @@ function halfTrend(values: number[]): number {
   const second = values.slice(half).reduce((a, b) => a + b, 0);
   if (first === 0) return second > 0 ? 100 : 0;
   return ((second - first) / first) * 100;
+}
+
+function periodTrend(current: number, prev: number): number {
+  if (prev === 0) return current > 0 ? 100 : 0;
+  return ((current - prev) / prev) * 100;
 }
 
 function StatusBars({ s }: { s: StatusBreakdown }) {
@@ -137,9 +143,7 @@ function ProductTypeBars({ items }: { items: ProductTypeMetric[] }) {
           <div key={item.type}>
             <div className="flex items-baseline justify-between mb-1">
               <div className="flex items-center gap-2">
-                <span
-                  style={{ fontSize: "10px", fontWeight: 600, color: "var(--muted-foreground)", minWidth: "14px", textAlign: "right" }}
-                >
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--muted-foreground)", minWidth: "14px", textAlign: "right" }}>
                   {i + 1}
                 </span>
                 <span style={{ fontSize: "12px", color: "var(--foreground)" }}>{item.type}</span>
@@ -179,9 +183,69 @@ function ProductTypeBars({ items }: { items: ProductTypeMetric[] }) {
   );
 }
 
-async function ShopifyContent() {
+function DiscountCodesTable({ codes }: { codes: DiscountCodeMetric[] }) {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n);
+
+  if (!codes.length) {
+    return (
+      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
+        No se usaron descuentos en este período
+      </p>
+    );
+  }
+
+  const maxCount = Math.max(...codes.map((c) => c.count), 1);
+
+  return (
+    <div className="space-y-2.5">
+      {codes.map((c, i) => {
+        const pct = (c.count / maxCount) * 100;
+        return (
+          <div key={c.code}>
+            <div className="flex items-baseline justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--muted-foreground)", minWidth: "14px", textAlign: "right" }}>
+                  {i + 1}
+                </span>
+                <span
+                  className="font-mono"
+                  style={{ fontSize: "12px", color: "var(--foreground)", letterSpacing: "0.04em" }}
+                >
+                  {c.code}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <span style={{ fontSize: "11px", color: "var(--muted-foreground)" }}>
+                  {c.count} {c.count === 1 ? "uso" : "usos"}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    color: "#4f7a3e",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                  }}
+                >
+                  {fmt(c.totalDiscount)}
+                </span>
+              </div>
+            </div>
+            <div style={{ height: "4px", background: "var(--border)", borderRadius: "2px", overflow: "hidden" }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: "rgba(79,122,62,0.5)", borderRadius: "2px" }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+async function ShopifyContent({ days }: { days: number }) {
   "use cache";
-  const stats = await getShopifyStats(30).catch(() => null);
+  const stats = await getShopifyStats(days).catch(() => null);
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("es-MX", {
@@ -203,26 +267,30 @@ async function ShopifyContent() {
   const revTrend = revValues.length >= 2 ? halfTrend(revValues) : undefined;
   const ordTrend = ordValues.length >= 2 ? halfTrend(ordValues) : undefined;
 
+  const revVsPrev = periodTrend(stats.totalRevenue, stats.prevRevenue);
+  const ordVsPrev = periodTrend(stats.totalOrders, stats.prevOrders);
+
   return (
     <div className="space-y-4">
-      {/* Row 1: KPI cards */}
+      {/* Row 1: Primary KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
-          title="Revenue 30d"
+          title={`Revenue ${days}d`}
           value={fmt(stats.totalRevenue)}
-          description="Pedidos pagados"
+          description={`Ant. ${fmt(stats.prevRevenue)}`}
           icon={<DollarSign size={14} />}
           iconColor="#bb9a4c"
           sparklineData={revValues.length >= 2 ? revValues : undefined}
-          trendPct={revTrend}
+          trendPct={stats.prevRevenue > 0 ? revVsPrev : revTrend}
         />
         <KpiCard
-          title="Pedidos 30d"
+          title={`Pedidos ${days}d`}
           value={stats.totalOrders.toString()}
+          description={`Ant. ${stats.prevOrders} pedidos`}
           icon={<ShoppingCart size={14} />}
           iconColor="#4f7a3e"
           sparklineData={ordValues.length >= 2 ? ordValues : undefined}
-          trendPct={ordTrend}
+          trendPct={stats.prevOrders > 0 ? ordVsPrev : ordTrend}
         />
         <KpiCard
           title="Ticket promedio"
@@ -233,12 +301,48 @@ async function ShopifyContent() {
         <KpiCard
           title="Clientes totales"
           value={stats.totalCustomers.toLocaleString("es-MX")}
+          description="Acumulado"
           icon={<Users size={14} />}
           iconColor="#78695a"
         />
       </div>
 
-      {/* Row 2: Revenue chart + New vs Returning */}
+      {/* Row 2: Secondary KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard
+          title={`LTV promedio ${days}d`}
+          value={fmt(stats.ltv)}
+          description="Revenue / cliente único"
+          icon={<TrendingUp size={14} />}
+          iconColor="#bb9a4c"
+        />
+        <KpiCard
+          title="Tasa de recompra"
+          value={`${stats.repeatRate.toFixed(1)}%`}
+          description="Clientes recurrentes"
+          changePositive={stats.repeatRate >= 30}
+          change={
+            stats.repeatRate >= 30 ? "Buena retención" :
+            stats.repeatRate >= 15 ? "Mejorable" : undefined
+          }
+          icon={<Repeat size={14} />}
+          iconColor={stats.repeatRate >= 30 ? "#4f7a3e" : "#78695a"}
+        />
+        <KpiCard
+          title={`Clientes nuevos ${days}d`}
+          value={stats.newCustomers.toLocaleString("es-MX")}
+          icon={<Users size={14} />}
+          iconColor="#4f7a3e"
+        />
+        <KpiCard
+          title={`Clientes recurrentes ${days}d`}
+          value={stats.returningCustomers.toLocaleString("es-MX")}
+          icon={<Repeat size={14} />}
+          iconColor="#b07a30"
+        />
+      </div>
+
+      {/* Row 3: Revenue chart + Orders chart + New vs Returning */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <SectionCard title="Revenue por día">
           <RevenueChart data={stats.revenueByDay} />
@@ -254,22 +358,25 @@ async function ShopifyContent() {
         </SectionCard>
       </div>
 
-      {/* Row 3: Status breakdown + Product type revenue */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Row 4: Status breakdown + Product type revenue + Discount codes */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <SectionCard title="Estado de pedidos">
           <StatusBars s={stats.statusBreakdown} />
         </SectionCard>
         <SectionCard title="Revenue por tipo de producto">
           <ProductTypeBars items={stats.byProductType} />
         </SectionCard>
+        <SectionCard title={`Códigos de descuento · ${days}d`}>
+          <DiscountCodesTable codes={stats.discountCodes} />
+        </SectionCard>
       </div>
 
-      {/* Row 4: Heatmap */}
-      <SectionCard title="Pedidos por hora y día de semana · 30d">
+      {/* Row 5: Heatmap */}
+      <SectionCard title={`Pedidos por hora y día de semana · ${days}d`}>
         <OrdersHeatmap data={stats.heatmap} />
       </SectionCard>
 
-      {/* Row 5: Top Products + Province */}
+      {/* Row 6: Top Products + Province */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <TopProducts products={stats.topProducts} />
         <SectionCard title="Pedidos por estado / provincia">
@@ -280,26 +387,47 @@ async function ShopifyContent() {
   );
 }
 
-export default function ShopifyPage() {
+async function ShopifyContentWrapper({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
+  const { days: daysParam } = await searchParams;
+  const days = [7, 30, 90].includes(Number(daysParam)) ? Number(daysParam) : 30;
+  return <ShopifyContent days={days} />;
+}
+
+export default function ShopifyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
   return (
     <div className="p-6 max-w-7xl">
-      <div className="mb-6">
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "2rem",
-            fontWeight: 500,
-            lineHeight: 1,
-            letterSpacing: "-0.01em",
-            color: "var(--foreground)",
-          }}
-        >
-          Shopify
-        </h1>
-        <p className="text-[12px] text-muted-foreground mt-1">Últimos 30 días</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "2rem",
+              fontWeight: 500,
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+              color: "var(--foreground)",
+            }}
+          >
+            Shopify
+          </h1>
+          <p className="text-[12px] text-muted-foreground mt-1">
+            Últimos 30 días · cambia el período arriba a la derecha
+          </p>
+        </div>
+        <Suspense fallback={null}>
+          <PeriodSelector />
+        </Suspense>
       </div>
       <Suspense fallback={<Skeleton className="h-96 rounded-lg" />}>
-        <ShopifyContent />
+        <ShopifyContentWrapper searchParams={searchParams} />
       </Suspense>
     </div>
   );

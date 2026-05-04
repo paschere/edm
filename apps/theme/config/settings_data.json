@@ -2,6 +2,7 @@
   "current": "Default",
   "presets": {
     "Default": {
+      "edm_pixel_endpoint": "https://edmco.vercel.app/api/pixel/events",
       "logo_width": 120,
       "color_schemes": {
         "scheme-1": {

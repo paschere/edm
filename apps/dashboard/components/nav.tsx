@@ -8,6 +8,8 @@ import {
   ShoppingBag,
   Share2,
   Activity,
+  Users,
+  Package,
   LogOut,
 } from "lucide-react";
 
@@ -16,6 +18,8 @@ const links = [
   { href: "/shopify", label: "Shopify", icon: ShoppingBag },
   { href: "/meta", label: "Meta / Facebook", icon: Share2 },
   { href: "/behavior", label: "Comportamiento", icon: Activity },
+  { href: "/customers", label: "Clientes", icon: Users },
+  { href: "/inventory", label: "Inventario", icon: Package },
 ];
 
 const GOLD = "#bb9a4c";
