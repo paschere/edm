@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getShopifyStats } from "@/lib/shopify";
 import type { TopCustomer } from "@/lib/shopify";
@@ -168,6 +169,7 @@ function RetentionGauge({ repeatRate }: { repeatRate: number }) {
 
 async function CustomersContent({ days }: { days: number }) {
   "use cache";
+  cacheLife({ stale: 30, revalidate: 30, expire: 60 });
   const stats = await getShopifyStats(days).catch(() => null);
 
   const fmt = (n: number) =>

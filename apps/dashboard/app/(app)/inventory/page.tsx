@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getInventoryData } from "@/lib/shopify";
 import type { InventoryItem } from "@/lib/shopify";
@@ -151,6 +152,7 @@ function InventoryAlertsList({ items }: { items: InventoryItem[] }) {
 
 async function InventoryContent() {
   "use cache";
+  cacheLife({ stale: 30, revalidate: 30, expire: 60 });
   const items = await getInventoryData().catch(() => null);
 
   if (!items) {

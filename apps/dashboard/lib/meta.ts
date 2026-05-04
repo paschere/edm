@@ -9,7 +9,7 @@ async function metaFetch<T>(path: string, params: Record<string, string> = {}): 
   url.searchParams.set("access_token", META_TOKEN);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 30 } });
   if (!res.ok) throw new Error(`Meta API error: ${res.status} ${path}`);
   return res.json();
 }

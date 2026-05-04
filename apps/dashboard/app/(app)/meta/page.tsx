@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getMetaStats } from "@/lib/meta";
 import { getShopifyStats } from "@/lib/shopify";
@@ -63,6 +64,7 @@ function MetricPill({ label, value, color }: { label: string; value: string; col
 
 async function MetaContent({ days }: { days: number }) {
   "use cache";
+  cacheLife({ stale: 30, revalidate: 30, expire: 60 });
   const [meta, shopify] = await Promise.all([
     getMetaStats(days).catch(() => null),
     getShopifyStats(days).catch(() => null),

@@ -7,7 +7,7 @@ const base = `https://${SHOPIFY_DOMAIN}/admin/api/${API_VERSION}`;
 async function shopifyFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${base}${path}`, {
     headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN },
-    next: { revalidate: 300 },
+    next: { revalidate: 30 },
   });
   if (!res.ok) throw new Error(`Shopify API error: ${res.status} ${path}`);
   return res.json();

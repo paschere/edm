@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getDb } from "@/lib/db";
 import { pixelEvents } from "@/lib/db/schema";
@@ -280,6 +281,7 @@ function UtmAttribution({
 // ─── Data layer ───────────────────────────────────────────────────────────────
 async function BehaviorContent({ days }: { days: number }) {
   "use cache";
+  cacheLife({ stale: 30, revalidate: 30, expire: 60 });
 
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const funnelKeys = FUNNEL_STEPS.map((s) => s.key);

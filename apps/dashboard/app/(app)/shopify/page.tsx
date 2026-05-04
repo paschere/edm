@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { getShopifyStats } from "@/lib/shopify";
 import type { StatusBreakdown, ProductTypeMetric, DiscountCodeMetric } from "@/lib/shopify";
@@ -245,6 +246,7 @@ function DiscountCodesTable({ codes }: { codes: DiscountCodeMetric[] }) {
 
 async function ShopifyContent({ days }: { days: number }) {
   "use cache";
+  cacheLife({ stale: 30, revalidate: 30, expire: 60 });
   const stats = await getShopifyStats(days).catch(() => null);
 
   const fmt = (n: number) =>
