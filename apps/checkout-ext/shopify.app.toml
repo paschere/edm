@@ -1,0 +1,19 @@
+name = "EDM Checkout"
+client_id = "REEMPLAZA_CON_TU_CLIENT_ID"
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = false
+
+[access_scopes]
+scopes = "read_orders"
+
+[auth]
+redirect_urls = [
+  "https://shopify.dev/apps/default-app-home",
+  "https://redirect.shopify.com/oauth/redirect-from-cli"
+]
+
+[webhooks]
+api_version = "2025-04"
+
+[pos]
+embedded = false

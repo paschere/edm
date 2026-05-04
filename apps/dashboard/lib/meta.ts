@@ -50,6 +50,11 @@ export interface MetaPixelStats {
   purchases: number;
 }
 
+export interface MetaDailySpend {
+  date: string;
+  value: number;
+}
+
 export interface MetaStats {
   campaigns: MetaCampaign[];
   totalSpend: number;
@@ -58,6 +63,7 @@ export interface MetaStats {
   page: MetaPageInsights;
   instagram: MetaInstagramInsights;
   pixel: MetaPixelStats;
+  dailySpend: MetaDailySpend[];
 }
 
 export async function getMetaStats(): Promise<MetaStats> {
@@ -82,6 +88,15 @@ export async function getMetaStats(): Promise<MetaStats> {
       metric: "impressions,reach,profile_views",
       period: "days_28",
     }),
+    metaFetch<{ data: { date_start: string; spend: string }[] }>(
+      `/${AD_ACCOUNT_ID}/insights`,
+      {
+        time_increment: "1",
+        date_preset: "last_30d",
+        fields: "date_start,spend",
+        level: "account",
+      }
+    ),
   ]);
 
   const campaigns = results[0].status === "fulfilled"
@@ -92,6 +107,7 @@ export async function getMetaStats(): Promise<MetaStats> {
   const pageInfo = results[2].status === "fulfilled" ? results[2].value : null;
   const igInfo = results[3].status === "fulfilled" ? results[3].value : null;
   const igInsights = results[4].status === "fulfilled" ? results[4].value.data : [];
+  const rawDailySpend = results[5].status === "fulfilled" ? results[5].value.data : [];
 
   const page: MetaPageInsights = {
     impressions: sumInsight(pageInsights, "page_impressions"),
@@ -115,6 +131,10 @@ export async function getMetaStats(): Promise<MetaStats> {
       ? campaigns.reduce((s, c) => s + c.roas, 0) / campaigns.filter((c) => c.roas > 0).length
       : 0;
 
+  const dailySpend: MetaDailySpend[] = rawDailySpend
+    .map((d) => ({ date: d.date_start, value: parseFloat(d.spend) }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
   return {
     campaigns,
     totalSpend,
@@ -123,6 +143,7 @@ export async function getMetaStats(): Promise<MetaStats> {
     page,
     instagram,
     pixel: { pageViews: 0, addToCart: 0, initiateCheckout: 0, purchases: 0 },
+    dailySpend,
   };
 }
 

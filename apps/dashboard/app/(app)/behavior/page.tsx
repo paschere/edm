@@ -3,9 +3,9 @@ import { getDb } from "@/lib/db";
 import { pixelEvents } from "@/lib/db/schema";
 import { sql, gte, desc } from "drizzle-orm";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { FunnelChart } from "@/components/charts/funnel-chart";
+import { FunnelBars } from "@/components/charts/funnel-bars";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, ShoppingCart, CheckCircle, Percent } from "lucide-react";
+import { Eye, ShoppingCart, CheckCircle, Percent, TrendingDown } from "lucide-react";
 
 const FUNNEL_EVENTS = [
   { name: "page_viewed", label: "Páginas vistas" },
@@ -87,8 +87,12 @@ async function BehaviorContent() {
   }
 
   const totalSessions = funnelData[0]?.value ?? 0;
+  const addToCart = funnelData[2]?.value ?? 0;
+  const checkoutStarted = funnelData[3]?.value ?? 0;
   const purchases = funnelData[4]?.value ?? 0;
   const convRate = totalSessions > 0 ? ((purchases / totalSessions) * 100).toFixed(2) : "0.00";
+  const abandonRate =
+    addToCart > 0 ? (((addToCart - purchases) / addToCart) * 100).toFixed(1) : "—";
 
   const EVENT_COLORS: Record<string, string> = {
     page_viewed: "#bb9a4c",
@@ -106,7 +110,7 @@ async function BehaviorContent() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         <KpiCard
           title="Páginas vistas 30d"
           value={totalSessions.toLocaleString("es-MX")}
@@ -115,7 +119,7 @@ async function BehaviorContent() {
         />
         <KpiCard
           title="Add to carts 30d"
-          value={(funnelData[2]?.value ?? 0).toLocaleString("es-MX")}
+          value={addToCart.toLocaleString("es-MX")}
           icon={<ShoppingCart size={14} />}
           iconColor="#b07a30"
         />
@@ -131,11 +135,20 @@ async function BehaviorContent() {
           icon={<Percent size={14} />}
           iconColor="#78695a"
         />
+        <KpiCard
+          title="Abandono carrito"
+          value={abandonRate === "—" ? "—" : `${abandonRate}%`}
+          description="Cart → no compra"
+          change={abandonRate !== "—" ? `${abandonRate}%` : undefined}
+          changePositive={false}
+          icon={<TrendingDown size={14} />}
+          iconColor="#b43c28"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <SectionCard title="Funnel de conversión 30d">
-          <FunnelChart data={funnelData} />
+          <FunnelBars data={funnelData} />
         </SectionCard>
 
         <SectionCard title="Páginas más visitadas 30d">

@@ -1,0 +1,219 @@
+<section
+  class="edm-faq color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width" style="max-width:760px;">
+    <div class="edm-faq__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-faq__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="edm-faq__title">{{ section.settings.title | default: 'Preguntas frecuentes' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="edm-faq__sub">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="edm-faq__list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'faq_item' -%}
+          <details class="edm-faq__item" {{ block.shopify_attributes }}>
+            <summary class="edm-faq__q">
+              <span>{{ block.settings.question }}</span>
+              <span class="edm-faq__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l5 5 5-5"/></svg>
+              </span>
+            </summary>
+            <div class="edm-faq__a edm-faq__rte">{{ block.settings.answer }}</div>
+          </details>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-faq__head { text-align: center; margin-bottom: 5.6rem; }
+
+.edm-faq__eyebrow {
+  font-size: 1.15rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 1.4rem;
+}
+
+.edm-faq__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4.5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  color: #0b0805;
+  margin: 0 0 1.6rem;
+}
+
+.edm-faq__sub {
+  font-size: 1.7rem;
+  color: #78695a;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.edm-faq__list { border-top: 1px solid rgba(11,8,5,.08); }
+
+.edm-faq__item { border-bottom: 1px solid rgba(11,8,5,.08); }
+
+.edm-faq__q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 2.4rem 0;
+  cursor: pointer;
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #0b0805;
+  list-style: none;
+  user-select: none;
+  transition: color 0.2s;
+}
+.edm-faq__q::-webkit-details-marker { display: none; }
+.edm-faq__q:hover { color: #9d7f32; }
+
+.edm-faq__icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+.edm-faq__icon svg { width: 100%; height: 100%; }
+.edm-faq__item[open] .edm-faq__icon { transform: rotate(180deg); }
+.edm-faq__item[open] .edm-faq__q { color: #9d7f32; }
+
+.edm-faq__a {
+  padding: 0 0 2.4rem;
+  font-size: 1.65rem;
+  color: #4a3f2f;
+  line-height: 1.72;
+  animation: edmFaqIn 0.28s ease both;
+}
+@keyframes edmFaqIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.edm-faq__rte p { margin: 0 0 1rem; }
+.edm-faq__rte p:last-child { margin: 0; }
+.edm-faq__rte a { color: #9d7f32; }
+.edm-faq__rte ul, .edm-faq__rte ol { padding-left: 2rem; }
+.edm-faq__rte li { margin-bottom: 0.4rem; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto encima del título",
+      "default": "Resolvemos tus dudas"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Preguntas frecuentes"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "Pregunta",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Pregunta",
+          "default": "¿Los bronceadores son seguros para piel sensible?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Respuesta",
+          "default": "<p>Sí. Nuestra fórmula está validada por dermatólogos y libre de parabenos, sulfatos y colorantes artificiales.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Los bronceadores son seguros para piel sensible?",
+            "answer": "<p>Sí. Nuestra fórmula está validada por dermatólogos y libre de parabenos, sulfatos y colorantes artificiales. Ideal para pieles reactivas y delicadas.</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Cuánto tiempo dura el bronceado?",
+            "answer": "<p>Con uso regular, el bronceado se mantiene y prolonga por 3 a 5 días. Para mejores resultados, aplica después del baño sobre piel hidratada.</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Tienen protección solar?",
+            "answer": "<p>Nuestros bronceadores no contienen filtro solar. Te recomendamos combinarlos con protector solar para una exposición responsable.</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Hacen envíos a todo Colombia?",
+            "answer": "<p>Sí, enviamos a todo el territorio nacional. Envío gratis en pedidos desde $80.000. El tiempo de entrega es de 2 a 5 días hábiles.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

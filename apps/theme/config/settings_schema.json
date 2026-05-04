@@ -1,9 +1,9 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Dawn",
+    "theme_name": "EDM Theme",
     "theme_version": "15.4.1",
-    "theme_author": "Shopify",
+    "theme_author": "EDM",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
   },
@@ -1449,6 +1449,29 @@
         "id": "cart_color_scheme",
         "label": "t:sections.all.colors.label",
         "default": "scheme-1"
+      }
+    ]
+  },
+  {
+    "name": "EDM WhatsApp",
+    "settings": [
+      {
+        "type": "text",
+        "id": "whatsapp_phone",
+        "label": "Número de WhatsApp",
+        "info": "Solo dígitos con código de país. Ej: 573001234567"
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_message",
+        "label": "Mensaje predeterminado",
+        "default": "Hola! Tengo una pregunta sobre su tienda."
+      },
+      {
+        "type": "checkbox",
+        "id": "whatsapp_product_message",
+        "label": "Incluir nombre del producto en el mensaje (PDP)",
+        "default": true
       }
     ]
   },

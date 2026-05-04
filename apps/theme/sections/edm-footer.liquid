@@ -1,0 +1,674 @@
+<footer class="edm-ft" role="contentinfo">
+
+  {%- if section.settings.show_newsletter -%}
+    <div class="edm-ft__nl">
+      <div class="edm-ft__nl-inner page-width">
+        <div class="edm-ft__nl-copy">
+          <p class="edm-ft__nl-eyebrow">Newsletter</p>
+          <h2 class="edm-ft__nl-h">{{ section.settings.newsletter_heading | default: 'Únete al ritual solar' }}</h2>
+          {%- if section.settings.newsletter_subtext != blank -%}
+            <p class="edm-ft__nl-sub">{{ section.settings.newsletter_subtext }}</p>
+          {%- endif -%}
+        </div>
+        <div class="edm-ft__nl-form-wrap">
+          {%- form 'customer', id: 'edm-ft-nl-form-{{ section.id }}' -%}
+            {%- if form.posted_successfully? -%}
+              <p class="edm-ft__nl-ok">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 10l5 5 9-9"/></svg>
+                ¡Gracias! Ya eres parte del ritual.
+              </p>
+            {%- else -%}
+              {%- if form.errors -%}
+                <p class="edm-ft__nl-err">{{ form.errors | default_errors }}</p>
+              {%- endif -%}
+              <input type="hidden" name="contact[tags]" value="newsletter">
+              <div class="edm-ft__nl-row">
+                <label for="edm-ft-nl-email-{{ section.id }}" class="visually-hidden">Tu email</label>
+                <input
+                  type="email"
+                  name="contact[email]"
+                  id="edm-ft-nl-email-{{ section.id }}"
+                  class="edm-ft__nl-input"
+                  placeholder="tu@email.com"
+                  required
+                  autocomplete="email"
+                >
+                <button type="submit" class="edm-ft__nl-btn" aria-label="Suscribirme">
+                  <svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h17M11 1l7 6-7 6"/></svg>
+                </button>
+              </div>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="edm-ft__main">
+    <div class="edm-ft__main-inner page-width">
+
+      <div class="edm-ft__brand">
+        {%- if section.settings.logo != blank -%}
+          <a href="{{ routes.root_url }}" class="edm-ft__logo-link" aria-label="{{ shop.name }}">
+            {{ section.settings.logo | image_url: width: 240 | image_tag: loading: 'lazy', class: 'edm-ft__logo', alt: shop.name | escape }}
+          </a>
+        {%- else -%}
+          <a href="{{ routes.root_url }}" class="edm-ft__wordmark" aria-label="{{ shop.name }}">
+            {{- shop.name -}}
+          </a>
+        {%- endif -%}
+
+        <p class="edm-ft__origin">
+          <svg viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><circle cx="5" cy="5" r="2"/></svg>
+          Est.&nbsp;MMXX&nbsp;·&nbsp;Medellín,&nbsp;Colombia
+        </p>
+
+        {%- if section.settings.tagline != blank -%}
+          <p class="edm-ft__tagline">{{ section.settings.tagline }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.show_social -%}
+          <div class="edm-ft__social" aria-label="Redes sociales">
+            {%- if section.settings.instagram_url != blank -%}
+              <a href="{{ section.settings.instagram_url }}" class="edm-ft__soc" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+                <span class="edm-ft__soc-lbl">Instagram</span>
+              </a>
+            {%- endif -%}
+            {%- if section.settings.tiktok_url != blank -%}
+              <a href="{{ section.settings.tiktok_url }}" class="edm-ft__soc" aria-label="TikTok" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.53V6.77a4.85 4.85 0 0 1-1.01-.08z"/></svg>
+                <span class="edm-ft__soc-lbl">TikTok</span>
+              </a>
+            {%- endif -%}
+            {%- if section.settings.whatsapp_url != blank -%}
+              <a href="{{ section.settings.whatsapp_url }}" class="edm-ft__soc" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                <span class="edm-ft__soc-lbl">WhatsApp</span>
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- assign nav_blocks = section.blocks | where: 'type', 'nav_column' -%}
+      {%- for block in nav_blocks -%}
+        <nav class="edm-ft__nav" aria-label="{{ block.settings.heading | escape }}" {{ block.shopify_attributes }}>
+          {%- if block.settings.heading != blank -%}
+            <p class="edm-ft__nav-title">{{ block.settings.heading }}</p>
+          {%- endif -%}
+          {%- if block.settings.menu != blank -%}
+            <ul class="edm-ft__nav-list" role="list">
+              {%- for link in block.settings.menu.links -%}
+                <li class="edm-ft__nav-item">
+                  <a href="{{ link.url }}" class="edm-ft__nav-link">
+                    <span>{{ link.title }}</span>
+                    <svg class="edm-ft__nav-arrow" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13M9 1l5 5-5 5"/></svg>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </nav>
+      {%- endfor -%}
+
+    </div>
+  </div>
+
+  {%- assign trust_blocks = section.blocks | where: 'type', 'trust_badge' -%}
+  {%- if trust_blocks.size > 0 -%}
+    <div class="edm-ft__trust" aria-label="Certificaciones y promesas">
+      <div class="edm-ft__trust-inner page-width">
+        {%- for block in trust_blocks -%}
+          <div class="edm-ft__tb" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon_svg != blank -%}
+              <span class="edm-ft__tb-icon" aria-hidden="true">{{ block.settings.icon_svg }}</span>
+            {%- endif -%}
+            <span class="edm-ft__tb-txt">{{ block.settings.text }}</span>
+          </div>
+          {%- unless forloop.last -%}
+            <span class="edm-ft__tb-dot" aria-hidden="true"></span>
+          {%- endunless -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="edm-ft__bottom">
+    <div class="edm-ft__bottom-inner page-width">
+      <p class="edm-ft__copy">
+        &copy;&nbsp;{{ 'now' | date: '%Y' }}&nbsp;{{ shop.name }}.
+        {%- if section.settings.copyright_extra != blank %}&ensp;{{ section.settings.copyright_extra }}{%- endif -%}
+      </p>
+      {%- if section.settings.show_payment -%}
+        <div class="edm-ft__payment" aria-label="Métodos de pago aceptados">
+          {%- for type in shop.enabled_payment_types -%}
+            {{ type | payment_type_svg_tag: class: 'edm-ft__pay-icon' }}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+      {%- if section.settings.show_policy_links -%}
+        <ul class="edm-ft__policies" role="list">
+          {%- if shop.privacy_policy.body != blank -%}
+            <li><a href="{{ shop.privacy_policy.url }}" class="edm-ft__pol">{{ shop.privacy_policy.title }}</a></li>
+          {%- endif -%}
+          {%- if shop.terms_of_service.body != blank -%}
+            <li><a href="{{ shop.terms_of_service.url }}" class="edm-ft__pol">{{ shop.terms_of_service.title }}</a></li>
+          {%- endif -%}
+          {%- if shop.refund_policy.body != blank -%}
+            <li><a href="{{ shop.refund_policy.url }}" class="edm-ft__pol">{{ shop.refund_policy.title }}</a></li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+
+</footer>
+
+{% stylesheet %}
+.edm-ft {
+  background: #0b0805;
+  color: rgba(251,248,241,.6);
+  position: relative;
+}
+.edm-ft::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(208,177,106,.15) 15%, rgba(208,177,106,.6) 40%, rgba(157,127,50,.8) 50%, rgba(208,177,106,.6) 60%, rgba(208,177,106,.15) 85%, transparent 100%);
+}
+
+/* ── Newsletter ─────────────────────────────────────── */
+.edm-ft__nl {
+  border-bottom: 1px solid rgba(251,248,241,.07);
+  padding: 6.4rem 0;
+}
+.edm-ft__nl-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6.4rem;
+  align-items: center;
+}
+.edm-ft__nl-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #d0b16a;
+  margin: 0 0 2rem;
+}
+.edm-ft__nl-eyebrow::before {
+  content: '';
+  width: 24px; height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.edm-ft__nl-h {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.2rem, 3.5vw, 5.2rem);
+  font-weight: 400;
+  font-style: italic;
+  color: #fbf8f1;
+  line-height: 1.1;
+  margin: 0 0 1.2rem;
+}
+.edm-ft__nl-sub {
+  font-size: 1.45rem;
+  color: rgba(251,248,241,.5);
+  line-height: 1.6;
+  margin: 0;
+}
+.edm-ft__nl-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1.5px solid rgba(251,248,241,.25);
+  transition: border-color 0.25s ease;
+  gap: 0;
+}
+.edm-ft__nl-row:focus-within { border-color: #d0b16a; }
+.edm-ft__nl-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fbf8f1;
+  font-size: 1.6rem;
+  padding: 1.4rem 0;
+  line-height: 1;
+}
+.edm-ft__nl-input::placeholder { color: rgba(251,248,241,.28); }
+.edm-ft__nl-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(251,248,241,.4);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 1.6rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.edm-ft__nl-btn svg { width: 2rem; height: 1.4rem; }
+.edm-ft__nl-btn:hover { color: #d0b16a; transform: translateX(3px); }
+.edm-ft__nl-ok {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.5rem;
+  color: #d0b16a;
+  margin: 0;
+}
+.edm-ft__nl-ok svg { width: 1.8rem; height: 1.8rem; flex-shrink: 0; }
+.edm-ft__nl-err { font-size: 1.3rem; color: #e07070; margin: 0 0 1.2rem; }
+
+/* ── Main grid ──────────────────────────────────────── */
+.edm-ft__main { padding: 7.2rem 0 6.4rem; }
+.edm-ft__main-inner {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr 1fr 1fr;
+  gap: 5.6rem;
+}
+
+/* ── Brand column ───────────────────────────────────── */
+.edm-ft__brand { display: flex; flex-direction: column; }
+
+.edm-ft__logo-link { display: inline-block; margin-bottom: 2.4rem; }
+.edm-ft__logo { height: 44px; width: auto; display: block; filter: brightness(0) invert(1) opacity(.85); transition: opacity .25s ease; }
+.edm-ft__logo-link:hover .edm-ft__logo { opacity: 1; }
+
+.edm-ft__wordmark {
+  display: inline-block;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4vw, 5.6rem);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #fbf8f1;
+  text-decoration: none;
+  line-height: 1;
+  margin-bottom: 1.6rem;
+  transition: color .25s ease;
+}
+.edm-ft__wordmark:hover { color: #d0b16a; }
+
+.edm-ft__origin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(208,177,106,.55);
+  font-weight: 600;
+  margin: 0 0 2.8rem;
+}
+.edm-ft__origin svg { width: 0.6rem; height: 0.6rem; color: #9d7f32; flex-shrink: 0; }
+
+.edm-ft__tagline {
+  font-size: 1.45rem;
+  line-height: 1.72;
+  color: rgba(251,248,241,.42);
+  margin: 0 0 3.6rem;
+  max-width: 30rem;
+  flex: 1;
+}
+
+/* ── Social icons ───────────────────────────────────── */
+.edm-ft__social { display: flex; gap: 1rem; margin-top: auto; }
+.edm-ft__soc {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  height: 4.4rem;
+  padding: 0 1.4rem 0 1.2rem;
+  border-radius: 100px;
+  border: 1px solid rgba(251,248,241,.12);
+  color: rgba(251,248,241,.45);
+  text-decoration: none;
+  transition: all .28s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.edm-ft__soc svg { width: 1.8rem; height: 1.8rem; flex-shrink: 0; }
+.edm-ft__soc-lbl {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width .3s ease, opacity .2s ease .1s;
+}
+.edm-ft__soc:hover {
+  border-color: rgba(208,177,106,.5);
+  color: #d0b16a;
+  background: rgba(208,177,106,.06);
+}
+.edm-ft__soc:hover .edm-ft__soc-lbl {
+  max-width: 8rem;
+  opacity: 1;
+}
+
+/* ── Nav columns ────────────────────────────────────── */
+.edm-ft__nav { padding-top: 0.4rem; }
+
+.edm-ft__nav-title {
+  font-size: 1.0rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #fbf8f1;
+  margin: 0 0 0;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(208,177,106,.2);
+  margin-bottom: 2.8rem;
+}
+
+.edm-ft__nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.edm-ft__nav-item { display: flex; }
+
+.edm-ft__nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.85rem 0;
+  font-size: 1.45rem;
+  color: rgba(251,248,241,.45);
+  text-decoration: none;
+  transition: color .2s ease;
+  border-bottom: 1px solid transparent;
+  gap: 0.8rem;
+}
+.edm-ft__nav-link:hover { color: rgba(251,248,241,.9); }
+.edm-ft__nav-arrow {
+  width: 1.4rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.edm-ft__nav-link:hover .edm-ft__nav-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Trust strip ────────────────────────────────────── */
+.edm-ft__trust {
+  border-top: 1px solid rgba(251,248,241,.07);
+  border-bottom: 1px solid rgba(251,248,241,.07);
+  padding: 2.4rem 0;
+}
+.edm-ft__trust-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+.edm-ft__tb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(251,248,241,.35);
+  padding: 0.6rem 2.4rem;
+  transition: color .2s ease;
+}
+.edm-ft__tb:hover { color: rgba(251,248,241,.65); }
+.edm-ft__tb-icon { display: flex; align-items: center; }
+.edm-ft__tb-icon svg { width: 1.6rem; height: 1.6rem; }
+.edm-ft__tb-dot {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+  background: rgba(208,177,106,.3);
+  flex-shrink: 0;
+}
+
+/* ── Bottom bar ─────────────────────────────────────── */
+.edm-ft__bottom { background: rgba(0,0,0,.22); }
+.edm-ft__bottom-inner {
+  display: flex;
+  align-items: center;
+  gap: 3.2rem;
+  padding: 2.6rem 0;
+  flex-wrap: wrap;
+}
+.edm-ft__copy {
+  font-size: 1.25rem;
+  color: rgba(251,248,241,.25);
+  margin: 0;
+  flex: 1;
+  min-width: 180px;
+}
+.edm-ft__payment {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.edm-ft__pay-icon {
+  height: 2.2rem;
+  width: auto;
+  opacity: .35;
+  transition: opacity .2s ease;
+}
+.edm-ft__pay-icon:hover { opacity: .6; }
+.edm-ft__policies {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.edm-ft__pol {
+  font-size: 1.2rem;
+  color: rgba(251,248,241,.28);
+  text-decoration: none;
+  padding: 0.3rem 1.6rem;
+  transition: color .2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+.edm-ft__pol + .edm-ft__pol::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%; transform: translateY(-50%);
+  width: 1px; height: 1.1em;
+  background: rgba(251,248,241,.15);
+}
+.edm-ft__pol:first-child { padding-left: 0; }
+.edm-ft__pol:hover { color: rgba(251,248,241,.65); }
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 989px) {
+  .edm-ft__nl-inner {
+    grid-template-columns: 1fr;
+    gap: 3.6rem;
+  }
+  .edm-ft__nl { padding: 5.6rem 0; }
+  .edm-ft__main-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem 3.2rem;
+    padding: 6rem 0 5.2rem;
+  }
+  .edm-ft__main { padding: 0; }
+  .edm-ft__brand {
+    grid-column: 1 / -1;
+    flex-direction: column;
+  }
+  .edm-ft__tagline { max-width: none; }
+  .edm-ft__tb { padding: 0.6rem 1.4rem; }
+  .edm-ft__bottom-inner { flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .edm-ft__copy { flex: none; }
+}
+@media (max-width: 599px) {
+  .edm-ft__main-inner { grid-template-columns: 1fr; gap: 3.6rem; }
+  .edm-ft__soc-lbl { display: none; }
+  .edm-ft__soc { padding: 0 1.2rem; }
+  .edm-ft__trust-inner { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; padding-bottom: 0.8rem; }
+  .edm-ft__trust-inner::-webkit-scrollbar { display: none; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Footer EDM",
+  "tag": "footer",
+  "class": "footer-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo (se muestra blanco sobre oscuro)"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline / descripción breve",
+      "default": "Bronceadores naturales hechos en Colombia. Formulados con amor para honrar tu piel y el mar."
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Mostrar franja de newsletter",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Título newsletter",
+      "default": "Únete al ritual solar"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_subtext",
+      "label": "Subtexto newsletter",
+      "default": "Descuentos exclusivos, rituales solares y novedades. Sin spam."
+    },
+    {
+      "type": "header",
+      "content": "Redes sociales"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "Mostrar redes sociales",
+      "default": true
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram"
+    },
+    {
+      "type": "url",
+      "id": "tiktok_url",
+      "label": "TikTok"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_url",
+      "label": "WhatsApp"
+    },
+    {
+      "type": "header",
+      "content": "Barra inferior"
+    },
+    {
+      "type": "text",
+      "id": "copyright_extra",
+      "label": "Texto adicional copyright",
+      "default": "Todos los derechos reservados."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment",
+      "label": "Mostrar métodos de pago",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policy_links",
+      "label": "Mostrar links de políticas",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "nav_column",
+      "name": "Columna de navegación",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Título",
+          "default": "Menú"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menú de navegación",
+          "default": "footer"
+        }
+      ]
+    },
+    {
+      "type": "trust_badge",
+      "name": "Badge de confianza",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "Ícono SVG (opcional)"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto",
+          "default": "Hecho en Colombia"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer EDM",
+      "blocks": [
+        { "type": "nav_column", "settings": { "heading": "Tienda", "menu": "main-menu" } },
+        { "type": "nav_column", "settings": { "heading": "Nosotros", "menu": "footer" } },
+        { "type": "nav_column", "settings": { "heading": "Ayuda", "menu": "footer" } },
+        { "type": "trust_badge", "settings": { "text": "INVIMA Certificado" } },
+        { "type": "trust_badge", "settings": { "text": "Dermatólogo Aprobado" } },
+        { "type": "trust_badge", "settings": { "text": "Reef Safe" } },
+        { "type": "trust_badge", "settings": { "text": "100% Natural" } },
+        { "type": "trust_badge", "settings": { "text": "Hecho en Colombia" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,302 @@
+{%- assign has_overlay = false -%}
+{%- if section.settings.overlay_text != blank or section.settings.cta_label != blank -%}
+  {%- assign has_overlay = true -%}
+{%- endif -%}
+{%- liquid
+  assign video_type = 'shopify'
+  if section.settings.external_url != blank
+    if section.settings.external_url contains 'youtube.com' or section.settings.external_url contains 'youtu.be'
+      assign video_type = 'youtube'
+    elsif section.settings.external_url contains 'vimeo.com'
+      assign video_type = 'vimeo'
+    endif
+  elsif section.settings.video == blank
+    assign video_type = 'none'
+  endif
+-%}
+
+<section
+  class="edm-vid color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+>
+  {%- if section.settings.eyebrow != blank or section.settings.title != blank -%}
+    <div class="edm-vid__header page-width">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-vid__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      {%- if section.settings.title != blank -%}
+        <h2 class="edm-vid__title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="edm-vid__wrap{% if section.settings.full_width %} edm-vid__wrap--full{% else %} page-width{% endif %}">
+    <div class="edm-vid__frame" style="aspect-ratio:{{ section.settings.aspect_ratio }};">
+
+      {%- if video_type == 'shopify' and section.settings.video != blank -%}
+        {{-
+          section.settings.video
+          | video_tag:
+            autoplay: true,
+            muted: true,
+            loop: true,
+            playsinline: true,
+            class: 'edm-vid__media'
+        -}}
+
+      {%- elsif video_type == 'youtube' -%}
+        {%- assign yt_id = section.settings.external_url | split: 'v=' | last | split: '&' | first -%}
+        {%- if section.settings.external_url contains 'youtu.be/' -%}
+          {%- assign yt_id = section.settings.external_url | split: 'youtu.be/' | last | split: '?' | first -%}
+        {%- endif -%}
+        <iframe
+          class="edm-vid__media"
+          src="https://www.youtube.com/embed/{{ yt_id }}?autoplay=1&mute=1&loop=1&playlist={{ yt_id }}&controls=0&modestbranding=1&playsinline=1"
+          allow="autoplay; fullscreen"
+          loading="lazy"
+          title="{{ section.settings.title | escape }}"
+        ></iframe>
+
+      {%- elsif video_type == 'vimeo' -%}
+        {%- assign vimeo_id = section.settings.external_url | split: 'vimeo.com/' | last | split: '/' | first -%}
+        <iframe
+          class="edm-vid__media"
+          src="https://player.vimeo.com/video/{{ vimeo_id }}?autoplay=1&muted=1&loop=1&background=1"
+          allow="autoplay; fullscreen"
+          loading="lazy"
+          title="{{ section.settings.title | escape }}"
+        ></iframe>
+
+      {%- else -%}
+        <div class="edm-vid__placeholder">
+          <svg class="edm-vid__sun" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+            <circle cx="100" cy="100" r="38" fill="rgba(208,177,106,0.25)"/>
+            <circle cx="100" cy="100" r="24" fill="rgba(208,177,106,0.4)"/>
+            {%- for i in (0..11) -%}
+              <line x1="100" y1="54" x2="100" y2="44" stroke="rgba(208,177,106,0.5)" stroke-width="2.5" stroke-linecap="round" transform="rotate({{ i | times: 30 }} 100 100)"/>
+            {%- endfor -%}
+          </svg>
+        </div>
+      {%- endif -%}
+
+      {%- if has_overlay -%}
+        <div class="edm-vid__overlay">
+          {%- if section.settings.overlay_text != blank -%}
+            <p class="edm-vid__overlay-text">{{ section.settings.overlay_text }}</p>
+          {%- endif -%}
+          {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+            <a href="{{ section.settings.cta_url }}" class="edm-vid__cta">{{ section.settings.cta_label }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-vid__header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+.edm-vid__eyebrow {
+  font-size: 1.15rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 1.4rem;
+}
+.edm-vid__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4.5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.06;
+  color: #0b0805;
+  margin: 0;
+}
+
+.edm-vid__wrap--full { padding: 0; }
+
+.edm-vid__frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0b0805;
+}
+.edm-vid__wrap--full .edm-vid__frame { border-radius: 0; }
+
+.edm-vid__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+}
+
+.edm-vid__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, #2a1e0e 0%, #0b0805 65%);
+}
+.edm-vid__sun {
+  width: clamp(14rem, 18vw, 24rem);
+  height: clamp(14rem, 18vw, 24rem);
+  opacity: 0.9;
+  animation: edmSunPulse 4s ease-in-out infinite;
+}
+@keyframes edmSunPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+.edm-vid__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11,8,5,.7) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4.8rem;
+  text-align: center;
+}
+
+.edm-vid__overlay-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.2rem, 4vw, 5.6rem);
+  font-style: italic;
+  font-weight: 400;
+  color: #fbf8f1;
+  margin: 0 0 2.4rem;
+  line-height: 1.1;
+  max-width: 72rem;
+}
+
+.edm-vid__cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 1.4rem 3.6rem;
+  background: #fbf8f1;
+  color: #0b0805;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.edm-vid__cta:hover { background: #9d7f32; color: #fbf8f1; }
+
+@media (max-width: 749px) {
+  .edm-vid__overlay { padding: 2.4rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Video",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto encima del título"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título de sección"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video (Shopify CDN)"
+    },
+    {
+      "type": "text",
+      "id": "external_url",
+      "label": "URL externa (YouTube / Vimeo)",
+      "info": "Si se ingresa una URL externa, se usará en lugar del video de Shopify"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Relación de aspecto",
+      "options": [
+        { "value": "16/9", "label": "16:9 horizontal" },
+        { "value": "9/16", "label": "9:16 vertical" },
+        { "value": "4/3", "label": "4:3" },
+        { "value": "1/1", "label": "1:1 cuadrado" }
+      ],
+      "default": "16/9"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Ancho completo",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Texto superpuesto"
+    },
+    {
+      "type": "text",
+      "id": "overlay_text",
+      "label": "Texto sobre el video"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Enlace del botón"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video",
+      "settings": {
+        "overlay_text": "Bronceado natural, hecho en Colombia.",
+        "cta_label": "Descubrir la línea",
+        "cta_url": "/collections/all"
+      }
+    }
+  ]
+}
+{% endschema %}

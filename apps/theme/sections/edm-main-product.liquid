@@ -1,0 +1,902 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id = 'edm-pdp-form-' | append: section.id
+  assign atc_label = section.settings.add_to_cart_label | default: 'Agregar al carrito'
+-%}
+
+<script type="application/json" id="edm-variants-{{ section.id }}">{{ product.variants | json }}</script>
+<script type="application/json" id="edm-mmap-{{ section.id }}">{
+  {%- for variant in product.variants -%}
+    "{{ variant.id }}":{%- if variant.featured_media -%}{{ variant.featured_media.position | minus: 1 }}{%- else -%}0{%- endif -%}{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+}</script>
+
+<script>
+(function() {
+  function edmPDP(vid, mid) {
+    var variants = JSON.parse(document.getElementById(vid).textContent);
+    var mediaMap = JSON.parse(document.getElementById(mid).textContent);
+    var first = null;
+    for (var i = 0; i < variants.length; i++) {
+      if (variants[i].available) { first = variants[i]; break; }
+    }
+    if (!first && variants.length) first = variants[0];
+    return {
+      variants: variants,
+      mediaMap: mediaMap,
+      activeIdx: 0,
+      qty: 1,
+      options: first ? first.options.slice() : [],
+      selectedVariantId: first ? first.id : null,
+      loading: false,
+      added: false,
+      stickyVisible: false,
+      get selectedVariant() {
+        var id = this.selectedVariantId;
+        return this.variants.find(function(v) { return v.id === id; }) || null;
+      },
+      pickOption: function(idx, val) {
+        var opts = this.options.slice();
+        opts[idx] = val;
+        this.options = opts;
+        var match = this.variants.find(function(v) {
+          return v.options.length === opts.length &&
+            v.options.every(function(o, i) { return o === opts[i]; });
+        }) || null;
+        this.selectedVariantId = match ? match.id : null;
+        if (match) {
+          var mi = this.mediaMap[String(match.id)];
+          if (typeof mi !== 'undefined') this.activeIdx = mi;
+        }
+      },
+      addToCart: async function() {
+        if (this.loading) return;
+        var variantId = this.selectedVariantId;
+        var variant = this.variants.find(function(v) { return v.id === variantId; });
+        if (!variant || !variant.available) return;
+        this.loading = true;
+        var self = this;
+        try {
+          var res = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: variantId,
+              quantity: this.qty,
+              sections: ['cart-drawer', 'cart-icon-bubble'],
+              sections_url: window.location.pathname
+            })
+          });
+          if (!res.ok) throw new Error('cart');
+          var parsedState = await res.json();
+          self.added = true;
+          self.openCartDrawer(parsedState, variantId);
+          setTimeout(function() { self.added = false; }, 2600);
+        } catch(e) {
+          window.location.href = '/cart/add?id=' + variantId + '&quantity=' + self.qty + '&return_to=/cart';
+        } finally {
+          self.loading = false;
+        }
+      },
+      openCartDrawer: function(parsedState, variantId) {
+        var el = document.querySelector('cart-drawer');
+        if (!el) return;
+
+        el.classList.remove('is-empty');
+
+        if (parsedState && parsedState.sections && typeof el.renderContents === 'function') {
+          try {
+            el.renderContents(parsedState);
+            console.log('[EDM] renderContents OK');
+          } catch(e) {
+            console.log('[EDM] renderContents error:', e.message);
+            setTimeout(function() {
+              el.classList.add('animate', 'active');
+              document.body.classList.add('overflow-hidden');
+            });
+          }
+        } else {
+          setTimeout(function() {
+            el.classList.add('animate', 'active');
+            document.body.classList.add('overflow-hidden');
+          });
+        }
+      },
+      init: function() {
+        var self = this;
+        var btn = document.getElementById('edm-atc-main-{{ section.id }}');
+        if (!btn || !('IntersectionObserver' in window)) return;
+        var obs = new IntersectionObserver(function(entries) {
+          self.stickyVisible = !entries[0].isIntersecting;
+        }, { threshold: 0 });
+        obs.observe(btn);
+      },
+      fmtMoney: function(cents) {
+        if (typeof cents !== 'number') return '';
+        return '$ ' + (cents / 100).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      }
+    };
+  }
+  window.edmPDP = edmPDP;
+})();
+</script>
+
+<section
+  class="edm-pdp color-{{ section.settings.color_scheme }} gradient"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  x-data="edmPDP('edm-variants-{{ section.id }}','edm-mmap-{{ section.id }}')"
+  x-init="init()"
+>
+  <div class="edm-pdp__inner page-width">
+
+    <div class="edm-pdp__gallery">
+      {%- if product.media.size > 1 -%}
+        <div class="edm-pdp__thumbs" role="list">
+          {%- for media in product.media -%}
+            <button
+              class="edm-pdp__thumb"
+              :class="{ 'is-active': activeIdx === {{ forloop.index0 }} }"
+              @click="activeIdx = {{ forloop.index0 }}"
+              type="button"
+              role="listitem"
+              aria-label="Ver imagen {{ forloop.index }}"
+            >
+              {{- media | image_url: width: 160 | image_tag: loading: 'lazy', class: 'edm-pdp__thumb-img', alt: '' -}}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="edm-pdp__main">
+        {%- for media in product.media -%}
+          <div
+            class="edm-pdp__slide"
+            x-show="activeIdx === {{ forloop.index0 }}"
+            {%- unless forloop.first %} x-cloak{%- endunless %}
+          >
+            {{-
+              media
+              | image_url: width: 1400
+              | image_tag:
+                loading: 'eager',
+                width: 1400,
+                class: 'edm-pdp__img',
+                alt: media.alt | default: product.title | escape
+            -}}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="edm-pdp__info">
+
+      {%- if section.settings.show_vendor and product.vendor != blank -%}
+        <p class="edm-pdp__vendor">{{ product.vendor }}</p>
+      {%- endif -%}
+
+      <h1 class="edm-pdp__h1">{{ product.title }}</h1>
+
+      <div class="edm-pdp__prices" aria-live="polite" aria-atomic="true">
+        <span class="edm-pdp__price" x-text="fmtMoney(selectedVariant ? selectedVariant.price : {{ current_variant.price | default: 0 }})">{{ current_variant.price | money }}</span>
+        <del class="edm-pdp__was" x-show="selectedVariant && selectedVariant.compare_at_price > selectedVariant.price" x-cloak x-text="fmtMoney(selectedVariant ? selectedVariant.compare_at_price : 0)"></del>
+        <span class="edm-pdp__sale" x-show="selectedVariant && selectedVariant.compare_at_price > selectedVariant.price" x-cloak>Oferta</span>
+      </div>
+
+      <p
+        class="edm-pdp__low-stock"
+        x-show="selectedVariant && selectedVariant.inventory_management === 'shopify' && selectedVariant.inventory_quantity > 0 && selectedVariant.inventory_quantity <= {{ section.settings.low_stock_threshold }}"
+        x-cloak
+        aria-live="polite"
+      >
+        ¡Solo quedan <span x-text="selectedVariant ? selectedVariant.inventory_quantity : 0"></span> unidades!
+      </p>
+
+      {%- unless product.has_only_default_variant -%}
+        {%- for option in product.options_with_values -%}
+          <div class="edm-pdp__opt">
+            <p class="edm-pdp__opt-lbl">
+              {{ option.name }}:&nbsp;<strong x-text="options[{{ forloop.index0 }}]"></strong>
+            </p>
+            <div class="edm-pdp__chips" role="group" aria-label="{{ option.name | escape }}">
+              {%- for value in option.values -%}
+                <button
+                  type="button"
+                  class="edm-pdp__chip"
+                  :class='{ "is-on": options[{{ forloop.parentloop.index0 }}] === {{ value | json }} }'
+                  @click='pickOption({{ forloop.parentloop.index0 }}, {{ value | json }})'
+                  :aria-pressed='(options[{{ forloop.parentloop.index0 }}] === {{ value | json }}).toString()'
+                >{{ value }}</button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endunless -%}
+
+      <div class="edm-pdp__add-row">
+        <div class="edm-pdp__qty-wrap" role="group" aria-label="Cantidad">
+          <button type="button" class="edm-pdp__qbtn" @click="qty > 1 && qty--" :disabled="qty <= 1" aria-label="Reducir">−</button>
+          <input
+            type="number"
+            x-model.number="qty"
+            min="1"
+            class="edm-pdp__qval"
+            aria-label="Cantidad"
+          >
+          <button type="button" class="edm-pdp__qbtn" @click="qty++" aria-label="Aumentar">+</button>
+        </div>
+
+        <button
+          id="edm-atc-main-{{ section.id }}"
+          type="button"
+          class="edm-pdp__atc"
+          @click="addToCart()"
+          :disabled="loading || !selectedVariant || !selectedVariant.available"
+          :class="{ 'is-added': added }"
+        >
+          <span class="edm-pdp__spin" x-show="loading" x-cloak aria-hidden="true"></span>
+          <span x-show="!loading">
+            <span x-show="added" x-cloak>✓ &nbsp;¡Agregado!</span>
+            <span x-show="!added" x-text="(!selectedVariant || !selectedVariant.available) ? 'Agotado' : '{{ atc_label | escape }}'">{{ atc_label | escape }}</span>
+          </span>
+        </button>
+      </div>
+
+
+      {%- assign trust_blocks = section.blocks | where: 'type', 'trust_item' -%}
+      {%- if trust_blocks.size > 0 -%}
+        <div class="edm-pdp__trust" aria-label="Garantías">
+          {%- for block in trust_blocks -%}
+            <div class="edm-pdp__ti" {{ block.shopify_attributes }}>
+              {%- if block.settings.icon_svg != blank -%}
+                <span class="edm-pdp__ti-icon" aria-hidden="true">{{ block.settings.icon_svg }}</span>
+              {%- endif -%}
+              <span class="edm-pdp__ti-txt">{{ block.settings.text }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="edm-pdp__tabs">
+        {%- if product.description != blank -%}
+          <details class="edm-pdp__tab">
+            <summary class="edm-pdp__tab-sum">
+              {{ section.settings.description_label | default: 'Descripción' }}
+              <svg class="edm-pdp__chv" viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 1l9 9 9-9"/></svg>
+            </summary>
+            <div class="edm-pdp__tab-bd edm-pdp__rte">{{ product.description }}</div>
+          </details>
+        {%- endif -%}
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'collapsible_tab' -%}
+            <details class="edm-pdp__tab" {{ block.shopify_attributes }}>
+              <summary class="edm-pdp__tab-sum">
+                {{ block.settings.heading | default: 'Información' }}
+                <svg class="edm-pdp__chv" viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 1l9 9 9-9"/></svg>
+              </summary>
+              <div class="edm-pdp__tab-bd edm-pdp__rte">
+                {%- if block.settings.content != blank -%}{{ block.settings.content }}{%- endif -%}
+                {%- if block.settings.page != blank -%}{{ block.settings.page.content }}{%- endif -%}
+              </div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+
+  <div class="edm-pdp__sticky" x-show="stickyVisible" x-cloak x-transition:enter="edm-pdp__sticky--enter" x-transition:enter-start="edm-pdp__sticky--hidden" x-transition:enter-end="edm-pdp__sticky--shown" x-transition:leave="edm-pdp__sticky--enter" x-transition:leave-start="edm-pdp__sticky--shown" x-transition:leave-end="edm-pdp__sticky--hidden">
+    <div class="edm-pdp__sticky-inner page-width">
+      <div class="edm-pdp__sticky-info">
+        {%- if product.featured_image -%}
+          {{- product.featured_image | image_url: width: 120 | image_tag: class: 'edm-pdp__sticky-thumb', alt: '', loading: 'lazy', width: 60, height: 60 -}}
+        {%- endif -%}
+        <div>
+          <p class="edm-pdp__sticky-title">{{ product.title }}</p>
+          <p class="edm-pdp__sticky-price" x-text="fmtMoney(selectedVariant ? selectedVariant.price : {{ current_variant.price | default: 0 }})"></p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="edm-pdp__sticky-atc"
+        @click="addToCart()"
+        :disabled="loading || !selectedVariant || !selectedVariant.available"
+        :class="{ 'is-added': added }"
+      >
+        <span x-show="loading" x-cloak class="edm-pdp__spin" aria-hidden="true"></span>
+        <span x-show="!loading">
+          <span x-show="added" x-cloak>✓ &nbsp;¡Agregado!</span>
+          <span x-show="!added" x-text="(!selectedVariant || !selectedVariant.available) ? 'Agotado' : '{{ atc_label | escape }}'">{{ atc_label | escape }}</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+[x-cloak] { display: none !important; }
+
+.edm-pdp { overflow: hidden; }
+
+.edm-pdp__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 460px;
+  gap: 7.2rem;
+  align-items: start;
+}
+
+.edm-pdp__gallery {
+  display: flex;
+  gap: 1.8rem;
+  position: sticky;
+  top: 10rem;
+}
+
+.edm-pdp__thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 80px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 520px;
+  scrollbar-width: none;
+}
+.edm-pdp__thumbs::-webkit-scrollbar { display: none; }
+
+.edm-pdp__thumb {
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease;
+}
+.edm-pdp__thumb.is-active,
+.edm-pdp__thumb:hover { border-color: #9d7f32; }
+.edm-pdp__thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.edm-pdp__main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f4eee1;
+  aspect-ratio: 4/5;
+}
+
+.edm-pdp__slide {
+  position: absolute;
+  inset: 0;
+  animation: edmPdpReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes edmPdpReveal {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.edm-pdp__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.edm-pdp__info { padding-top: 0.8rem; }
+
+.edm-pdp__vendor {
+  font-size: 1.2rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #9d7f32;
+  font-weight: 600;
+  margin: 0 0 1.6rem;
+}
+
+.edm-pdp__h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4rem, 3.6vw, 6.4rem);
+  font-weight: 400;
+  line-height: 1.07;
+  letter-spacing: -0.01em;
+  color: #0b0805;
+  margin: 0 0 2.4rem;
+}
+
+.edm-pdp__prices {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin: 0 0 3.2rem;
+}
+
+.edm-pdp__price {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 4.2rem;
+  font-style: italic;
+  font-weight: 500;
+  color: #0b0805;
+  line-height: 1;
+}
+
+.edm-pdp__was {
+  font-size: 2.4rem;
+  color: #b0a090;
+  text-decoration: line-through;
+  font-style: normal;
+  line-height: 1;
+}
+
+.edm-pdp__sale {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1.2rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #9d7f32;
+  border: 1.5px solid #9d7f32;
+  border-radius: 100px;
+  line-height: 1;
+}
+
+.edm-pdp__opt { margin-bottom: 2.8rem; }
+
+.edm-pdp__opt-lbl {
+  font-size: 1.25rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #78695a;
+  font-weight: 600;
+  margin: 0 0 1.2rem;
+}
+.edm-pdp__opt-lbl strong { color: #0b0805; font-weight: 700; }
+
+.edm-pdp__chips { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+
+.edm-pdp__chip {
+  padding: 0.9rem 2.2rem;
+  border: 1.5px solid rgba(11, 8, 5, 0.18);
+  border-radius: 100px;
+  font-size: 1.35rem;
+  color: #4a3f2f;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.edm-pdp__chip:hover { border-color: #0b0805; color: #0b0805; }
+.edm-pdp__chip.is-on { background: #0b0805; border-color: #0b0805; color: #fbf8f1; }
+
+.edm-pdp__add-row {
+  display: flex;
+  gap: 1.4rem;
+  align-items: stretch;
+  margin-bottom: 1.4rem;
+}
+
+.edm-pdp__qty-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid rgba(11, 8, 5, 0.18);
+  border-radius: 100px;
+  height: 5.6rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.edm-pdp__qbtn {
+  width: 4.8rem;
+  height: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  color: #0b0805;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+.edm-pdp__qbtn:hover { background: rgba(11, 8, 5, 0.05); }
+.edm-pdp__qbtn:disabled { opacity: 0.3; cursor: default; }
+
+.edm-pdp__qval {
+  width: 3.6rem;
+  text-align: center;
+  border: none;
+  background: none;
+  font-size: 1.6rem;
+  color: #0b0805;
+  font-weight: 700;
+  outline: none;
+  -moz-appearance: textfield;
+  padding: 0;
+}
+.edm-pdp__qval::-webkit-outer-spin-button,
+.edm-pdp__qval::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.edm-pdp__atc {
+  flex: 1;
+  height: 5.6rem;
+  background: #0b0805;
+  color: #fbf8f1;
+  border: none;
+  border-radius: 100px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  transition: background 0.3s ease, transform 0.12s ease;
+  padding: 0 2.8rem;
+  min-width: 0;
+}
+.edm-pdp__atc:hover:not(:disabled) { background: #9d7f32; }
+.edm-pdp__atc:active:not(:disabled) { transform: scale(0.98); }
+.edm-pdp__atc:disabled { background: #c5bdb5; cursor: not-allowed; }
+.edm-pdp__atc.is-added { background: #1e6e34; }
+
+.edm-pdp__spin {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 2px solid rgba(251, 248, 241, 0.3);
+  border-top-color: #fbf8f1;
+  border-radius: 50%;
+  animation: edmPdpSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes edmPdpSpin { to { transform: rotate(360deg); } }
+
+
+.edm-pdp__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2.4rem 0;
+  border-top: 1px solid rgba(11, 8, 5, 0.08);
+  border-bottom: 1px solid rgba(11, 8, 5, 0.08);
+  margin: 0 0 3.2rem;
+}
+
+.edm-pdp__ti {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.3rem;
+  color: #4a3f2f;
+  font-weight: 500;
+}
+.edm-pdp__ti-icon { display: flex; align-items: center; }
+.edm-pdp__ti-icon svg {
+  width: 2rem;
+  height: 2rem;
+  stroke: #9d7f32;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.edm-pdp__tabs { display: flex; flex-direction: column; }
+
+.edm-pdp__tab { border-bottom: 1px solid rgba(11, 8, 5, 0.08); }
+.edm-pdp__tab:first-child { border-top: 1px solid rgba(11, 8, 5, 0.08); }
+
+.edm-pdp__tab-sum {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 0;
+  cursor: pointer;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0b0805;
+  list-style: none;
+  user-select: none;
+  transition: color 0.2s;
+  gap: 1.6rem;
+}
+.edm-pdp__tab-sum::-webkit-details-marker { display: none; }
+.edm-pdp__tab-sum:hover { color: #9d7f32; }
+
+.edm-pdp__chv {
+  width: 1.8rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+.edm-pdp__tab[open] .edm-pdp__chv { transform: rotate(180deg); }
+
+.edm-pdp__tab-bd {
+  padding: 0 0 2.4rem;
+  font-size: 1.6rem;
+  color: #4a3f2f;
+  line-height: 1.74;
+}
+
+.edm-pdp__rte p { margin: 0 0 1.2rem; }
+.edm-pdp__rte p:last-child { margin: 0; }
+.edm-pdp__rte ul,
+.edm-pdp__rte ol { padding-left: 2rem; margin: 0 0 1.2rem; }
+.edm-pdp__rte li { margin-bottom: 0.4rem; }
+.edm-pdp__rte a { color: #9d7f32; }
+
+.edm-pdp__low-stock {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c0392b;
+  letter-spacing: 0.04em;
+  margin: -1.6rem 0 2.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.edm-pdp__low-stock::before {
+  content: '';
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: #c0392b;
+  border-radius: 50%;
+  animation: edmPdpPulse 1.4s ease infinite;
+  flex-shrink: 0;
+}
+@keyframes edmPdpPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+.edm-pdp__sticky {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fbf8f1;
+  border-top: 1px solid rgba(11,8,5,.1);
+  box-shadow: 0 -4px 24px rgba(11,8,5,.08);
+  z-index: 900;
+  padding: 1.2rem 0;
+}
+.edm-pdp__sticky--enter { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.edm-pdp__sticky--hidden { transform: translateY(100%); }
+.edm-pdp__sticky--shown { transform: translateY(0); }
+.edm-pdp__sticky-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.edm-pdp__sticky-info {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  min-width: 0;
+}
+.edm-pdp__sticky-thumb {
+  width: 5.2rem;
+  height: 5.2rem;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.edm-pdp__sticky-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0b0805;
+  margin: 0 0 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 26rem;
+}
+.edm-pdp__sticky-price {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-style: italic;
+  color: #0b0805;
+  margin: 0;
+  line-height: 1;
+}
+.edm-pdp__sticky-atc {
+  height: 4.8rem;
+  padding: 0 3.2rem;
+  background: #0b0805;
+  color: #fbf8f1;
+  border: none;
+  border-radius: 100px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+.edm-pdp__sticky-atc:hover:not(:disabled) { background: #9d7f32; }
+.edm-pdp__sticky-atc:disabled { background: #c5bdb5; cursor: not-allowed; }
+.edm-pdp__sticky-atc.is-added { background: #1e6e34; }
+
+@media (max-width: 989px) {
+  .edm-pdp__inner { grid-template-columns: 1fr; gap: 4rem; }
+  .edm-pdp__gallery { position: static; flex-direction: column-reverse; gap: 1.2rem; }
+  .edm-pdp__thumbs {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    height: 68px;
+  }
+  .edm-pdp__thumb { width: 68px; height: 68px; }
+  .edm-pdp__main { aspect-ratio: 1/1; }
+  .edm-pdp__add-row { flex-direction: column; }
+  .edm-pdp__qty-wrap { width: 100%; justify-content: space-between; }
+  .edm-pdp__atc { width: 100%; }
+  .edm-pdp__trust { gap: 1.6rem; }
+  .edm-pdp__sticky-title { max-width: 12rem; }
+  .edm-pdp__sticky-atc { padding: 0 2rem; font-size: 1.2rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Producto principal",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Mostrar proveedor",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_label",
+      "label": "Texto botón añadir",
+      "default": "Agregar al carrito"
+    },
+    {
+      "type": "text",
+      "id": "description_label",
+      "label": "Etiqueta pestaña descripción",
+      "default": "Descripción"
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Alerta stock bajo (unidades)",
+      "min": 0, "max": 20, "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" },
+        { "value": "scheme-3", "label": "Oscuro" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_item",
+      "name": "Promesa",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "SVG del ícono",
+          "default": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 12l2 2 4-4'/></svg>"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto",
+          "default": "Pago seguro"
+        }
+      ]
+    },
+    {
+      "type": "collapsible_tab",
+      "name": "Pestaña plegable",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Título",
+          "default": "Ingredientes"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Contenido"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Página"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Producto principal",
+      "blocks": [
+        {
+          "type": "trust_item",
+          "settings": {
+            "text": "Pago seguro",
+            "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 12l2 2 4-4'/></svg>"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "text": "Envío gratis +$80k",
+            "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='1' y='3' width='15' height='13' rx='1'></rect><path d='M16 8h4l3 3v5h-7V8z'></path><circle cx='5.5' cy='18.5' r='2.5'></circle><circle cx='18.5' cy='18.5' r='2.5'></circle></svg>"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "text": "Hecho en Colombia",
+            "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/></svg>"
+          }
+        },
+        {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Ingredientes",
+            "content": "<p>Formulado con zanahoria, aceite de coco, vitamina E y extractos del trópico colombiano.</p>"
+          }
+        },
+        {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Envío y devoluciones",
+            "content": "<p>Envío gratis en compras desde $80.000. Entregas en 2-5 días hábiles a todo Colombia.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

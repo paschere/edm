@@ -43,6 +43,27 @@
             {%- when '@app' -%}
               {% render block %}
             {%- when 'subtotal' -%}
+              {%- assign ship_threshold = 16000000 -%}
+              {%- assign ship_remaining = ship_threshold | minus: cart.total_price -%}
+              {%- assign ship_pct = cart.total_price | times: 100 | divided_by: ship_threshold | at_most: 100 -%}
+              <div class="edm-ship-bar" id="edm-ship-bar">
+                <div class="edm-ship-bar__top">
+                  <svg class="edm-ship-bar__truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  {%- if ship_remaining > 0 -%}
+                    <p class="edm-ship-bar__msg">
+                      Te faltan <strong>{{ ship_remaining | money_without_trailing_zeros }}</strong> para <strong>envío gratis</strong>
+                    </p>
+                  {%- else -%}
+                    <p class="edm-ship-bar__msg edm-ship-bar__msg--done">
+                      ¡Tienes envío gratis!
+                    </p>
+                  {%- endif -%}
+                </div>
+                <div class="edm-ship-bar__track" role="progressbar" aria-valuenow="{{ ship_pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso hacia envío gratis">
+                  <div class="edm-ship-bar__fill" style="width:{{ ship_pct }}%"></div>
+                </div>
+              </div>
+
               <div class="js-contents" {{ block.shopify_attributes }}>
                 <div>
                   {%- if cart.cart_level_discount_applications.size > 0 -%}
@@ -104,7 +125,23 @@
                 </small>
               </div>
             {%- else -%}
-              <div class="cart__ctas" {{ block.shopify_attributes }}>
+              <div class="edm-cart-cedula" {{ block.shopify_attributes }}>
+                <label class="edm-cart-cedula__label" for="edm-cedula-input">Cédula / NIT <span class="edm-cart-cedula__req" aria-hidden="true">*</span></label>
+                <input
+                  type="text"
+                  id="edm-cedula-input"
+                  name="attributes[Cedula NIT]"
+                  form="cart"
+                  class="edm-cart-cedula__input"
+                  placeholder="Ej. 1234567890 o 900123456-1"
+                  value="{{ cart.attributes['Cedula NIT'] }}"
+                  autocomplete="off"
+                  inputmode="numeric"
+                >
+                <p class="edm-cart-cedula__hint">Requerido para factura electrónica</p>
+              </div>
+
+              <div class="cart__ctas">
                 <button
                   type="submit"
                   id="checkout"
@@ -132,6 +169,161 @@
     </div>
   </div>
 </div>
+
+<script>
+(function() {
+  var THRESHOLD = 16000000;
+  function updateShipBar(totalCents) {
+    var bar = document.getElementById('edm-ship-bar');
+    if (!bar) return;
+    var remaining = THRESHOLD - totalCents;
+    var pct = Math.min(100, Math.round((totalCents / THRESHOLD) * 100));
+    var fill = bar.querySelector('.edm-ship-bar__fill');
+    var msg = bar.querySelector('.edm-ship-bar__msg');
+    if (fill) fill.style.width = pct + '%';
+    if (msg) {
+      if (remaining > 0) {
+        var formatted = '$ ' + Math.round(remaining / 100).toLocaleString('es-CO');
+        msg.innerHTML = 'Te faltan <strong>' + formatted + '</strong> para <strong>envío gratis</strong>';
+        msg.classList.remove('edm-ship-bar__msg--done');
+      } else {
+        msg.innerHTML = '¡Tienes envío gratis!';
+        msg.classList.add('edm-ship-bar__msg--done');
+      }
+    }
+    var track = bar.querySelector('.edm-ship-bar__track');
+    if (track) track.setAttribute('aria-valuenow', pct);
+  }
+
+  if (typeof window.subscribe === 'function' && window.PUB_SUB_EVENTS) {
+    window.subscribe(window.PUB_SUB_EVENTS.cartUpdate, function() {
+      fetch('/cart.js').then(function(r) { return r.json(); }).then(function(cart) {
+        updateShipBar(cart.total_price);
+      });
+    });
+  }
+
+  var input = document.getElementById('edm-cedula-input');
+  if (input) {
+    var timer;
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      var val = input.value;
+      if (val.trim()) input.closest('.edm-cart-cedula').classList.remove('edm-cart-cedula--error');
+      timer = setTimeout(function() {
+        fetch('/cart/update.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attributes: { 'Cedula NIT': val } })
+        });
+      }, 600);
+    });
+  }
+
+  var cartForm = document.getElementById('cart');
+  if (cartForm) {
+    cartForm.addEventListener('submit', function(e) {
+      if (!e.submitter || e.submitter.name !== 'checkout') return;
+      var inp = document.getElementById('edm-cedula-input');
+      if (!inp || inp.value.trim() !== '') return;
+      e.preventDefault();
+      inp.closest('.edm-cart-cedula').classList.add('edm-cart-cedula--error');
+      inp.focus();
+    });
+  }
+})();
+</script>
+
+{% stylesheet %}
+.edm-ship-bar {
+  background: rgba(208,177,106,0.08);
+  border: 1px solid rgba(208,177,106,0.3);
+  border-radius: 8px;
+  padding: 1.6rem 2rem 1.8rem;
+  margin-bottom: 2.4rem;
+}
+.edm-ship-bar__top {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.edm-ship-bar__truck {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  stroke: #9d7f32;
+}
+.edm-ship-bar__msg {
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+.edm-ship-bar__msg strong { color: #9d7f32; font-weight: 700; }
+.edm-ship-bar__msg--done {
+  color: #1a6b34;
+  font-weight: 600;
+}
+.edm-ship-bar__msg--done + .edm-ship-bar__track .edm-ship-bar__fill {
+  background: #1a6b34;
+}
+.edm-ship-bar__track {
+  height: 5px;
+  background: rgba(var(--color-foreground), 0.1);
+  border-radius: 40px;
+  overflow: hidden;
+}
+.edm-ship-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d0b16a 0%, #9d7f32 100%);
+  border-radius: 40px;
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  min-width: 4px;
+}
+
+.edm-cart-cedula {
+  margin-bottom: 1.6rem;
+}
+.edm-cart-cedula__label {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.75);
+  margin-bottom: 0.8rem;
+}
+.edm-cart-cedula__req { color: #c0392b; }
+.edm-cart-cedula__input {
+  display: block;
+  width: 100%;
+  padding: 1.2rem 1.6rem;
+  border: 1.5px solid rgba(var(--color-foreground), 0.2);
+  border-radius: var(--inputs-radius, 4px);
+  background: transparent;
+  color: rgb(var(--color-foreground));
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+.edm-cart-cedula__input:focus {
+  outline: none;
+  border-color: rgba(var(--color-foreground), 0.6);
+}
+.edm-cart-cedula__hint {
+  font-size: 1.2rem;
+  color: rgba(var(--color-foreground), 0.5);
+  margin: 0.6rem 0 0;
+}
+.edm-cart-cedula--error .edm-cart-cedula__input { border-color: #c0392b; }
+.edm-cart-cedula--error .edm-cart-cedula__hint {
+  color: #c0392b;
+  font-weight: 600;
+}
+.edm-cart-cedula--error .edm-cart-cedula__hint::before { content: '⚠ '; }
+{% endstylesheet %}
 
 {% schema %}
 {

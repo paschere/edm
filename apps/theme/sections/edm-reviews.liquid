@@ -1,0 +1,456 @@
+{%- assign review_blocks = section.blocks | where: 'type', 'review' -%}
+{%- assign featured = review_blocks | first -%}
+{%- assign rest_blocks = review_blocks | slice: 1, 20 -%}
+
+<section
+  class="edm-rv color-{{ section.settings.color_scheme }} gradient"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+>
+  <div class="edm-rv__inner page-width">
+
+    <header class="edm-rv__head">
+      <div class="edm-rv__head-left">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="edm-rv__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="edm-rv__h2">{{ section.settings.title | default: 'Lo que dicen nuestras estrellas' }}</h2>
+      </div>
+      {%- if section.settings.avg_score != blank -%}
+        <div class="edm-rv__score" aria-label="Calificación promedio {{ section.settings.avg_score }} de 5">
+          <span class="edm-rv__score-num">{{ section.settings.avg_score }}</span>
+          <div>
+            <div class="edm-rv__score-stars" aria-hidden="true">
+              {%- for i in (1..5) -%}
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.39 7.26H20l-6.19 4.5 2.36 7.26L10 15.5l-6.17 4.52 2.36-7.26L0 8.26h7.61L10 1z" fill="currentColor"/></svg>
+              {%- endfor -%}
+            </div>
+            {%- if section.settings.review_count != blank -%}
+              <p class="edm-rv__score-sub">{{ section.settings.review_count }} reseñas verificadas</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </header>
+
+    {%- if featured != blank -%}
+      {%- assign feat_rating = featured.settings.rating | default: 5 -%}
+      <div class="edm-rv__featured" {{ featured.shopify_attributes }}>
+        <div class="edm-rv__feat-deco" aria-hidden="true">"</div>
+        <div class="edm-rv__feat-body">
+          <div class="edm-rv__feat-stars" aria-label="{{ feat_rating }} de 5 estrellas">
+            {%- for i in (1..5) -%}
+              {%- if i <= feat_rating -%}
+                <svg class="edm-rv__fstar edm-rv__fstar--on" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.39 7.26H20l-6.19 4.5 2.36 7.26L10 15.5l-6.17 4.52 2.36-7.26L0 8.26h7.61L10 1z" fill="currentColor"/></svg>
+              {%- else -%}
+                <svg class="edm-rv__fstar edm-rv__fstar--off" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.39 7.26H20l-6.19 4.5 2.36 7.26L10 15.5l-6.17 4.52 2.36-7.26L0 8.26h7.61L10 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          <blockquote class="edm-rv__feat-quote">
+            <p class="edm-rv__feat-text">{{ featured.settings.text }}</p>
+          </blockquote>
+          <footer class="edm-rv__feat-foot">
+            {%- assign feat_initials = featured.settings.name | split: ' ' -%}
+            <div class="edm-rv__feat-avatar" aria-hidden="true">
+              {{- feat_initials[0] | slice: 0, 1 | upcase -}}{{- feat_initials[1] | slice: 0, 1 | upcase -}}
+            </div>
+            <div>
+              <p class="edm-rv__feat-name">{{ featured.settings.name }}</p>
+              {%- if featured.settings.location != blank -%}
+                <p class="edm-rv__feat-loc">{{ featured.settings.location }}</p>
+              {%- endif -%}
+            </div>
+            {%- if featured.settings.verified -%}
+              <span class="edm-rv__feat-verified" aria-label="Compra verificada">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M13 4l-6.5 6.5L3 7"/></svg>
+                Verificada
+              </span>
+            {%- endif -%}
+          </footer>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if rest_blocks.size > 0 -%}
+      <div class="edm-rv__grid">
+        {%- for block in rest_blocks -%}
+          {%- assign rating = block.settings.rating | default: 5 -%}
+          <article class="edm-rv__card" {{ block.shopify_attributes }}>
+            <div class="edm-rv__stars" aria-label="{{ rating }} de 5 estrellas">
+              {%- for i in (1..5) -%}
+                {%- if i <= rating -%}
+                  <svg class="edm-rv__star edm-rv__star--on" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.39 7.26H20l-6.19 4.5 2.36 7.26L10 15.5l-6.17 4.52 2.36-7.26L0 8.26h7.61L10 1z" fill="currentColor"/></svg>
+                {%- else -%}
+                  <svg class="edm-rv__star edm-rv__star--off" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.39 7.26H20l-6.19 4.5 2.36 7.26L10 15.5l-6.17 4.52 2.36-7.26L0 8.26h7.61L10 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+            <blockquote class="edm-rv__quote">
+              <p class="edm-rv__text">{{ block.settings.text }}</p>
+            </blockquote>
+            <footer class="edm-rv__foot">
+              {%- assign initials = block.settings.name | split: ' ' -%}
+              <div class="edm-rv__avatar" aria-hidden="true">
+                {{- initials[0] | slice: 0, 1 | upcase -}}{{- initials[1] | slice: 0, 1 | upcase -}}
+              </div>
+              <div>
+                <p class="edm-rv__name">{{ block.settings.name }}</p>
+                {%- if block.settings.location != blank -%}
+                  <p class="edm-rv__loc">{{ block.settings.location }}</p>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.verified -%}
+                <div class="edm-rv__badge" aria-label="Compra verificada">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M13 4l-6.5 6.5L3 7"/></svg>
+                </div>
+              {%- endif -%}
+            </footer>
+          </article>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="edm-rv__cta-wrap">
+        <a href="{{ section.settings.cta_url }}" class="edm-rv__cta">
+          {{ section.settings.cta_label }}
+          <svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h17M11 1l7 6-7 6"/></svg>
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-rv { overflow: hidden; }
+
+/* ── Header ─────────────────────────── */
+.edm-rv__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4rem;
+  flex-wrap: wrap;
+  margin-bottom: 5.6rem;
+}
+.edm-rv__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 2rem;
+}
+.edm-rv__eyebrow::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.edm-rv__h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.8rem, 4vw, 6rem);
+  font-weight: 400;
+  line-height: 1.08;
+  color: #0b0805;
+  margin: 0;
+}
+.edm-rv__score {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-shrink: 0;
+  padding: 2.4rem 3.2rem;
+  border: 1px solid rgba(208,177,106,.25);
+  border-radius: 8px;
+  background: rgba(208,177,106,.06);
+}
+.edm-rv__score-num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 5.6rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #0b0805;
+  line-height: 1;
+}
+.edm-rv__score-stars {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+.edm-rv__score-stars svg { width: 1.8rem; height: 1.8rem; color: #d0b16a; }
+.edm-rv__score-sub {
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78695a;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Featured review ────────────────── */
+.edm-rv__featured {
+  position: relative;
+  background: #0b0805;
+  border-radius: 8px;
+  padding: 6.4rem 7.2rem;
+  margin-bottom: 3.2rem;
+  overflow: hidden;
+}
+.edm-rv__feat-deco {
+  position: absolute;
+  top: -2rem;
+  right: 4rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 28rem;
+  line-height: 1;
+  color: rgba(208,177,106,.07);
+  pointer-events: none;
+  user-select: none;
+}
+.edm-rv__feat-body { position: relative; z-index: 1; }
+.edm-rv__feat-stars {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 3.6rem;
+}
+.edm-rv__fstar { width: 2.2rem; height: 2.2rem; }
+.edm-rv__fstar--on { color: #d0b16a; }
+.edm-rv__fstar--off { color: rgba(208,177,106,.2); }
+
+.edm-rv__feat-quote { margin: 0 0 4.4rem; }
+.edm-rv__feat-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.6rem, 3vw, 4rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.52;
+  color: #fbf8f1;
+  margin: 0;
+  max-width: 80rem;
+}
+
+.edm-rv__feat-foot {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+}
+.edm-rv__feat-avatar {
+  width: 5.2rem; height: 5.2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fbf8f1;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.edm-rv__feat-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fbf8f1;
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+}
+.edm-rv__feat-loc {
+  font-size: 1.25rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(251,248,241,.45);
+  margin: 0;
+  font-weight: 500;
+}
+.edm-rv__feat-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #d0b16a;
+  border: 1px solid rgba(208,177,106,.3);
+  padding: 0.5rem 1.2rem;
+  border-radius: 100px;
+}
+.edm-rv__feat-verified svg { width: 1.4rem; height: 1.4rem; }
+
+/* ── Supporting grid ────────────────── */
+.edm-rv__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.4rem;
+}
+.edm-rv__card {
+  background: #fbf8f1;
+  border-radius: 8px;
+  padding: 3.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-left: 3px solid rgba(208,177,106,.4);
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+.edm-rv__card:hover {
+  border-left-color: #d0b16a;
+  box-shadow: 0 8px 32px -8px rgba(11,8,5,.1);
+}
+
+.edm-rv__stars { display: flex; gap: 0.4rem; }
+.edm-rv__star { width: 1.6rem; height: 1.6rem; }
+.edm-rv__star--on { color: #d0b16a; }
+.edm-rv__star--off { color: rgba(208,177,106,.28); }
+
+.edm-rv__quote { flex: 1; margin: 0; }
+.edm-rv__text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-style: italic;
+  line-height: 1.62;
+  color: #0b0805;
+  margin: 0;
+}
+
+.edm-rv__foot {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(11,8,5,.07);
+  margin-top: auto;
+}
+.edm-rv__avatar {
+  width: 4rem; height: 4rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fbf8f1;
+  flex-shrink: 0;
+}
+.edm-rv__name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0b0805;
+  margin: 0 0 0.2rem;
+  line-height: 1.2;
+}
+.edm-rv__loc {
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78695a;
+  margin: 0;
+  font-weight: 500;
+}
+.edm-rv__badge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem; height: 2.8rem;
+  border-radius: 50%;
+  background: rgba(30,110,52,.1);
+  color: #1e6e34;
+  flex-shrink: 0;
+}
+.edm-rv__badge svg { width: 1.4rem; height: 1.4rem; }
+
+/* ── CTA ────────────────────────────── */
+.edm-rv__cta-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 5.6rem;
+}
+.edm-rv__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #0b0805;
+  text-decoration: none;
+  padding-bottom: 0.4rem;
+  border-bottom: 1.5px solid #0b0805;
+  transition: all .3s ease;
+}
+.edm-rv__cta svg { width: 1.8rem; height: 1.3rem; transition: transform .3s ease; }
+.edm-rv__cta:hover { color: #9d7f32; border-color: #9d7f32; }
+.edm-rv__cta:hover svg { transform: translateX(4px); }
+
+@media (max-width: 989px) {
+  .edm-rv__head { flex-direction: column; align-items: flex-start; gap: 3.2rem; margin-bottom: 3.6rem; }
+  .edm-rv__score { width: 100%; box-sizing: border-box; }
+  .edm-rv__featured { padding: 4.8rem 4rem; }
+  .edm-rv__feat-deco { font-size: 18rem; right: 2rem; }
+  .edm-rv__feat-text { font-size: clamp(2.2rem, 4vw, 3rem); }
+  .edm-rv__grid { grid-template-columns: 1fr; gap: 2rem; }
+  .edm-rv__feat-verified { margin-left: 0; margin-top: 1.6rem; }
+}
+@media (max-width: 599px) {
+  .edm-rv__featured { padding: 4rem 2.8rem; }
+  .edm-rv__feat-deco { display: none; }
+  .edm-rv__card { padding: 2.8rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Reseñas",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Kicker", "default": "Reseñas" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Lo que dicen nuestras estrellas" },
+    { "type": "text", "id": "avg_score", "label": "Puntuación promedio", "default": "4.9" },
+    { "type": "text", "id": "review_count", "label": "Número de reseñas", "default": "1.842" },
+    { "type": "text", "id": "cta_label", "label": "Texto botón CTA" },
+    { "type": "url", "id": "cta_url", "label": "Destino botón CTA" },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    { "type": "range", "id": "padding_top", "label": "Padding superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 60 }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Reseña",
+      "settings": [
+        { "type": "range", "id": "rating", "label": "Calificación", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "textarea", "id": "text", "label": "Texto de la reseña", "default": "El mejor bronceador que he usado en mi vida. Mi piel quedó perfecta y el bronceado duró 3 semanas." },
+        { "type": "text", "id": "name", "label": "Nombre del cliente", "default": "Valentina R." },
+        { "type": "text", "id": "location", "label": "Ciudad / país", "default": "Medellín" },
+        { "type": "checkbox", "id": "verified", "label": "Mostrar 'Compra verificada'", "default": true }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reseñas",
+      "blocks": [
+        { "type": "review", "settings": { "rating": 5, "text": "El mejor bronceador que he usado en mi vida. Mi piel quedó perfecta para el matrimonio de mi amiga y duró 3 semanas.", "name": "Valentina R.", "location": "Medellín", "verified": true } },
+        { "type": "review", "settings": { "rating": 5, "text": "Me lo recomendó mi dermatólogo y no lo cambio por nada. Ingredientes naturales y no me da alergia.", "name": "Laura M.", "location": "Bogotá", "verified": true } },
+        { "type": "review", "settings": { "rating": 5, "text": "El Kit Summer Box es lo mejor. Me lo llevo a cada viaje. Huele increíble y el bronceado es super natural.", "name": "Daniela P.", "location": "Cali", "verified": true } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -181,27 +181,20 @@
       }
     },
 
-    "edm_reviews_placeholder": {
-      "type": "multicolumn",
+    "edm_reviews": {
+      "type": "edm-reviews",
       "blocks": {
-        "review_1": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"El mejor bronceador que he usado en mi vida. Mi piel quedó perfecta para el matrimonio de mi amiga y duró 3 semanas.\"</p><p><em>— Valentina R., Medellín</em></p>" } },
-        "review_2": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"Me lo recomendó mi dermatólogo y no lo cambio por nada. Ingredientes naturales y no me da alergia.\"</p><p><em>— Laura M., Bogotá</em></p>" } },
-        "review_3": { "type": "column", "settings": { "title": "⭐⭐⭐⭐⭐", "text": "<p>\"El Kit See You Sun es lo mejor. Me lo llevo a cada viaje. Huele increíble y el bronceado es super natural.\"</p><p><em>— Daniela P., Cali</em></p>" } }
+        "review_1": { "type": "review", "settings": { "rating": 5, "text": "El mejor bronceador que he usado en mi vida. Mi piel quedó perfecta para el matrimonio de mi amiga y duró 3 semanas.", "name": "Valentina R.", "location": "Medellín", "verified": true } },
+        "review_2": { "type": "review", "settings": { "rating": 5, "text": "Me lo recomendó mi dermatólogo y no lo cambio por nada. Ingredientes naturales y no me da alergia.", "name": "Laura M.", "location": "Bogotá", "verified": true } },
+        "review_3": { "type": "review", "settings": { "rating": 5, "text": "El Kit Summer Box es lo mejor. Me lo llevo a cada viaje. Huele increíble y el bronceado es super natural.", "name": "Daniela P.", "location": "Cali", "verified": true } }
       },
       "block_order": ["review_1", "review_2", "review_3"],
       "settings": {
+        "eyebrow": "Reseñas",
         "title": "Lo que dicen nuestras estrellas",
-        "heading_size": "h2",
-        "image_width": "third",
-        "image_ratio": "adapt",
-        "columns_desktop": 3,
-        "column_alignment": "left",
-        "background_style": "none",
-        "button_label": "Ver todas las reseñas",
-        "button_link": "#judge-me-reviews",
-        "swipe_on_mobile": true,
+        "avg_score": "4.9",
+        "review_count": "1.842",
         "color_scheme": "scheme-1",
-        "columns_mobile": "1",
         "padding_top": 60,
         "padding_bottom": 60
       }
@@ -229,22 +222,131 @@
       }
     },
 
-    "edm_instagram": {
-      "type": "multicolumn",
+    "edm_quiz": {
+      "type": "edm-product-quiz",
       "blocks": {
-        "ig_1": { "type": "column", "settings": { "title": "@estrellademarco" } }
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "¿Cuál es tu tipo de piel?",
+            "options": "Seca:seca:Se reseca con facilidad | Grasa:grasa:Brilla durante el día | Mixta:mixta:Zona T grasa, mejillas secas"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "¿Con qué frecuencia te expones al sol?",
+            "options": "Poco:poco:1-2 veces por semana | Frecuente:frecuente:Casi todos los días | Mucho:mucho:Deportes al aire libre"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "¿Qué resultado buscas?",
+            "options": "Bronceado suave:suave:Natural y gradual | Bronceado intenso:intenso:Tono marcado rápido | Autobronceado:auto:Sin exposición al sol"
+          }
+        }
       },
-      "block_order": ["ig_1"],
+      "block_order": ["q1", "q2", "q3"],
       "settings": {
-        "title": "Síguenos en Instagram",
-        "heading_size": "h2",
-        "columns_desktop": 1,
-        "column_alignment": "center",
-        "button_label": "Ver @estrellademarco",
-        "button_link": "https://www.instagram.com/estrellademarco/",
+        "eyebrow": "Encuentra tu match",
+        "title": "¿Qué bronceador es para ti?",
+        "subtitle": "3 preguntas para encontrar tu bronceador ideal.",
+        "color_scheme": "scheme-2",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+
+    "edm_video": {
+      "type": "edm-video",
+      "settings": {
+        "overlay_text": "El ritual solar colombiano",
+        "cta_label": "Descubrir la línea",
+        "cta_url": "/collections/all",
+        "aspect_ratio": "16/9",
+        "full_width": true,
+        "color_scheme": "scheme-3",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+
+    "edm_compare": {
+      "type": "edm-compare",
+      "settings": {
+        "eyebrow": "Resultados reales",
+        "title": "La transformación habla sola",
+        "before_label": "Sin bronceador",
+        "after_label": "Con Estrella de Mar",
+        "color_scheme": "scheme-2",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+
+    "edm_faq": {
+      "type": "edm-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Los bronceadores son seguros para piel sensible?",
+            "answer": "<p>Sí. Nuestra fórmula está validada por dermatólogos y libre de parabenos, sulfatos y colorantes artificiales. Ideal para pieles reactivas y delicadas.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Cuánto tiempo dura el bronceado?",
+            "answer": "<p>Con uso regular, el bronceado se mantiene y prolonga por 3 a 5 días. Para mejores resultados, aplica después del baño sobre piel hidratada.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Tienen protección solar?",
+            "answer": "<p>Nuestros bronceadores no contienen filtro solar. Te recomendamos combinarlos con protector solar para una exposición responsable al sol.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq_item",
+          "settings": {
+            "question": "¿Hacen envíos a todo Colombia?",
+            "answer": "<p>Sí, enviamos a todo el territorio nacional. Envío gratis en pedidos desde $80.000. El tiempo de entrega es de 2 a 5 días hábiles.</p>"
+          }
+        }
+      },
+      "block_order": ["faq_1", "faq_2", "faq_3", "faq_4"],
+      "settings": {
+        "eyebrow": "Resolvemos tus dudas",
+        "title": "Preguntas frecuentes",
         "color_scheme": "scheme-1",
-        "padding_top": 40,
-        "padding_bottom": 60
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+
+    "edm_ugc": {
+      "type": "edm-ugc",
+      "blocks": {
+        "p1": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "El ritual solar que tu piel merece" } },
+        "p2": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "Bronceado natural desde Colombia" } },
+        "p3": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "Hecho con amor por el sol" } },
+        "p4": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "Ingredientes del trópico colombiano" } },
+        "p5": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "Tu bronceado, tu identidad" } },
+        "p6": { "type": "photo", "settings": { "username": "estrellademarco", "caption": "INVIMA certificado, alma colombiana" } }
+      },
+      "block_order": ["p1", "p2", "p3", "p4", "p5", "p6"],
+      "settings": {
+        "eyebrow": "Comunidad",
+        "title": "La comunidad solar",
+        "subtitle": "Reales. Sin filtro. Con amor desde Colombia.",
+        "cta_label": "Síguenos en Instagram",
+        "cta_url": "https://www.instagram.com/estrellademarco/",
+        "color_scheme": "scheme-1",
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     }
   },
@@ -254,11 +356,15 @@
     "edm_marquee",
     "edm_promise_bar",
     "edm_featured_products",
+    "edm_quiz",
     "edm_ritual",
     "edm_bundle_hero",
+    "edm_video",
     "edm_before_after",
-    "edm_reviews_placeholder",
+    "edm_compare",
+    "edm_reviews",
+    "edm_faq",
     "edm_founder_story",
-    "edm_instagram"
+    "edm_ugc"
   ]
 }

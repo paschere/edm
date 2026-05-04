@@ -1,0 +1,308 @@
+<section
+  class="edm-ugc color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <div class="edm-ugc__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-ugc__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="edm-ugc__title">{{ section.settings.title | default: 'La comunidad solar' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="edm-ugc__sub">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- assign photo_blocks = section.blocks | where: 'type', 'photo' -%}
+    {%- if photo_blocks.size > 0 -%}
+      <div class="edm-ugc__grid">
+        {%- for block in photo_blocks -%}
+          <div class="edm-ugc__item" {{ block.shopify_attributes }}>
+            <div class="edm-ugc__media">
+              {%- if block.settings.image != blank -%}
+                {{-
+                  block.settings.image
+                  | image_url: width: 600
+                  | image_tag:
+                    loading: 'lazy',
+                    width: 300,
+                    class: 'edm-ugc__img',
+                    alt: block.settings.username | escape
+                -}}
+              {%- else -%}
+                <div class="edm-ugc__ph">{{ 'lifestyle-' | append: forloop.index | placeholder_svg_tag: 'edm-ugc__ph-svg' }}</div>
+              {%- endif -%}
+
+              <div class="edm-ugc__overlay">
+                {%- if block.settings.username != blank -%}
+                  <span class="edm-ugc__handle">@{{ block.settings.username }}</span>
+                {%- endif -%}
+                {%- if block.settings.caption != blank -%}
+                  <p class="edm-ugc__caption">{{ block.settings.caption }}</p>
+                {%- endif -%}
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="edm-ugc__link" target="_blank" rel="noopener" aria-label="Ver en Instagram @{{ block.settings.username | escape }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="edm-ugc__cta-wrap">
+        <a href="{{ section.settings.cta_url }}" class="edm-ugc__cta" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.8rem;height:1.8rem;"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          {{ section.settings.cta_label }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-ugc__head {
+  text-align: center;
+  margin-bottom: 4.8rem;
+}
+.edm-ugc__eyebrow {
+  font-size: 1.15rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 1.4rem;
+}
+.edm-ugc__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4.5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.06;
+  color: #0b0805;
+  margin: 0 0 1.6rem;
+}
+.edm-ugc__sub {
+  font-size: 1.7rem;
+  color: #78695a;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.edm-ugc__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.edm-ugc__item { overflow: hidden; }
+
+.edm-ugc__media {
+  position: relative;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f4eee1;
+  cursor: pointer;
+}
+
+.edm-ugc__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.edm-ugc__media:hover .edm-ugc__img { transform: scale(1.05); }
+
+.edm-ugc__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edm-ugc__ph-svg { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+
+.edm-ugc__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11,8,5,.8) 0%, transparent 55%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.6rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.edm-ugc__media:hover .edm-ugc__overlay { opacity: 1; }
+
+.edm-ugc__handle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fbf8f1;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.edm-ugc__caption {
+  font-size: 1.2rem;
+  color: rgba(251,248,241,.75);
+  margin: 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.edm-ugc__link {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  background: rgba(251,248,241,.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbf8f1;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease;
+}
+.edm-ugc__link:hover { background: rgba(251,248,241,.3); }
+.edm-ugc__link svg { width: 1.8rem; height: 1.8rem; }
+
+.edm-ugc__cta-wrap {
+  text-align: center;
+  margin-top: 4rem;
+}
+.edm-ugc__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.4rem 3.2rem;
+  border: 1.5px solid rgba(11,8,5,.18);
+  border-radius: 100px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #0b0805;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.edm-ugc__cta:hover { border-color: #9d7f32; color: #9d7f32; }
+
+@media (max-width: 749px) {
+  .edm-ugc__grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+  .edm-ugc__overlay { opacity: 1; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Galería UGC",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto encima del título",
+      "default": "Comunidad"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "La comunidad solar"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Reales. Sin filtro. Con amor desde Colombia."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón Instagram",
+      "default": "Síguenos en Instagram"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "URL de Instagram"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "photo",
+      "name": "Foto",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Foto"
+        },
+        {
+          "type": "text",
+          "id": "username",
+          "label": "Usuario de Instagram",
+          "info": "Sin @, solo el nombre de usuario"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption corto"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Enlace al post"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Galería UGC",
+      "blocks": [
+        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
+        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
+        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
+        { "type": "photo", "settings": { "username": "estrelladelmar.co" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

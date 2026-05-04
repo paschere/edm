@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Sparkline } from "@/components/charts/sparkline";
 
 interface KpiCardProps {
   title: string;
@@ -10,6 +11,8 @@ interface KpiCardProps {
   description?: string;
   icon?: ReactNode;
   iconColor?: string;
+  sparklineData?: number[];
+  trendPct?: number;
 }
 
 export function KpiCard({
@@ -21,18 +24,33 @@ export function KpiCard({
   description,
   icon,
   iconColor = "#bb9a4c",
+  sparklineData,
+  trendPct,
 }: KpiCardProps) {
-  const TrendIcon = changeNeutral ? Minus : changePositive ? TrendingUp : TrendingDown;
+  // Derive trend from trendPct when change is not explicitly provided
+  let effectiveChange = change;
+  let effectivePositive = changePositive;
+  let effectiveNeutral = changeNeutral;
 
-  const trendStyle = changeNeutral
+  if (trendPct !== undefined && !change) {
+    effectiveChange = `${trendPct > 0 ? "+" : ""}${trendPct.toFixed(1)}%`;
+    effectivePositive = trendPct > 0;
+    effectiveNeutral = trendPct === 0;
+  }
+
+  const TrendIcon = effectiveNeutral ? Minus : effectivePositive ? TrendingUp : TrendingDown;
+
+  const trendStyle = effectiveNeutral
     ? { background: "rgba(11,8,5,0.05)", color: "#78695a" }
-    : changePositive
+    : effectivePositive
     ? { background: "rgba(79,122,62,0.1)", color: "#4f7a3e" }
     : { background: "rgba(180,60,40,0.08)", color: "#b43c28" };
 
+  const hasSparkline = sparklineData && sparklineData.length >= 2;
+
   return (
     <div
-      className="rounded-xl p-5 flex flex-col gap-4 border"
+      className="rounded-xl p-5 flex flex-col gap-4 border overflow-hidden"
       style={{
         background: "var(--card)",
         borderColor: "var(--border)",
@@ -77,13 +95,13 @@ export function KpiCard({
 
       {/* Trend + description */}
       <div className="flex items-center gap-2 min-h-[20px]">
-        {change && (
+        {effectiveChange && (
           <span
             className="inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5"
             style={trendStyle}
           >
             <TrendIcon size={10} />
-            {change}
+            {effectiveChange}
           </span>
         )}
         {description && (
@@ -91,7 +109,19 @@ export function KpiCard({
             {description}
           </span>
         )}
+        {!effectiveChange && !description && trendPct === undefined && (
+          <span className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>
+            &nbsp;
+          </span>
+        )}
       </div>
+
+      {/* Sparkline — bleeds to card edges at the bottom */}
+      {hasSparkline && (
+        <div className="-mx-5 -mb-5 mt-0">
+          <Sparkline data={sparklineData!} color={iconColor} height={52} />
+        </div>
+      )}
     </div>
   );
 }

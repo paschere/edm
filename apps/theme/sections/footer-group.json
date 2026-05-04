@@ -1,53 +1,55 @@
 {
-  "name": "t:sections.footer.name",
+  "name": "Footer",
   "type": "footer",
   "sections": {
     "footer": {
-      "type": "footer",
+      "type": "edm-footer",
       "blocks": {
-        "footer-0": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Quick links",
-            "menu": "footer"
-          }
+        "nav_1": {
+          "type": "nav_column",
+          "settings": { "heading": "Tienda", "menu": "main-menu" }
         },
-        "footer-1": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Info",
-            "menu": "footer"
-          }
+        "nav_2": {
+          "type": "nav_column",
+          "settings": { "heading": "Nosotros", "menu": "footer" }
         },
-        "footer-2": {
-          "type": "text",
-          "settings": {
-            "heading": "Our mission",
-            "subtext": "<p>Share contact information, store details, and brand content with your customers.<\/p>"
-          }
+        "nav_3": {
+          "type": "nav_column",
+          "settings": { "heading": "Ayuda", "menu": "footer" }
+        },
+        "tb_1": {
+          "type": "trust_badge",
+          "settings": { "text": "INVIMA Certificado" }
+        },
+        "tb_2": {
+          "type": "trust_badge",
+          "settings": { "text": "Dermatólogo Aprobado" }
+        },
+        "tb_3": {
+          "type": "trust_badge",
+          "settings": { "text": "Reef Safe" }
+        },
+        "tb_4": {
+          "type": "trust_badge",
+          "settings": { "text": "100% Natural" }
+        },
+        "tb_5": {
+          "type": "trust_badge",
+          "settings": { "text": "Hecho en Colombia" }
         }
       },
-      "block_order": [
-        "footer-0",
-        "footer-1",
-        "footer-2"
-      ],
+      "block_order": ["nav_1", "nav_2", "nav_3", "tb_1", "tb_2", "tb_3", "tb_4", "tb_5"],
       "settings": {
-        "color_scheme": "scheme-1",
-        "newsletter_enable": true,
-        "newsletter_heading": "Subscribe to our emails",
+        "tagline": "Bronceadores naturales hechos en Colombia. Formulados con amor para honrar tu piel y el mar.",
+        "show_newsletter": true,
+        "newsletter_heading": "Únete al ritual solar",
+        "newsletter_subtext": "Descuentos exclusivos, rituales solares y novedades. Sin spam.",
         "show_social": true,
-        "enable_country_selector": false,
-        "enable_language_selector": false,
-        "payment_enable": true,
-        "show_policy": false,
-        "margin_top": 48,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "show_payment": true,
+        "show_policy_links": true,
+        "copyright_extra": "Todos los derechos reservados."
       }
     }
   },
-  "order": [
-    "footer"
-  ]
+  "order": ["footer"]
 }

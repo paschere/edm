@@ -1,0 +1,315 @@
+{%- if section.settings.before_image == blank and section.settings.after_image == blank -%}
+  {%- if request.design_mode -%}
+    <div style="padding:4.8rem;text-align:center;background:#f4eee1;font-family:'Cormorant Garamond',serif;color:#78695a;">
+      <p style="font-size:2.4rem;margin:0 0 0.8rem;">Comparador antes/después</p>
+      <p style="font-size:1.5rem;margin:0;">Agrega las imágenes "Antes" y "Después" en la configuración de esta sección para activarla.</p>
+    </div>
+  {%- endif -%}
+{%- else -%}
+<section
+  class="edm-cmp color-{{ section.settings.color_scheme }} gradient"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <div class="edm-cmp__head">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="edm-cmp__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="edm-cmp__title">{{ section.settings.title }}</h2>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="edm-cmp__sub">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div
+      class="edm-cmp__slider"
+      id="edm-cmp-{{ section.id }}"
+      aria-label="Desliza para comparar antes y después"
+      role="img"
+    >
+      {%- if section.settings.after_image != blank -%}
+        <div class="edm-cmp__after">
+          {{-
+            section.settings.after_image
+            | image_url: width: 1400
+            | image_tag: class: 'edm-cmp__img', loading: 'lazy', width: 1400, alt: section.settings.after_label | escape
+          -}}
+        </div>
+      {%- else -%}
+        <div class="edm-cmp__after edm-cmp__after--ph">{{ 'lifestyle-2' | placeholder_svg_tag: 'edm-cmp__ph-svg' }}</div>
+      {%- endif -%}
+
+      <div class="edm-cmp__before">
+        {%- if section.settings.before_image != blank -%}
+          {{-
+            section.settings.before_image
+            | image_url: width: 1400
+            | image_tag: class: 'edm-cmp__img', loading: 'lazy', width: 1400, alt: section.settings.before_label | escape
+          -}}
+        {%- else -%}
+          <div class="edm-cmp__before--ph">{{ 'lifestyle-1' | placeholder_svg_tag: 'edm-cmp__ph-svg' }}</div>
+        {%- endif -%}
+      </div>
+
+      <div class="edm-cmp__handle" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Deslizador de comparación">
+        <div class="edm-cmp__line"></div>
+        <div class="edm-cmp__knob" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#fbf8f1" stroke="#d0b16a" stroke-width="1.5"/><path d="M14 20l-5 0M26 20l5 0M11 20l-3-3m3 3l-3 3M29 20l3-3m-3 3l3 3" stroke="#0b0805" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      {%- if section.settings.before_label != blank -%}
+        <span class="edm-cmp__badge edm-cmp__badge--before">{{ section.settings.before_label }}</span>
+      {%- endif -%}
+      {%- if section.settings.after_label != blank -%}
+        <span class="edm-cmp__badge edm-cmp__badge--after">{{ section.settings.after_label }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+<script>
+(function() {
+  var slider = document.getElementById('edm-cmp-{{ section.id }}');
+  if (!slider) return;
+  var before = slider.querySelector('.edm-cmp__before');
+  var handle = slider.querySelector('.edm-cmp__handle');
+  if (!before || !handle) return;
+  var pct = 50;
+
+  function setPos(x) {
+    var rect = slider.getBoundingClientRect();
+    pct = Math.min(100, Math.max(0, ((x - rect.left) / rect.width) * 100));
+    before.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
+    handle.style.left = pct + '%';
+    handle.setAttribute('aria-valuenow', Math.round(pct));
+  }
+
+  setPos(slider.getBoundingClientRect().left + slider.getBoundingClientRect().width / 2);
+
+  var dragging = false;
+
+  slider.addEventListener('mousedown', function(e) { dragging = true; setPos(e.clientX); e.preventDefault(); });
+  window.addEventListener('mousemove', function(e) { if (dragging) setPos(e.clientX); });
+  window.addEventListener('mouseup', function() { dragging = false; });
+
+  slider.addEventListener('touchstart', function(e) { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchmove', function(e) { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchend', function() { dragging = false; });
+
+  handle.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') { setPos(slider.getBoundingClientRect().left + (pct - 5) / 100 * slider.offsetWidth); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { setPos(slider.getBoundingClientRect().left + (pct + 5) / 100 * slider.offsetWidth); e.preventDefault(); }
+  });
+})();
+</script>
+
+{% stylesheet %}
+.edm-cmp__head {
+  text-align: center;
+  margin-bottom: 4.8rem;
+}
+.edm-cmp__eyebrow {
+  font-size: 1.15rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #9d7f32;
+  margin: 0 0 1.4rem;
+}
+.edm-cmp__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 4.5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.06;
+  color: #0b0805;
+  margin: 0 0 1.6rem;
+}
+.edm-cmp__sub {
+  font-size: 1.7rem;
+  color: #78695a;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.edm-cmp__slider {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  user-select: none;
+  touch-action: pan-y;
+  cursor: col-resize;
+  background: #f4eee1;
+  aspect-ratio: 16/9;
+  max-height: 72vh;
+}
+
+.edm-cmp__after,
+.edm-cmp__before {
+  position: absolute;
+  inset: 0;
+}
+.edm-cmp__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.edm-cmp__before {
+  clip-path: inset(0 50% 0 0);
+}
+
+.edm-cmp__after--ph,
+.edm-cmp__before--ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eee6d6;
+}
+.edm-cmp__ph-svg { width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
+
+.edm-cmp__handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: col-resize;
+}
+.edm-cmp__line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #d0b16a;
+  transform: translateX(-50%);
+}
+.edm-cmp__knob {
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 8px rgba(11,8,5,.2));
+  transition: transform 0.15s ease;
+}
+.edm-cmp__knob svg { width: 100%; height: 100%; }
+.edm-cmp__handle:active .edm-cmp__knob { transform: scale(1.1); }
+
+.edm-cmp__badge {
+  position: absolute;
+  bottom: 2rem;
+  padding: 0.5rem 1.4rem;
+  background: rgba(11,8,5,.55);
+  backdrop-filter: blur(4px);
+  color: #fbf8f1;
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 100px;
+  pointer-events: none;
+}
+.edm-cmp__badge--before { left: 2rem; }
+.edm-cmp__badge--after { right: 2rem; }
+
+@media (max-width: 749px) {
+  .edm-cmp__slider { aspect-ratio: 4/3; }
+  .edm-cmp__badge { font-size: 1rem; padding: 0.4rem 1rem; bottom: 1.4rem; }
+  .edm-cmp__badge--before { left: 1.2rem; }
+  .edm-cmp__badge--after { right: 1.2rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Comparador antes/después",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto encima del título"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo"
+    },
+    {
+      "type": "image_picker",
+      "id": "before_image",
+      "label": "Imagen ANTES"
+    },
+    {
+      "type": "text",
+      "id": "before_label",
+      "label": "Etiqueta imagen ANTES",
+      "default": "Antes"
+    },
+    {
+      "type": "image_picker",
+      "id": "after_image",
+      "label": "Imagen DESPUÉS"
+    },
+    {
+      "type": "text",
+      "id": "after_label",
+      "label": "Etiqueta imagen DESPUÉS",
+      "default": "Después"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "scheme-1", "label": "Bone" },
+        { "value": "scheme-2", "label": "Arena" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comparador antes/después",
+      "settings": {
+        "eyebrow": "Resultados reales",
+        "title": "La transformación habla sola",
+        "before_label": "Sin bronceador",
+        "after_label": "Con Estrella de Mar"
+      }
+    }
+  ]
+}
+{% endschema %}
