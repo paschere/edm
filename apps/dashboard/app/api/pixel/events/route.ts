@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       metadata: metadata ?? null,
     });
 
+    console.log(`[pixel] ${eventType} sid=${sessionId ?? "—"} url=${url ?? "—"}`);
     return Response.json({ ok: true }, { headers: CORS });
   } catch (err) {
     console.error("[pixel/events] error:", err);

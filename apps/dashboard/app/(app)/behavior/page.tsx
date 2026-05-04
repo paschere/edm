@@ -30,98 +30,109 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-// ─── Journey Flow (horizontal funnel with drop-offs) ─────────────────────────
+// ─── Journey Flow ─────────────────────────────────────────────────────────────
 function JourneyFlow({
   steps,
 }: {
   steps: { key: string; label: string; color: string; sessions: number }[];
 }) {
-  const max = steps[0]?.sessions ?? 1;
+  const top = steps[0]?.sessions ?? 0;
 
   return (
-    <div className="space-y-0">
+    <div>
       {steps.map((step, i) => {
-        const pct = max > 0 ? (step.sessions / max) * 100 : 0;
+        const pct = top > 0 ? Math.min((step.sessions / top) * 100, 100) : 0;
         const prev = steps[i - 1];
-        const convFromPrev = prev && prev.sessions > 0
-          ? (step.sessions / prev.sessions) * 100
+        const dropOff = prev && prev.sessions > step.sessions ? prev.sessions - step.sessions : 0;
+        const dropPct = prev && prev.sessions > 0 ? (dropOff / prev.sessions) * 100 : 0;
+        const contPct = prev && prev.sessions > 0
+          ? (Math.min(step.sessions, prev.sessions) / prev.sessions) * 100
           : null;
-        const dropOff = prev ? prev.sessions - step.sessions : 0;
+        const isEmpty = step.sessions === 0;
 
         return (
           <div key={step.key}>
-            {/* Drop-off row between steps */}
+            {/* Connector between steps */}
             {i > 0 && (
-              <div
-                className="flex items-center gap-3 py-1 pl-1"
-                style={{ marginLeft: `${Math.max(pct, 2)}%`, transition: "margin 0.3s" }}
-              >
-                <div
-                  className="shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded tabular-nums"
-                  style={{
-                    background: "rgba(180,60,40,0.1)",
-                    color: "#b43c28",
-                    border: "1px solid rgba(180,60,40,0.15)",
-                  }}
-                >
-                  ↓ {dropOff.toLocaleString("es-MX")} abandonan
+              <div className="flex items-stretch gap-3 my-0" style={{ paddingLeft: "11px" }}>
+                {/* Vertical line */}
+                <div style={{ width: "2px", background: "var(--border)", borderRadius: "1px", minHeight: "28px", flexShrink: 0 }} />
+                {/* Drop-off info */}
+                <div className="flex items-center gap-2 py-1">
+                  {dropOff > 0 ? (
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full tabular-nums"
+                      style={{ background: "rgba(180,60,40,0.08)", color: "#b43c28", border: "1px solid rgba(180,60,40,0.15)" }}
+                    >
+                      ↓ {dropOff} no continúan · {dropPct.toFixed(0)}%
+                    </span>
+                  ) : contPct !== null && step.sessions > 0 ? (
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full tabular-nums"
+                      style={{ background: "rgba(79,122,62,0.08)", color: "#4f7a3e", border: "1px solid rgba(79,122,62,0.15)" }}
+                    >
+                      ✓ todos continúan
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground px-2">sin datos</span>
+                  )}
                 </div>
-                {convFromPrev !== null && (
-                  <div
-                    className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded tabular-nums"
-                    style={{
-                      background:
-                        convFromPrev >= 50
-                          ? "rgba(79,122,62,0.12)"
-                          : convFromPrev >= 25
-                          ? "rgba(187,154,76,0.12)"
-                          : "rgba(180,60,40,0.1)",
-                      color:
-                        convFromPrev >= 50
-                          ? "#4f7a3e"
-                          : convFromPrev >= 25
-                          ? "#bb9a4c"
-                          : "#b43c28",
-                      border: `1px solid ${
-                        convFromPrev >= 50
-                          ? "rgba(79,122,62,0.2)"
-                          : convFromPrev >= 25
-                          ? "rgba(187,154,76,0.2)"
-                          : "rgba(180,60,40,0.15)"
-                      }`,
-                    }}
-                  >
-                    {convFromPrev.toFixed(1)}% continúan
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Step bar */}
+            {/* Step row */}
             <div className="flex items-center gap-3">
+              {/* Step number badge */}
               <div
-                className="rounded-r-sm flex items-center justify-end pr-3 transition-all duration-500"
+                className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold"
                 style={{
-                  width: `${Math.max(pct, 2)}%`,
-                  minWidth: "2%",
-                  height: "36px",
-                  background: `linear-gradient(to right, ${step.color}55, ${step.color}cc)`,
-                  borderRight: `3px solid ${step.color}`,
+                  background: isEmpty ? "var(--border)" : `${step.color}18`,
+                  color: isEmpty ? "var(--muted-foreground)" : step.color,
+                  border: `1.5px solid ${isEmpty ? "var(--border)" : step.color + "44"}`,
                 }}
-              />
-              <div className="flex items-baseline gap-2 shrink-0">
-                <span
-                  className="tabular-nums font-semibold"
-                  style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem", color: step.color, letterSpacing: "-0.02em" }}
-                >
-                  {step.sessions.toLocaleString("es-MX")}
-                </span>
-                <span className="text-[11px] text-muted-foreground">{step.label}</span>
-                {max > 0 && (
-                  <span className="text-[10px] tabular-nums" style={{ color: "var(--muted-foreground)", opacity: 0.6 }}>
-                    ({pct.toFixed(1)}%)
+              >
+                {i + 1}
+              </div>
+
+              {/* Bar + label */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1.5 gap-3">
+                  <span
+                    className="text-[12px] font-medium"
+                    style={{ color: isEmpty ? "var(--muted-foreground)" : "var(--foreground)" }}
+                  >
+                    {step.label}
                   </span>
-                )}
+                  <div className="flex items-baseline gap-1.5 shrink-0">
+                    <span className="text-[10px] text-muted-foreground tabular-nums">
+                      {top > 0 ? `${pct.toFixed(0)}%` : "—"}
+                    </span>
+                    <span
+                      className="tabular-nums font-semibold"
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "1rem",
+                        letterSpacing: "-0.02em",
+                        color: isEmpty ? "var(--muted-foreground)" : step.color,
+                      }}
+                    >
+                      {step.sessions.toLocaleString("es-MX")}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ height: "6px", background: "var(--border)", borderRadius: "3px", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: `${Math.max(pct, isEmpty ? 0 : 0.5)}%`,
+                      height: "100%",
+                      background: isEmpty
+                        ? "transparent"
+                        : `linear-gradient(to right, ${step.color}88, ${step.color})`,
+                      borderRadius: "3px",
+                      transition: "width 0.6s ease",
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -520,7 +531,12 @@ async function BehaviorContent({ days }: { days: number }) {
             <div className="space-y-2">
               {topPages.map((p, i) => {
                 const path = (() => {
-                  try { return new URL(p.url).pathname; } catch { return p.url; }
+                  try {
+                    const raw = new URL(p.url).pathname;
+                    if (raw.startsWith("/checkouts/")) return "/checkouts/…";
+                    if (raw.startsWith("/cart/")) return "/cart/…";
+                    return raw;
+                  } catch { return p.url; }
                 })();
                 return (
                   <div key={i} className="flex items-center justify-between gap-3">
