@@ -28,10 +28,9 @@
       tabindex="-1"
     >
       {%- if cart == empty -%}
-        <div class="drawer__inner-empty">
+        <div class="drawer__inner-empty edm-cart-empty">
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
-              <h2 class="cart__empty-text">{{ 'sections.cart.empty' | t }}</h2>
               <button
                 class="drawer__close"
                 type="button"
@@ -42,15 +41,36 @@
                   {{- 'icon-close.svg' | inline_asset_content -}}
                 </span>
               </button>
-              <a href="{{ routes.all_products_collection_url }}" class="button">
+
+              <div class="edm-cart-empty__art" aria-hidden="true">
+                {%- render 'edm-starfish', class: 'edm-cart-empty__star edm-cart-empty__star--big' -%}
+                {%- render 'edm-starfish', class: 'edm-cart-empty__star edm-cart-empty__star--sm' -%}
+                {%- render 'edm-sparkle', class: 'edm-cart-empty__spark edm-cart-empty__spark--1 edm-anim-spark' -%}
+                {%- render 'edm-sparkle', class: 'edm-cart-empty__spark edm-cart-empty__spark--2 edm-anim-spark' -%}
+              </div>
+
+              <p class="edm-cart-empty__eyebrow">
+                {%- render 'edm-sparkle', class: 'edm-cart-empty__eyb-spark edm-anim-spark' -%}
+                <span>Tu ritual</span>
+                {%- render 'edm-sparkle', class: 'edm-cart-empty__eyb-spark edm-anim-spark' -%}
+              </p>
+              <h2 class="edm-cart-empty__title">
+                Tu carrito está
+                <span class="edm-script edm-cart-empty__title-script">vacío</span>
+              </h2>
+              <p class="edm-cart-empty__sub">Llénalo de sol, dorado y mar — los rituales del Caribe te esperan.</p>
+
+              <a href="{{ routes.all_products_collection_url }}" class="edm-cart-empty__cta">
                 {{ 'general.continue_shopping' | t }}
               </a>
 
               {%- if shop.customer_accounts_enabled and customer == null -%}
-                <p class="cart__login-title h3">{{ 'sections.cart.login.title' | t }}</p>
-                <p class="cart__login-paragraph">
-                  {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
-                </p>
+                <div class="edm-cart-empty__login">
+                  <p class="cart__login-title">{{ 'sections.cart.login.title' | t }}</p>
+                  <p class="cart__login-paragraph">
+                    {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+                  </p>
+                </div>
               {%- endif -%}
             </div>
           </div>
@@ -61,10 +81,18 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-      <div class="drawer__header">
-        <h2 class="drawer__heading">{{ 'sections.cart.title' | t }}</h2>
+      <div class="drawer__header edm-cart-header">
+        <div class="edm-cart-header__title-wrap">
+          <p class="edm-cart-header__eyebrow">
+            {%- render 'edm-sparkle', class: 'edm-cart-header__spark edm-anim-spark' -%}
+            <span>Tu ritual solar</span>
+          </p>
+          <h2 class="drawer__heading edm-cart-header__title">
+            Tu <span class="edm-script edm-cart-header__title-script">carrito</span>
+          </h2>
+        </div>
         <button
-          class="drawer__close"
+          class="drawer__close edm-cart-header__close"
           type="button"
           onclick="this.closest('cart-drawer').close()"
           aria-label="{{ 'accessibility.close' | t }}"
