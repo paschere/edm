@@ -1,0 +1,459 @@
+<section
+  class="edm-pdb"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);position:relative;overflow:hidden;"
+>
+  {%- render 'edm-brand-decor', variant: 'soft', tone: 'soft', opacity: '0.45' -%}
+
+  <div class="edm-pdb__inner page-width" style="position:relative;z-index:1;">
+
+    <header class="edm-pdb__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-pdb__eyebrow">
+          {%- render 'edm-sparkle', class: 'edm-pdb__eyebrow-spark edm-anim-spark' -%}
+          <span>{{ section.settings.eyebrow }}</span>
+          {%- render 'edm-sparkle', class: 'edm-pdb__eyebrow-spark edm-anim-spark' -%}
+        </p>
+      {%- endif -%}
+
+      <h2 class="edm-pdb__h2">
+        {{ section.settings.title }}
+        {%- if section.settings.title_script != blank -%}
+          <span class="edm-script edm-pdb__h2-script">{{ section.settings.title_script }}</span>
+        {%- endif -%}
+      </h2>
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="edm-pdb__sub">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- assign benefit_blocks = section.blocks | where: 'type', 'benefit' -%}
+    {%- if benefit_blocks.size > 0 -%}
+      <ul class="edm-pdb__grid" role="list">
+        {%- for block in benefit_blocks -%}
+          <li class="edm-pdb__card" {{ block.shopify_attributes }} style="--bg: {{ block.settings.bg_color | default: '#FFEAEF' }};">
+            <div class="edm-pdb__icon" aria-hidden="true">
+              {%- if block.settings.icon_svg != blank -%}
+                {{ block.settings.icon_svg }}
+              {%- else -%}
+                {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.6)' -%}
+              {%- endif -%}
+            </div>
+            <h3 class="edm-pdb__card-title">{{ block.settings.title }}</h3>
+            {%- if block.settings.description != blank -%}
+              <p class="edm-pdb__card-desc">{{ block.settings.description }}</p>
+            {%- endif -%}
+            {%- if block.settings.stat != blank -%}
+              <p class="edm-pdb__card-stat">
+                <span class="edm-pdb__card-stat-num">{{ block.settings.stat }}</span>
+                {%- if block.settings.stat_label != blank -%}
+                  <span class="edm-pdb__card-stat-lbl">{{ block.settings.stat_label }}</span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- assign howto_blocks = section.blocks | where: 'type', 'howto_step' -%}
+    {%- if howto_blocks.size > 0 -%}
+      <div class="edm-pdb__howto">
+        <h3 class="edm-pdb__howto-title">
+          {{ section.settings.howto_title | default: 'Cómo usarlo' }}
+          {%- if section.settings.howto_title_script != blank -%}
+            <span class="edm-script edm-pdb__howto-title-script">{{ section.settings.howto_title_script }}</span>
+          {%- endif -%}
+        </h3>
+        <ol class="edm-pdb__steps" role="list">
+          {%- for block in howto_blocks -%}
+            <li class="edm-pdb__step" {{ block.shopify_attributes }}>
+              <div class="edm-pdb__step-num">
+                <span>{{ forloop.index }}</span>
+                {%- render 'edm-sparkle', class: 'edm-pdb__step-spark edm-anim-spark' -%}
+              </div>
+              <div class="edm-pdb__step-body">
+                <p class="edm-pdb__step-title">{{ block.settings.title }}</p>
+                {%- if block.settings.description != blank -%}
+                  <p class="edm-pdb__step-desc">{{ block.settings.description }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ol>
+      </div>
+    {%- endif -%}
+
+    {%- assign ing_blocks = section.blocks | where: 'type', 'ingredient_chip' -%}
+    {%- if ing_blocks.size > 0 -%}
+      <div class="edm-pdb__ings">
+        <p class="edm-pdb__ings-label">
+          {%- render 'edm-starfish', class: 'edm-pdb__ings-icon' -%}
+          <span>{{ section.settings.ingredients_label | default: 'Ingredientes clave' }}</span>
+        </p>
+        <ul class="edm-pdb__ings-list" role="list">
+          {%- for block in ing_blocks -%}
+            <li class="edm-pdb__ing" {{ block.shopify_attributes }}>
+              {%- if block.settings.emoji != blank -%}
+                <span class="edm-pdb__ing-emoji" aria-hidden="true">{{ block.settings.emoji }}</span>
+              {%- endif -%}
+              <span class="edm-pdb__ing-name">{{ block.settings.name }}</span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-pdb {
+  background: linear-gradient(180deg, #fff 0%, #FFFCF7 60%, #FFEAEF 100%);
+}
+
+.edm-pdb__head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 5.6rem;
+}
+.edm-pdb__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #FF88BB;
+  font-weight: 700;
+  margin: 0 0 1.4rem;
+}
+.edm-pdb__eyebrow-spark { width: 1.2rem; height: 1.2rem; color: #FF9966; }
+
+.edm-pdb__h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.2rem, 4.4vw, 5.6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #3D2330;
+  margin: 0 0 1.4rem;
+}
+.edm-pdb__h2-script {
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.12em);
+  font-size: 1.18em;
+  background: linear-gradient(100deg, #FF88BB 0%, #FF9966 50%, #FFCC99 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.edm-pdb__sub {
+  font-size: 1.55rem;
+  color: #7C5862;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.edm-pdb__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+  gap: 2.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 6.4rem;
+}
+
+.edm-pdb__card {
+  background: var(--bg, #FFEAEF);
+  border-radius: 2rem;
+  padding: 3.2rem 2.4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 136, 187, 0.12);
+  box-shadow: 0 8px 24px -10px rgba(255, 136, 187, 0.2);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
+}
+.edm-pdb__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -16px rgba(255, 136, 187, 0.32);
+}
+
+.edm-pdb__icon {
+  width: 7rem;
+  height: 7rem;
+  margin: 0 auto 1.8rem;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 8px 20px -6px rgba(255, 136, 187, 0.4);
+}
+.edm-pdb__icon svg { width: 60%; height: 60%; }
+
+.edm-pdb__card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #3D2330;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+.edm-pdb__card-desc {
+  font-size: 1.45rem;
+  color: #7C5862;
+  line-height: 1.6;
+  margin: 0;
+}
+.edm-pdb__card-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1.6rem 0 0;
+  padding: 0.8rem 1.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 100px;
+  border: 1px solid rgba(255, 136, 187, 0.2);
+}
+.edm-pdb__card-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  font-style: italic;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.edm-pdb__card-stat-lbl {
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7C5862;
+  font-weight: 600;
+}
+
+.edm-pdb__howto {
+  margin: 0 0 6.4rem;
+  padding: 4.8rem 4rem;
+  background: linear-gradient(135deg, rgba(255, 217, 228, 0.5) 0%, rgba(255, 204, 153, 0.4) 100%);
+  border-radius: 2.4rem;
+  border: 1px solid rgba(255, 136, 187, 0.18);
+}
+.edm-pdb__howto-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.6rem, 3.2vw, 4rem);
+  font-weight: 400;
+  text-align: center;
+  color: #3D2330;
+  margin: 0 0 3.6rem;
+}
+.edm-pdb__howto-title-script {
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.12em);
+  font-size: 1.18em;
+  background: linear-gradient(100deg, #FF88BB 0%, #FF9966 50%, #FFCC99 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.edm-pdb__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: 2.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: step;
+}
+.edm-pdb__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.6rem;
+}
+.edm-pdb__step-num {
+  width: 4.6rem;
+  height: 4.6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  font-style: italic;
+  box-shadow: 0 6px 16px -4px rgba(255, 136, 187, 0.45);
+  position: relative;
+}
+.edm-pdb__step-spark {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: #FFCC99;
+}
+.edm-pdb__step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.85rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #3D2330;
+  margin: 0 0 0.4rem;
+}
+.edm-pdb__step-desc {
+  font-size: 1.4rem;
+  color: #7C5862;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.edm-pdb__ings {
+  text-align: center;
+}
+.edm-pdb__ings-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #FF88BB;
+  font-weight: 700;
+  margin: 0 0 2rem;
+}
+.edm-pdb__ings-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: #FF88BB;
+}
+.edm-pdb__ings-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.edm-pdb__ing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.6rem;
+  background: #fff;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255, 136, 187, 0.22);
+  font-size: 1.3rem;
+  color: #3D2330;
+  font-weight: 600;
+  box-shadow: 0 4px 12px -4px rgba(255, 136, 187, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.edm-pdb__ing:hover {
+  transform: translateY(-2px);
+  border-color: #FF88BB;
+  box-shadow: 0 8px 18px -4px rgba(255, 136, 187, 0.3);
+}
+.edm-pdb__ing-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.edm-pdb__ing-name {
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 749px) {
+  .edm-pdb__howto { padding: 3.2rem 2rem; }
+  .edm-pdb__head { margin-bottom: 4rem; }
+  .edm-pdb__grid { gap: 1.6rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "PDP · Beneficios",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "header", "content": "Encabezado" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Por qué tu piel lo ama" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Cuidado con sentido" },
+    { "type": "text", "id": "title_script", "label": "Palabra final (script)", "default": "natural" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtítulo", "default": "Cada gota fue formulada para honrar tu piel y prolongar ese brillo dorado del sol del trópico." },
+
+    { "type": "header", "content": "Cómo usarlo" },
+    { "type": "text", "id": "howto_title", "label": "Título", "default": "Cómo lo" },
+    { "type": "text", "id": "howto_title_script", "label": "Palabra script", "default": "usamos" },
+
+    { "type": "header", "content": "Ingredientes" },
+    { "type": "text", "id": "ingredients_label", "label": "Etiqueta lista", "default": "Ingredientes clave" },
+
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding_top", "label": "Padding superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Beneficio",
+      "limit": 6,
+      "settings": [
+        { "type": "textarea", "id": "icon_svg", "label": "Ícono SVG", "default": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 12l2 2 4-4'/></svg>" },
+        { "type": "text", "id": "title", "label": "Título", "default": "Hidrata y nutre" },
+        { "type": "textarea", "id": "description", "label": "Descripción", "default": "Aceites naturales del trópico que sellan la humedad y dejan la piel suave por horas." },
+        { "type": "text", "id": "stat", "label": "Stat (opcional)", "info": "Ej: 24h, 100%, +60%" },
+        { "type": "text", "id": "stat_label", "label": "Etiqueta del stat", "info": "Ej: hidratación, natural" },
+        { "type": "color", "id": "bg_color", "label": "Color de fondo", "default": "#FFEAEF" }
+      ]
+    },
+    {
+      "type": "howto_step",
+      "name": "Paso de uso",
+      "limit": 5,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Título del paso", "default": "Aplica" },
+        { "type": "textarea", "id": "description", "label": "Descripción", "default": "Sobre la piel limpia y seca, masajea con movimientos circulares." }
+      ]
+    },
+    {
+      "type": "ingredient_chip",
+      "name": "Ingrediente",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "emoji", "label": "Emoji", "default": "🥥" },
+        { "type": "text", "id": "name", "label": "Nombre", "default": "Aceite de coco" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP · Beneficios",
+      "blocks": [
+        { "type": "benefit", "settings": { "title": "Hidrata 24h", "description": "Sella la humedad con aceites naturales y deja la piel sedosa.", "stat": "24h", "stat_label": "hidratación", "bg_color": "#FFEAEF" } },
+        { "type": "benefit", "settings": { "title": "Bronceado natural", "description": "Activa la melanina con betacaroteno y prolonga el tono dorado.", "stat": "+60%", "stat_label": "más bronceado", "bg_color": "#FFD9E4" } },
+        { "type": "benefit", "settings": { "title": "Reef safe · cruelty free", "description": "Sin parabenos, sin sulfatos, sin oxybenzone. El mar nos importa.", "stat": "100%", "stat_label": "natural", "bg_color": "#FFCC99" } },
+        { "type": "howto_step", "settings": { "title": "Exfolia", "description": "Sobre piel limpia y seca, exfolia para una base uniforme." } },
+        { "type": "howto_step", "settings": { "title": "Aplica", "description": "Masajea con movimientos circulares de pies a hombros." } },
+        { "type": "howto_step", "settings": { "title": "Disfruta el sol", "description": "Hidratada, protegida y radiante. Tu ritual solar es ahora." } },
+        { "type": "ingredient_chip", "settings": { "emoji": "🥕", "name": "Zanahoria" } },
+        { "type": "ingredient_chip", "settings": { "emoji": "🥥", "name": "Coco" } },
+        { "type": "ingredient_chip", "settings": { "emoji": "🌿", "name": "Aloe vera" } },
+        { "type": "ingredient_chip", "settings": { "emoji": "✨", "name": "Vitamina E" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

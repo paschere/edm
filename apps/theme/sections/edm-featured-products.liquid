@@ -1,0 +1,656 @@
+{%- liquid
+  assign coll = collections[section.settings.collection]
+  assign limit = section.settings.products_to_show | default: 6
+  assign cols = section.settings.columns | default: 3
+-%}
+
+<section
+  class="edm-fp"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;--cols:{{ cols }};padding-top:var(--pt);padding-bottom:var(--pb);"
+  aria-label="{{ section.settings.title | default: 'Nuestros productos' | escape }}"
+>
+  {%- render 'edm-brand-decor', variant: 'all', tone: 'soft', opacity: '0.4' -%}
+
+  <div class="edm-fp__inner page-width">
+
+    <header class="edm-fp__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="edm-fp__eyebrow">
+          {%- render 'edm-sparkle', class: 'edm-fp__eyebrow-spark edm-anim-spark' -%}
+          <span>{{ section.settings.eyebrow }}</span>
+          {%- render 'edm-sparkle', class: 'edm-fp__eyebrow-spark edm-anim-spark' -%}
+        </p>
+      {%- endif -%}
+
+      <h2 class="edm-fp__title">
+        {{ section.settings.title }}
+        {%- if section.settings.title_script != blank -%}
+          <span class="edm-script edm-fp__title-script">{{ section.settings.title_script }}</span>
+        {%- endif -%}
+      </h2>
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="edm-fp__sub">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- if coll == blank or coll.products.size == 0 -%}
+      <p class="edm-fp__empty">Configura una colección para mostrar productos.</p>
+    {%- else -%}
+      <ul class="edm-fp__grid" role="list">
+        {%- for product in coll.products limit: limit -%}
+          {%- liquid
+            assign first_variant = product.selected_or_first_available_variant
+            assign discount = 0
+            if product.compare_at_price > product.price
+              assign discount = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price
+            endif
+            assign color_option = null
+            for opt in product.options_with_values
+              assign opt_name = opt.name | downcase
+              if opt_name contains 'color' or opt_name contains 'tono' or opt_name contains 'shade'
+                assign color_option = opt
+                break
+              endif
+            endfor
+          -%}
+          <li class="edm-fp__item">
+            <a href="{{ product.url }}" class="edm-fp__card">
+
+              <div class="edm-fp__media">
+                {%- if product.featured_image -%}
+                  {{
+                    product.featured_image
+                    | image_url: width: 600
+                    | image_tag:
+                      loading: 'lazy',
+                      width: 600,
+                      class: 'edm-fp__img edm-fp__img--front',
+                      alt: product.featured_image.alt | default: product.title | escape
+                  }}
+                  {%- if product.images.size > 1 -%}
+                    {{
+                      product.images[1]
+                      | image_url: width: 600
+                      | image_tag:
+                        loading: 'lazy',
+                        width: 600,
+                        class: 'edm-fp__img edm-fp__img--back',
+                        alt: ''
+                    }}
+                  {%- endif -%}
+                {%- endif -%}
+
+                <div class="edm-fp__badges" aria-hidden="true">
+                  {%- if forloop.first -%}
+                    <span class="edm-fp__badge edm-fp__badge--star">
+                      {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.6)' -%}
+                      <span>Best Seller</span>
+                    </span>
+                  {%- endif -%}
+                  {%- if discount > 0 -%}
+                    <span class="edm-fp__badge edm-fp__badge--save">−{{ discount }}%</span>
+                  {%- endif -%}
+                  {%- unless product.available -%}
+                    <span class="edm-fp__badge edm-fp__badge--out">Agotado</span>
+                  {%- endunless -%}
+                </div>
+
+                {%- if product.available -%}
+                  <button
+                    type="button"
+                    class="edm-fp__quick"
+                    data-variant-id="{{ first_variant.id }}"
+                    aria-label="Agregar {{ product.title | escape }} al carrito"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="9" cy="21" r="1"/>
+                      <circle cx="20" cy="21" r="1"/>
+                      <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>
+                    </svg>
+                    <span class="edm-fp__quick-lbl">Añadir</span>
+                  </button>
+                {%- endif -%}
+              </div>
+
+              <div class="edm-fp__body">
+                {%- if product.vendor != blank -%}
+                  <p class="edm-fp__vendor">{{ product.vendor }}</p>
+                {%- endif -%}
+
+                <h3 class="edm-fp__name">{{ product.title }}</h3>
+
+                {%- if color_option != null -%}
+                  <ul class="edm-fp__swatches" role="list" aria-label="Colores disponibles">
+                    {%- for value in color_option.values limit: 5 -%}
+                      <li class="edm-fp__sw" style="--sw: {{ value | handleize | replace: 'medio', '#c89070' | replace: 'oscuro', '#7a4a2c' | replace: 'claro', '#e8c4a0' | replace: 'natural', '#d8b088' | replace: 'caramelo', '#a86838' | replace: 'bronce', '#a06038' | default: '#FF88BB' }};" title="{{ value }}"></li>
+                    {%- endfor -%}
+                    {%- if color_option.values.size > 5 -%}
+                      <li class="edm-fp__sw-more">+{{ color_option.values.size | minus: 5 }}</li>
+                    {%- endif -%}
+                  </ul>
+                {%- endif -%}
+
+                <div class="edm-fp__pricing">
+                  {%- if product.compare_at_price > product.price -%}
+                    <span class="edm-fp__price-was">{{ product.compare_at_price | money_without_trailing_zeros }}</span>
+                  {%- endif -%}
+                  <span class="edm-fp__price">{{ product.price | money_without_trailing_zeros }}</span>
+                </div>
+
+                {%- if section.settings.show_cuotas -%}
+                  {%- assign n_cuotas = section.settings.cuotas_count | default: 4 -%}
+                  {%- assign cuota_amt = product.price | divided_by: n_cuotas -%}
+                  <p class="edm-fp__cuotas">
+                    o {{ n_cuotas }} cuotas de
+                    <strong>{{ cuota_amt | money_without_trailing_zeros }}</strong>
+                  </p>
+                {%- endif -%}
+              </div>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if section.settings.cta_label != blank -%}
+        <div class="edm-fp__foot">
+          <a href="{{ section.settings.cta_url | default: coll.url | default: '/collections/all' }}" class="edm-fp__cta">
+            {{ section.settings.cta_label }}
+            <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13M9 1l5 5-5 5"/></svg>
+          </a>
+        </div>
+      {%- endif -%}
+
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+(function() {
+  document.addEventListener('click', async function(e) {
+    var btn = e.target.closest('.edm-fp__quick');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (btn.classList.contains('is-loading') || btn.classList.contains('is-added')) return;
+
+    var vid = btn.getAttribute('data-variant-id');
+    if (!vid) return;
+    btn.classList.add('is-loading');
+
+    try {
+      var res = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: vid, quantity: 1,
+          sections: ['cart-drawer', 'cart-icon-bubble'],
+          sections_url: window.location.pathname
+        })
+      });
+      if (!res.ok) throw new Error('cart');
+      var data = await res.json();
+
+      var drawer = document.querySelector('cart-drawer');
+      if (drawer && data.sections && typeof drawer.renderContents === 'function') {
+        drawer.classList.remove('is-empty');
+        drawer.renderContents(data);
+        if (data.product_id) sessionStorage.setItem('edm_last_pid', data.product_id);
+        document.dispatchEvent(new CustomEvent('edm:cart:opened', { detail: { productId: data.product_id } }));
+      }
+      btn.classList.remove('is-loading');
+      btn.classList.add('is-added');
+      setTimeout(function() { btn.classList.remove('is-added'); }, 2200);
+    } catch(err) {
+      btn.classList.remove('is-loading');
+      window.location.href = '/cart/add?id=' + vid + '&quantity=1&return_to=/cart';
+    }
+  });
+})();
+</script>
+
+{% stylesheet %}
+.edm-fp {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 217, 228, 0.4) 0%, transparent 38%),
+    radial-gradient(circle at 100% 100%, rgba(255, 204, 153, 0.32) 0%, transparent 42%),
+    #FFFCF7;
+}
+
+.edm-fp__inner { position: relative; z-index: 1; }
+
+.edm-fp__head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 6.4rem;
+}
+.edm-fp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #FF88BB;
+  font-weight: 700;
+  margin: 0 0 1.4rem;
+}
+.edm-fp__eyebrow-spark { width: 1.2rem; height: 1.2rem; color: #FF9966; }
+
+.edm-fp__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 5vw, 6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #3D2330;
+  margin: 0 0 1.6rem;
+}
+.edm-fp__title-script {
+  font-size: 1.18em;
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.12em);
+  background: linear-gradient(100deg, #FF88BB 0%, #FF9966 50%, #FFCC99 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.edm-fp__sub {
+  font-size: 1.55rem;
+  color: #7C5862;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.edm-fp__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 3.2rem 2.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.edm-fp__item {
+  list-style: none;
+}
+.edm-fp__card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  box-shadow: 0 6px 24px -10px rgba(255, 136, 187, 0.18);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s, border-radius 0.4s;
+  border: 1px solid rgba(255, 136, 187, 0.08);
+  position: relative;
+}
+.edm-fp__card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -16px rgba(255, 136, 187, 0.32);
+  border-color: rgba(255, 136, 187, 0.18);
+}
+
+.edm-fp__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  background: linear-gradient(160deg, #FFEAEF 0%, #FFD9E4 100%);
+}
+.edm-fp__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+.edm-fp__img--back { opacity: 0; }
+.edm-fp__card:hover .edm-fp__img--front { transform: scale(1.05); opacity: 0; }
+.edm-fp__card:hover .edm-fp__img--back { opacity: 1; transform: scale(1.04); }
+
+.edm-fp__badges {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  z-index: 2;
+}
+.edm-fp__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.edm-fp__badge--star {
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  padding-left: 0.7rem;
+  box-shadow: 0 4px 12px -3px rgba(255, 136, 187, 0.45);
+}
+.edm-fp__badge--star svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+.edm-fp__badge--save {
+  background: #3D2330;
+  color: #FFCC99;
+}
+.edm-fp__badge--out {
+  background: #fff;
+  color: #7C5862;
+  border: 1px solid rgba(61, 35, 48, 0.18);
+}
+
+.edm-fp__quick {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  background: #fff;
+  color: #3D2330;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 22px -8px rgba(255, 136, 187, 0.4);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.25s ease, color 0.25s ease;
+}
+.edm-fp__card:hover .edm-fp__quick {
+  opacity: 1;
+  transform: translateY(0);
+}
+.edm-fp__quick:hover {
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+}
+.edm-fp__quick svg { width: 1.6rem; height: 1.6rem; flex-shrink: 0; }
+.edm-fp__quick.is-loading { pointer-events: none; opacity: 0.85; }
+.edm-fp__quick.is-loading .edm-fp__quick-lbl::after {
+  content: '...';
+  display: inline-block;
+  width: 1.4em;
+  text-align: left;
+}
+.edm-fp__quick.is-added {
+  background: linear-gradient(135deg, #99FFFF 0%, #FFCC99 100%);
+  color: #3D2330;
+}
+.edm-fp__quick.is-added .edm-fp__quick-lbl::before { content: '✓ '; }
+
+.edm-fp__body {
+  padding: 1.8rem 1.8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.edm-fp__vendor {
+  font-size: 1.05rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #FF88BB;
+  font-weight: 700;
+  margin: 0;
+}
+.edm-fp__name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #3D2330;
+  line-height: 1.15;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.edm-fp__swatches {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0;
+}
+.edm-fp__sw {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--sw);
+  border: 1.5px solid rgba(61, 35, 48, 0.15);
+  flex-shrink: 0;
+}
+.edm-fp__sw-more {
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  color: #7C5862;
+  font-weight: 600;
+  margin-left: 0.2rem;
+}
+
+.edm-fp__pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+.edm-fp__price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #3D2330;
+}
+.edm-fp__price-was {
+  font-size: 1.4rem;
+  color: #A88891;
+  text-decoration: line-through;
+}
+
+.edm-fp__cuotas {
+  font-size: 1.1rem;
+  color: #7C5862;
+  margin: 0.4rem 0 0;
+}
+.edm-fp__cuotas strong {
+  color: #FF88BB;
+  font-weight: 700;
+}
+
+.edm-fp__empty {
+  text-align: center;
+  color: #7C5862;
+  padding: 4rem 2rem;
+}
+
+.edm-fp__foot {
+  display: flex;
+  justify-content: center;
+  margin-top: 5.6rem;
+}
+.edm-fp__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.6rem 3.4rem;
+  border-radius: 100px;
+  background: #fff;
+  color: #3D2330;
+  border: 1.5px solid rgba(255, 136, 187, 0.5);
+  text-decoration: none;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease, border-color 0.25s, box-shadow 0.25s;
+}
+.edm-fp__cta:hover {
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -8px rgba(255, 136, 187, 0.55);
+}
+.edm-fp__cta svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  transition: transform 0.25s ease;
+}
+.edm-fp__cta:hover svg { transform: translateX(4px); }
+
+@media (max-width: 989px) {
+  .edm-fp__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.4rem 1.6rem; }
+}
+@media (max-width: 549px) {
+  .edm-fp__head { margin-bottom: 4rem; }
+  .edm-fp__name { font-size: 1.85rem; }
+  .edm-fp__price { font-size: 2rem; }
+  .edm-fp__quick { opacity: 1; transform: translateY(0); padding: 0.7rem 1rem; }
+  .edm-fp__quick-lbl { display: none; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Productos destacados",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Encabezado"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Always Tan Club"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Nuestros productos"
+    },
+    {
+      "type": "text",
+      "id": "title_script",
+      "label": "Palabra final (script)",
+      "default": "estrella"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Aceites, autobronceadores y rituales para honrar la piel y el sol del trópico colombiano."
+    },
+    {
+      "type": "header",
+      "content": "Productos"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección a mostrar"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Productos a mostrar",
+      "min": 3, "max": 12, "step": 1,
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Columnas (escritorio)",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cuotas",
+      "label": "Mostrar cuotas en cada tarjeta",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cuotas_count",
+      "label": "Número de cuotas",
+      "min": 2, "max": 24, "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Botón final"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón",
+      "default": "Ver toda la colección"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Destino del botón"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Productos destacados"
+    }
+  ]
+}
+{% endschema %}

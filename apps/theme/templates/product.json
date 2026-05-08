@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -56,6 +65,30 @@
         "padding_bottom": 60
       }
     },
+    "pdp_benefits": {
+      "type": "edm-pdp-benefits",
+      "blocks": {
+        "b1": { "type": "benefit", "settings": { "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2.5C7.5 8 5 11.5 5 15a7 7 0 0 0 14 0c0-3.5-2.5-7-7-12.5z'/></svg>", "title": "Hidrata 24h", "description": "Sella la humedad y deja la piel suave todo el día con coco y vitamina E.", "stat": "24h", "stat_label": "hidratación", "bg_color": "#FFEAEF" } },
+        "b2": { "type": "benefit", "settings": { "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='4'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'/></svg>", "title": "Brillo dorado", "description": "Realza tu bronceado natural con un acabado luminoso, no naranja.", "stat": "100%", "stat_label": "natural", "bg_color": "#FFD9E4" } },
+        "b3": { "type": "benefit", "settings": { "icon_svg": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 17c2-1 4-1 6 0s4 1 6 0 4-1 6 0'/><path d='M3 13c2-1 4-1 6 0s4 1 6 0 4-1 6 0'/><path d='M3 21c2-1 4-1 6 0s4 1 6 0 4-1 6 0'/></svg>", "title": "Reef-safe", "description": "Sin químicos dañinos para los corales ni el ecosistema marino.", "stat": "0", "stat_label": "octinoxato · oxibenzona", "bg_color": "#FFCC99" } },
+        "h1": { "type": "howto_step", "settings": { "title": "Aplica", "description": "Sobre piel limpia y seca, en movimientos circulares ascendentes." } },
+        "h2": { "type": "howto_step", "settings": { "title": "Disfruta", "description": "30 min bajo el sol activan el bronceado dorado natural." } },
+        "h3": { "type": "howto_step", "settings": { "title": "Reaplica", "description": "Cada 2 horas o después de nadar para mantener la hidratación." } },
+        "i1": { "type": "ingredient_chip", "settings": { "emoji": "🥕", "name": "Zanahoria" } },
+        "i2": { "type": "ingredient_chip", "settings": { "emoji": "🥥", "name": "Coco" } },
+        "i3": { "type": "ingredient_chip", "settings": { "emoji": "🌿", "name": "Vitamina E" } },
+        "i4": { "type": "ingredient_chip", "settings": { "emoji": "🌺", "name": "Trópico colombiano" } }
+      },
+      "block_order": ["b1", "b2", "b3", "h1", "h2", "h3", "i1", "i2", "i3", "i4"],
+      "settings": {
+        "eyebrow": "Por qué tu piel lo ama",
+        "title": "Cuidado con sentido",
+        "title_script": "natural",
+        "subtitle": "Cada gota está hecha para resaltar tu brillo, sin comprometer tu piel ni el océano.",
+        "padding_top": 60,
+        "padding_bottom": 80
+      }
+    },
     "related-products": {
       "type": "related-products",
       "settings": {
@@ -75,6 +108,7 @@
   },
   "order": [
     "main",
+    "pdp_benefits",
     "related-products"
   ]
 }

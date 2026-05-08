@@ -6,9 +6,11 @@
 
 <section
   class="edm-bh color-{{ section.settings.color_scheme }} gradient"
-  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);position:relative;"
 >
-  <div class="edm-bh__inner">
+  {%- render 'edm-brand-decor', variant: 'all', tone: 'soft', opacity: '0.45' -%}
+
+  <div class="edm-bh__inner" style="position:relative;z-index:1;">
 
     <div class="edm-bh__media">
       {%- if section.settings.image != blank -%}
@@ -49,7 +51,12 @@
         <p class="edm-bh__eyebrow">{{ section.settings.eyebrow }}</p>
       {%- endif -%}
 
-      <h2 class="edm-bh__name">{{ section.settings.bundle_name | default: 'Bundle Estrella' }}</h2>
+      <h2 class="edm-bh__name">
+        {{ section.settings.bundle_name | default: 'Summer' }}
+        {%- if section.settings.bundle_name_script != blank -%}
+          <span class="edm-script edm-bh__name-script">{{ section.settings.bundle_name_script }}</span>
+        {%- endif -%}
+      </h2>
 
       {%- if section.settings.description != blank -%}
         <p class="edm-bh__desc">{{ section.settings.description }}</p>
@@ -150,7 +157,7 @@
 .edm-bh__media {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, #c8935a, #a06030);
+  background: linear-gradient(145deg, #FFA5D3 0%, #FF9966 100%);
 }
 .edm-bh__img {
   width: 100%;
@@ -165,7 +172,7 @@
   width: 100%;
   height: 100%;
   min-height: 560px;
-  background: linear-gradient(145deg, #d4954e 0%, #e8aa5c 30%, #c47830 65%, #7a3e10 100%);
+  background: linear-gradient(145deg, #FFA5D3 0%, #FF88BB 35%, #FF9966 70%, #FFCC99 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,18 +183,19 @@
   font-style: italic;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(251, 248, 241, 0.4);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .edm-bh__media-wash {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to right, transparent 60%, rgba(11, 8, 5, 0.15) 100%);
+  background: linear-gradient(to right, transparent 55%, rgba(255, 136, 187, 0.25) 100%);
 }
 
 .edm-bh__badge {
   position: absolute; top: 2.4rem; left: 2.4rem;
-  background: rgba(11, 8, 5, 0.85);
-  color: #d0b16a;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px -6px rgba(255, 136, 187, 0.5);
   font-size: 1.1rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -212,7 +220,7 @@
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #9d7f32;
+  color: #FF88BB;
   margin: 0;
 }
 .edm-bh__eyebrow::before {
@@ -229,13 +237,24 @@
   font-weight: 400;
   line-height: 1.06;
   letter-spacing: -0.015em;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0;
+}
+.edm-bh__name-script {
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.12em);
+  font-size: 1.18em;
+  background: linear-gradient(100deg, #FF88BB 0%, #FF9966 50%, #FFCC99 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .edm-bh__desc {
   font-size: 1.65rem;
-  color: #4a3f2f;
+  color: #7C5862;
   line-height: 1.72;
   margin: 0;
   max-width: 460px;
@@ -254,7 +273,7 @@
   align-items: center;
   gap: 1.4rem;
   font-size: 1.6rem;
-  color: #0b0805;
+  color: #3D2330;
 }
 .edm-bh__check {
   width: 2.2rem; height: 2.2rem; border-radius: 50%;
@@ -262,7 +281,7 @@
   border: 1px solid rgba(157, 127, 50, 0.3);
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #9d7f32;
+  color: #FF88BB;
 }
 
 .edm-bh__pricing {
@@ -275,7 +294,7 @@
 }
 .edm-bh__compare {
   font-size: 2rem;
-  color: #78695a;
+  color: #A88891;
   text-decoration: line-through;
   opacity: 0.55;
 }
@@ -284,7 +303,7 @@
   font-size: 5rem;
   font-weight: 500;
   font-style: italic;
-  color: #0b0805;
+  color: #3D2330;
   line-height: 1;
 }
 .edm-bh__saving {
@@ -293,7 +312,7 @@
   padding: 0.6rem 1.4rem;
   background: rgba(157, 127, 50, 0.1);
   border: 1px solid rgba(157, 127, 50, 0.25);
-  color: #9d7f32;
+  color: #FF88BB;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -307,15 +326,15 @@
   gap: 1.6rem;
   flex-wrap: wrap;
 }
-.edm-bh__countdown-label { font-size: 1.3rem; color: #78695a; letter-spacing: 0.04em; }
+.edm-bh__countdown-label { font-size: 1.3rem; color: #A88891; letter-spacing: 0.04em; }
 .edm-bh__countdown-units { display: flex; align-items: center; gap: 0.8rem; }
 .edm-bh__unit {
   display: flex; align-items: baseline; gap: 0.4rem;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.6rem; font-weight: 500; color: #0b0805;
+  font-size: 2.6rem; font-weight: 500; color: #3D2330;
 }
-.edm-bh__unit small { font-size: 1.2rem; color: #78695a; font-family: inherit; }
-.edm-bh__colon { font-size: 2rem; color: #78695a; }
+.edm-bh__unit small { font-size: 1.2rem; color: #A88891; font-family: inherit; }
+.edm-bh__colon { font-size: 2rem; color: #A88891; }
 
 .edm-bh__actions {
   display: flex;
@@ -328,17 +347,17 @@
   font-size: 1.25rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
   border-radius: 2px; border: none; cursor: pointer; text-decoration: none;
   position: relative; overflow: hidden;
-  background: #0b0805; color: #fbf8f1;
+  background: #3D2330; color: #fbf8f1;
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
 }
 .edm-bh__btn span { position: relative; z-index: 1; transition: color 0.3s; }
 .edm-bh__btn::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  background: linear-gradient(135deg, #FFCC99, #FF88BB);
   opacity: 0; transition: opacity 0.3s;
 }
 .edm-bh__btn:hover::after { opacity: 1; }
-.edm-bh__btn:hover span { color: #0b0805; }
+.edm-bh__btn:hover span { color: #3D2330; }
 .edm-bh__btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(157, 127, 50, 0.5); }
 
 .edm-bh__ghost {
@@ -346,10 +365,10 @@
   padding: 1.6rem 3.2rem;
   font-size: 1.25rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
   border-radius: 2px; border: 1.5px solid rgba(11, 8, 5, 0.35);
-  background: transparent; color: #0b0805; cursor: pointer; text-decoration: none;
+  background: transparent; color: #3D2330; cursor: pointer; text-decoration: none;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.edm-bh__ghost:hover { border-color: #0b0805; background: #0b0805; color: #fbf8f1; transform: translateY(-2px); }
+.edm-bh__ghost:hover { border-color: #3D2330; background: #3D2330; color: #fbf8f1; transform: translateY(-2px); }
 
 @media (max-width: 989px) {
   .edm-bh__inner { grid-template-columns: 1fr; min-height: auto; }
@@ -395,7 +414,13 @@
       "type": "text",
       "id": "bundle_name",
       "label": "Nombre del bundle",
-      "default": "Summer Box"
+      "default": "Summer"
+    },
+    {
+      "type": "text",
+      "id": "bundle_name_script",
+      "label": "Palabra final (script)",
+      "default": "Box"
     },
     {
       "type": "textarea",

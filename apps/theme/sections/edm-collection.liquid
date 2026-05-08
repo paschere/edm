@@ -8,9 +8,10 @@
 
 <section
   class="edm-col color-{{ section.settings.color_scheme }} gradient"
-  style="--edm-col-pt:{{ pad_top }}px;--edm-col-pb:{{ pad_bottom }}px;--edm-col-cols:{{ col_desktop }};"
+  style="--edm-col-pt:{{ pad_top }}px;--edm-col-pb:{{ pad_bottom }}px;--edm-col-cols:{{ col_desktop }};position:relative;overflow:hidden;"
   aria-label="{{ collection.title | escape }}"
 >
+  {%- render 'edm-brand-decor', variant: 'soft', tone: 'soft', opacity: '0.35' -%}
 
   {%- comment -%}── BANNER ──────────────────────────────────────────────────────{%- endcomment -%}
   {%- if section.settings.show_banner -%}
@@ -387,17 +388,17 @@
 {% stylesheet %}
 /* ═══════════════════════════════════════════════════════════════════════════
    EDM COLLECTION — Estrella de Mar
-   Paleta: #0b0805 | #d0b16a / #9d7f32 | #fbf8f1 | #78695a
+   Paleta: #3D2330 | #FFCC99 / #FF88BB | #fbf8f1 | #A88891
    Base: 1rem = 10px
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Variables ─────────────────────────────────────────────────────────── */
 .edm-col {
-  --edm-ink:    #0b0805;
-  --edm-gold:   #d0b16a;
-  --edm-gold-d: #9d7f32;
+  --edm-ink:    #3D2330;
+  --edm-gold:   #FFCC99;
+  --edm-gold-d: #FF88BB;
   --edm-cream:  #fbf8f1;
-  --edm-warm:   #78695a;
+  --edm-warm:   #A88891;
   --edm-col-pt: 40px;
   --edm-col-pb: 60px;
   --edm-col-cols: 3;
@@ -434,7 +435,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, rgba(11,8,5,0.10) 0%, rgba(11,8,5,0.55) 100%);
+  background: linear-gradient(180deg, rgba(255,165,211,0.18) 0%, rgba(255,136,187,0.55) 100%);
   text-align: center;
   padding: 2.4rem;
 }
@@ -442,17 +443,19 @@
 .edm-col__banner-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(3.6rem, 6vw, 7.2rem);
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  color: #fbf8f1;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #fff;
   margin: 0 0 1.2rem;
-  line-height: 1.1;
+  line-height: 1.05;
+  text-shadow: 0 4px 24px rgba(255,136,187,0.4);
 }
 
 .edm-col__banner-desc {
   font-size: 1.6rem;
-  color: rgba(251,248,241,0.85);
+  color: rgba(255,255,255,0.92);
   max-width: 60rem;
+  text-shadow: 0 1px 10px rgba(255,136,187,0.3);
   line-height: 1.65;
   margin: 0;
 }
@@ -778,6 +781,17 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: #fff;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 136, 187, 0.12);
+  box-shadow: 0 6px 20px -10px rgba(255, 136, 187, 0.18);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s, border-color 0.4s;
+}
+.edm-col__card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -16px rgba(255, 136, 187, 0.32);
+  border-color: rgba(255, 136, 187, 0.28);
 }
 
 /* ── Card image ─────────────────────────────────────────────────────────── */
@@ -790,7 +804,7 @@
 .edm-col__card-img-wrap {
   position: relative;
   overflow: hidden;
-  background: #f0ece4;
+  background: linear-gradient(160deg, #FFEAEF 0%, #FFD9E4 100%);
   aspect-ratio: 3 / 4;
 }
 
@@ -803,7 +817,7 @@
 }
 
 .edm-col__card:hover .edm-col__card-img {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .edm-col__card-img-placeholder {
@@ -812,7 +826,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0ece4;
+  background: linear-gradient(160deg, #FFEAEF 0%, #FFD9E4 100%);
 }
 
 .edm-col__card-placeholder-svg {
@@ -842,7 +856,7 @@
 }
 
 .edm-col__badge-sale {
-  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  background: linear-gradient(135deg, #FFCC99, #FF88BB);
   color: var(--edm-ink);
   top: 1.4rem;
   left: auto;
@@ -860,29 +874,31 @@
 
 .edm-col__card-vendor {
   font-size: 1rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--edm-warm);
+  color: #FF88BB;
+  font-weight: 700;
   margin: 0;
   line-height: 1.4;
 }
 
 .edm-col__card-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.8rem;
-  font-weight: 400;
+  font-size: 2rem;
+  font-weight: 500;
+  font-style: italic;
   margin: 0;
   line-height: 1.2;
 }
 
 .edm-col__card-title-link {
-  color: var(--edm-ink);
+  color: #3D2330;
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .edm-col__card-title-link:hover {
-  color: var(--edm-gold-d);
+  color: #FF88BB;
 }
 
 /* ── Price ──────────────────────────────────────────────────────────────── */
@@ -937,7 +953,7 @@
 /* ── Swatch colors ──────────────────────────────────────────────────────── */
 .swatch--dorado,
 .swatch--gold,
-.swatch--oro       { background: linear-gradient(135deg, #d0b16a, #9d7f32); }
+.swatch--oro       { background: linear-gradient(135deg, #FFCC99, #FF88BB); }
 
 .swatch--bronce,
 .swatch--bronze    { background: linear-gradient(135deg, #cd7f32, #a05c20); }
@@ -960,7 +976,7 @@
 .swatch--caramelo  { background: #c68642; }
 
 .swatch--dorado-oscuro,
-.swatch--dark-gold  { background: linear-gradient(135deg, #9d7f32, #6b561f); }
+.swatch--dark-gold  { background: linear-gradient(135deg, #FF88BB, #6b561f); }
 
 .swatch--perla,
 .swatch--pearl     { background: radial-gradient(circle at 35% 35%, #f9f3e8, #dcd1bb); }

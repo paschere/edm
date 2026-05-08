@@ -294,6 +294,171 @@
   {%- render 'cart-notification', color_scheme: section.settings.color_scheme, desktop_menu_type: section.settings.menu_type_desktop -%}
 {%- endif -%}
 
+<style>
+  .header-wrapper {
+    --edm-pink: #FF88BB;
+    --edm-tangerine: #FF9966;
+  }
+
+  .header__heading,
+  .header__heading-link {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.005em;
+  }
+  .header__heading-link {
+    font-size: 2.6rem;
+    color: var(--edm-pink);
+    transition: color 0.25s ease;
+  }
+  .header__heading-link:hover { color: var(--edm-tangerine); }
+
+  .header__menu-item,
+  .header__inline-menu .list-menu__item--link {
+    font-family: 'Quicksand', system-ui, sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    position: relative;
+    transition: color 0.22s ease;
+    padding: 1rem 1.4rem;
+  }
+  .header__menu-item span { font-weight: 600; }
+  .header__menu-item:hover,
+  .header__inline-menu .list-menu__item--link:hover {
+    color: var(--edm-pink);
+  }
+  .header__menu-item::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0.4rem;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(135deg, var(--edm-pink) 0%, var(--edm-tangerine) 100%);
+    border-radius: 2px;
+    transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .header__menu-item:hover::after,
+  .header__active-menu-item::after {
+    width: calc(100% - 2.8rem);
+    left: 1.4rem;
+  }
+
+  .header__icon svg {
+    width: 2.2rem;
+    height: 2.2rem;
+    stroke-width: 1.5;
+  }
+  .header__icon { transition: transform 0.2s ease, color 0.22s ease; }
+  .header__icon:hover { transform: translateY(-1px); color: var(--edm-pink); }
+
+  .cart-count-bubble {
+    background: linear-gradient(135deg, var(--edm-pink) 0%, var(--edm-tangerine) 100%) !important;
+    color: #fff !important;
+    border-radius: 100px !important;
+    box-shadow: 0 4px 12px -3px rgba(255, 136, 187, 0.5);
+    font-family: 'Quicksand', system-ui, sans-serif;
+    font-weight: 700;
+    min-width: 2rem;
+    height: 2rem;
+  }
+
+  .menu-drawer {
+    background: linear-gradient(160deg, #FFEAEF 0%, #FFD9E4 50%, #FFCC99 100%) !important;
+  }
+  .menu-drawer__menu .menu-drawer__menu-item {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.4rem;
+    font-weight: 500;
+    font-style: italic;
+    color: #3D2330;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid rgba(61, 35, 48, 0.12);
+    transition: color 0.2s ease, padding 0.2s ease;
+  }
+  .menu-drawer__menu .menu-drawer__menu-item:hover,
+  .menu-drawer__menu .menu-drawer__menu-item:focus {
+    color: var(--edm-pink);
+    padding-left: 0.6rem;
+  }
+  .menu-drawer__close-button { color: #3D2330; }
+  .menu-drawer__close-button:hover { color: var(--edm-pink); }
+
+  .header__inline-menu summary.list-menu__item--link::after,
+  .header__inline-menu summary.list-menu__item--link-active::after { display: none; }
+</style>
+
+{%- if section.settings.transparent_on_top and template.name == 'index' -%}
+<style>
+  .shopify-section-group-header-group {
+    position: relative;
+    z-index: 50;
+  }
+  body.edm-header-overlay #MainContent {
+    margin-top: calc(-1 * var(--edm-header-h, 80px));
+  }
+  .header-wrapper {
+    transition: background-color 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  body:not(.edm-header-scrolled) .header-wrapper {
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+  body:not(.edm-header-scrolled) .header-wrapper .header__heading,
+  body:not(.edm-header-scrolled) .header-wrapper .header__heading-link,
+  body:not(.edm-header-scrolled) .header-wrapper .header__menu-item,
+  body:not(.edm-header-scrolled) .header-wrapper .header__menu-item span,
+  body:not(.edm-header-scrolled) .header-wrapper .header__icon span,
+  body:not(.edm-header-scrolled) .header-wrapper .list-menu__item,
+  body:not(.edm-header-scrolled) .header-wrapper details summary > *,
+  body:not(.edm-header-scrolled) .header-wrapper .header__active-menu-item {
+    color: #ffffff !important;
+  }
+  body:not(.edm-header-scrolled) .header-wrapper .header__icon svg,
+  body:not(.edm-header-scrolled) .header-wrapper .header__heading-link svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+  }
+  body:not(.edm-header-scrolled) .header-wrapper .header__icon .cart-count-bubble {
+    background-color: #ffffff !important;
+    color: #FF88BB !important;
+  }
+  body.edm-header-scrolled .header-wrapper {
+    box-shadow: 0 4px 20px -10px rgba(255, 136, 187, 0.3);
+  }
+</style>
+
+<script>
+  (function() {
+    var threshold = {{ section.settings.transparent_scroll_threshold | default: 80 }};
+    var headerEl = document.querySelector('.header-wrapper');
+
+    function setHeight() {
+      if (!headerEl) return;
+      document.documentElement.style.setProperty('--edm-header-h', headerEl.offsetHeight + 'px');
+    }
+    function update() {
+      document.body.classList.toggle('edm-header-scrolled', window.scrollY > threshold);
+    }
+
+    document.body.classList.add('edm-header-overlay');
+    setHeight();
+    update();
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', function() { setHeight(); update(); }, { passive: true });
+    if (window.ResizeObserver && headerEl) {
+      new ResizeObserver(setHeight).observe(headerEl);
+    }
+  })();
+</script>
+{%- endif -%}
+
 {% javascript %}
   class StickyHeader extends HTMLElement {
     constructor() {
@@ -548,6 +713,21 @@
       "id": "show_line_separator",
       "default": true,
       "label": "t:sections.header.settings.show_line_separator.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_on_top",
+      "default": true,
+      "label": "Transparente al inicio (sólido al hacer scroll)",
+      "info": "Header transparente con texto blanco al cargar; cambia a fondo sólido cuando el usuario hace scroll. Ideal con un hero a color. Desmárcalo para tener un header sólido siempre."
+    },
+    {
+      "type": "range",
+      "id": "transparent_scroll_threshold",
+      "label": "Umbral de scroll (px)",
+      "min": 20, "max": 400, "step": 10, "unit": "px",
+      "default": 80,
+      "info": "Distancia que el usuario debe scrollear antes de que el header se vuelva sólido."
     },
     {
       "type": "header",

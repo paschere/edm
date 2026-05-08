@@ -1,15 +1,42 @@
 <section
   class="edm-ugc color-{{ section.settings.color_scheme }} gradient"
-  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;position:relative;overflow:hidden;"
 >
-  <div class="page-width">
+  {%- render 'edm-brand-decor', variant: 'all', tone: 'soft', opacity: '0.4' -%}
+
+  <div class="edm-ugc__deco edm-ugc__deco--palm-l edm-anim-palm-sway" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-ugc__palm' -%}
+  </div>
+  <div class="edm-ugc__deco edm-ugc__deco--palm-r edm-anim-palm-sway-r" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-ugc__palm edm-ugc__palm--flip' -%}
+  </div>
+
+  <div class="page-width" style="position:relative;z-index:1;">
     <div class="edm-ugc__head">
       {%- if section.settings.eyebrow != blank -%}
-        <p class="edm-ugc__eyebrow">{{ section.settings.eyebrow }}</p>
+        <p class="edm-ugc__eyebrow">
+          {%- render 'edm-sparkle', class: 'edm-ugc__eyebrow-spark edm-anim-spark' -%}
+          <span>{{ section.settings.eyebrow }}</span>
+          {%- render 'edm-sparkle', class: 'edm-ugc__eyebrow-spark edm-anim-spark' -%}
+        </p>
       {%- endif -%}
-      <h2 class="edm-ugc__title">{{ section.settings.title | default: 'La comunidad solar' }}</h2>
+
+      <h2 class="edm-ugc__title">
+        {{ section.settings.title }}
+        {%- if section.settings.title_script != blank -%}
+          <span class="edm-script edm-ugc__title-script">{{ section.settings.title_script }}</span>
+        {%- endif -%}
+      </h2>
+
       {%- if section.settings.subtitle != blank -%}
         <p class="edm-ugc__sub">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.handle != blank -%}
+        <a class="edm-ugc__handle-pill" href="{{ section.settings.cta_url | default: '#' }}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          <span>@{{ section.settings.handle }}</span>
+        </a>
       {%- endif -%}
     </div>
 
@@ -17,37 +44,50 @@
     {%- if photo_blocks.size > 0 -%}
       <div class="edm-ugc__grid">
         {%- for block in photo_blocks -%}
-          <div class="edm-ugc__item" {{ block.shopify_attributes }}>
+          {%- liquid
+            assign post_link = block.settings.link
+            if post_link == blank
+              assign post_link = section.settings.cta_url
+            endif
+          -%}
+          <a class="edm-ugc__item"
+             {%- if post_link != blank %} href="{{ post_link }}" target="_blank" rel="noopener"{% endif -%}
+             aria-label="Foto de @{{ block.settings.username | default: section.settings.handle | escape }}"
+             {{ block.shopify_attributes }}>
             <div class="edm-ugc__media">
               {%- if block.settings.image != blank -%}
                 {{-
                   block.settings.image
-                  | image_url: width: 600
+                  | image_url: width: 800
                   | image_tag:
                     loading: 'lazy',
-                    width: 300,
+                    width: 400,
                     class: 'edm-ugc__img',
-                    alt: block.settings.username | escape
+                    alt: block.settings.username | default: section.settings.handle | escape
                 -}}
               {%- else -%}
-                <div class="edm-ugc__ph">{{ 'lifestyle-' | append: forloop.index | placeholder_svg_tag: 'edm-ugc__ph-svg' }}</div>
+                <div class="edm-ugc__ph" aria-hidden="true">
+                  {%- render 'edm-starfish', stroke: 'rgba(255,136,187,0.55)' -%}
+                </div>
               {%- endif -%}
 
               <div class="edm-ugc__overlay">
-                {%- if block.settings.username != blank -%}
-                  <span class="edm-ugc__handle">@{{ block.settings.username }}</span>
-                {%- endif -%}
-                {%- if block.settings.caption != blank -%}
-                  <p class="edm-ugc__caption">{{ block.settings.caption }}</p>
-                {%- endif -%}
-                {%- if block.settings.link != blank -%}
-                  <a href="{{ block.settings.link }}" class="edm-ugc__link" target="_blank" rel="noopener" aria-label="Ver en Instagram @{{ block.settings.username | escape }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-                  </a>
-                {%- endif -%}
+                <div class="edm-ugc__overlay-top">
+                  <span class="edm-ugc__ig-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  </span>
+                </div>
+                <div class="edm-ugc__overlay-bot">
+                  {%- if block.settings.username != blank or section.settings.handle != blank -%}
+                    <span class="edm-ugc__handle">@{{ block.settings.username | default: section.settings.handle }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.caption != blank -%}
+                    <p class="edm-ugc__caption">{{ block.settings.caption }}</p>
+                  {%- endif -%}
+                </div>
               </div>
             </div>
-          </div>
+          </a>
         {%- endfor -%}
       </div>
     {%- endif -%}
@@ -64,48 +104,120 @@
 </section>
 
 {% stylesheet %}
+.edm-ugc {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(255,165,211,0.35) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 100%, rgba(255,204,153,0.4) 0%, transparent 45%),
+    linear-gradient(180deg, #FFF6F2 0%, #FFEAEF 100%);
+}
+.edm-ugc__deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+.edm-ugc__deco--palm-l { top: -3rem; left: -4rem; }
+.edm-ugc__deco--palm-r { bottom: -3rem; right: -4rem; }
+.edm-ugc__palm {
+  width: 18rem;
+  height: 30rem;
+  color: rgba(255,153,102,0.32);
+}
+.edm-ugc__palm--flip { transform: scaleX(-1); }
+
 .edm-ugc__head {
   text-align: center;
   margin-bottom: 4.8rem;
 }
 .edm-ugc__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Quicksand', system-ui, sans-serif;
   font-size: 1.15rem;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
-  font-weight: 600;
-  color: #9d7f32;
-  margin: 0 0 1.4rem;
-}
-.edm-ugc__title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(3.6rem, 4.5vw, 6rem);
-  font-weight: 400;
-  line-height: 1.06;
-  color: #0b0805;
+  font-weight: 700;
+  color: #FF88BB;
   margin: 0 0 1.6rem;
 }
+.edm-ugc__eyebrow-spark { width: 1.2rem; height: 1.2rem; color: #FF9966; }
+
+.edm-ugc__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4rem, 5.4vw, 7.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #3D2330;
+  margin: 0 0 1.6rem;
+}
+.edm-ugc__title-script {
+  font-size: 1.25em;
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.1em);
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 .edm-ugc__sub {
   font-size: 1.7rem;
-  color: #78695a;
+  color: #7C5862;
   line-height: 1.65;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 540px;
+}
+
+.edm-ugc__handle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 2rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  box-shadow: 0 8px 22px -8px rgba(255,136,187,0.55);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.edm-ugc__handle-pill svg { width: 1.6rem; height: 1.6rem; }
+.edm-ugc__handle-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -8px rgba(255,136,187,0.7);
 }
 
 .edm-ugc__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.2rem;
+  gap: 1.4rem;
 }
 
-.edm-ugc__item { overflow: hidden; }
+.edm-ugc__item {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.edm-ugc__item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -16px rgba(255,136,187,0.45);
+}
 
 .edm-ugc__media {
   position: relative;
   aspect-ratio: 1/1;
   overflow: hidden;
-  border-radius: 4px;
-  background: #f4eee1;
-  cursor: pointer;
+  border-radius: 1.6rem;
+  background: linear-gradient(135deg, #FFEAEF 0%, #FFD9E4 100%);
 }
 
 .edm-ugc__img {
@@ -113,9 +225,9 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.edm-ugc__media:hover .edm-ugc__img { transform: scale(1.05); }
+.edm-ugc__item:hover .edm-ugc__img { transform: scale(1.06); }
 
 .edm-ugc__ph {
   position: absolute;
@@ -124,108 +236,132 @@
   align-items: center;
   justify-content: center;
 }
-.edm-ugc__ph-svg { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+.edm-ugc__ph svg { width: 50%; height: 50%; opacity: 0.6; }
 
 .edm-ugc__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(11,8,5,.8) 0%, transparent 55%);
+  background: linear-gradient(to top, rgba(61,35,48,0.78) 0%, rgba(61,35,48,0.15) 45%, transparent 70%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.6rem;
+  justify-content: space-between;
+  padding: 1.4rem;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-.edm-ugc__media:hover .edm-ugc__overlay { opacity: 1; }
+.edm-ugc__item:hover .edm-ugc__overlay { opacity: 1; }
+.edm-ugc__overlay-top {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.edm-ugc__ig-badge {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF88BB;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.edm-ugc__ig-badge svg { width: 1.6rem; height: 1.6rem; }
 
 .edm-ugc__handle {
+  font-family: 'Quicksand', system-ui, sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fbf8f1;
-  letter-spacing: 0.04em;
+  color: #fff;
+  letter-spacing: 0.06em;
   margin-bottom: 0.4rem;
   display: block;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .edm-ugc__caption {
-  font-size: 1.2rem;
-  color: rgba(251,248,241,.75);
+  font-size: 1.18rem;
+  color: rgba(255,255,255,0.92);
   margin: 0;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
-
-.edm-ugc__link {
-  position: absolute;
-  top: 1.2rem;
-  right: 1.2rem;
-  width: 3.2rem;
-  height: 3.2rem;
-  background: rgba(251,248,241,.15);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fbf8f1;
-  backdrop-filter: blur(4px);
-  transition: background 0.2s ease;
-}
-.edm-ugc__link:hover { background: rgba(251,248,241,.3); }
-.edm-ugc__link svg { width: 1.8rem; height: 1.8rem; }
 
 .edm-ugc__cta-wrap {
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 4.8rem;
 }
 .edm-ugc__cta {
   display: inline-flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.4rem 3.2rem;
-  border: 1.5px solid rgba(11,8,5,.18);
+  padding: 1.6rem 3.4rem;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  border: none;
   border-radius: 100px;
-  font-size: 1.4rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: #0b0805;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   text-decoration: none;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 12px 32px -10px rgba(255,136,187,0.55);
 }
-.edm-ugc__cta:hover { border-color: #9d7f32; color: #9d7f32; }
+.edm-ugc__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -10px rgba(255,136,187,0.7);
+}
 
 @media (max-width: 749px) {
-  .edm-ugc__grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-  .edm-ugc__overlay { opacity: 1; }
+  .edm-ugc__grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .edm-ugc__overlay { opacity: 1; background: linear-gradient(to top, rgba(61,35,48,0.7) 0%, transparent 60%); }
+  .edm-ugc__palm { width: 12rem; height: 22rem; }
 }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Galería UGC",
+  "name": "Comunidad solar",
   "tag": "section",
   "class": "section",
   "settings": [
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Texto encima del título",
+      "label": "Eyebrow",
       "default": "Comunidad"
     },
     {
       "type": "text",
       "id": "title",
       "label": "Título",
-      "default": "La comunidad solar"
+      "default": "La comunidad"
+    },
+    {
+      "type": "text",
+      "id": "title_script",
+      "label": "Palabra en script",
+      "default": "solar",
+      "info": "Aparece al final del título en tipografía manuscrita."
     },
     {
       "type": "text",
       "id": "subtitle",
       "label": "Subtítulo",
       "default": "Reales. Sin filtro. Con amor desde Colombia."
+    },
+    {
+      "type": "text",
+      "id": "handle",
+      "label": "Usuario IG (sin @)",
+      "default": "estrelladelmar.co"
     },
     {
       "type": "text",
@@ -269,38 +405,23 @@
       "name": "Foto",
       "limit": 12,
       "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Foto"
-        },
-        {
-          "type": "text",
-          "id": "username",
-          "label": "Usuario de Instagram",
-          "info": "Sin @, solo el nombre de usuario"
-        },
-        {
-          "type": "text",
-          "id": "caption",
-          "label": "Caption corto"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Enlace al post"
-        }
+        { "type": "image_picker", "id": "image", "label": "Foto" },
+        { "type": "text", "id": "username", "label": "Usuario (override)", "info": "Sin @, opcional. Si está vacío usa el handle global." },
+        { "type": "text", "id": "caption", "label": "Caption corto" },
+        { "type": "url", "id": "link", "label": "Enlace al post" }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Galería UGC",
+      "name": "Comunidad solar",
       "blocks": [
-        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
-        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
-        { "type": "photo", "settings": { "username": "estrelladelmar.co" } },
-        { "type": "photo", "settings": { "username": "estrelladelmar.co" } }
+        { "type": "photo", "settings": { "caption": "Bronceado dorado en Cartagena 🌅" } },
+        { "type": "photo", "settings": { "caption": "Ritual solar en San Andrés ✨" } },
+        { "type": "photo", "settings": { "caption": "Made with love in Medellín 🌴" } },
+        { "type": "photo", "settings": { "caption": "Días de playa con Estrella de Mar 🌊" } },
+        { "type": "photo", "settings": { "caption": "Atardeceres del Caribe 🌺" } },
+        { "type": "photo", "settings": { "caption": "Brillo natural sin filtros ⭐" } }
       ]
     }
   ]

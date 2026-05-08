@@ -12,19 +12,30 @@
 
 <section
   class="edm-quiz color-{{ section.settings.color_scheme }} gradient"
-  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px; position:relative; overflow:hidden;"
   aria-label="Quiz de recomendación de producto"
 >
-  <div class="page-width" style="max-width: 680px;">
+  {%- render 'edm-brand-decor', variant: 'sparkles', tone: 'soft', opacity: '0.5' -%}
+
+  <div class="page-width" style="max-width: 680px; position:relative; z-index:1;">
 
     {%- comment -%} Encabezado {%- endcomment -%}
-    <div style="text-align: center; margin-bottom: 40px;">
+    <div class="edm-quiz__head">
       {%- if section.settings.eyebrow != blank -%}
-        <span class="section-eyebrow">{{ section.settings.eyebrow }}</span>
+        <p class="edm-quiz__eyebrow">
+          {%- render 'edm-sparkle', class: 'edm-quiz__eyebrow-spark edm-anim-spark' -%}
+          <span>{{ section.settings.eyebrow }}</span>
+          {%- render 'edm-sparkle', class: 'edm-quiz__eyebrow-spark edm-anim-spark' -%}
+        </p>
       {%- endif -%}
-      <h2 class="section-title">{{ section.settings.title | default: '¿Qué bronceador es para ti?' }}</h2>
+      <h2 class="edm-quiz__title">
+        {{ section.settings.title | default: '¿Qué bronceador es para ti?' }}
+        {%- if section.settings.title_script != blank -%}
+          <span class="edm-script edm-quiz__title-script">{{ section.settings.title_script }}</span>
+        {%- endif -%}
+      </h2>
       {%- if section.settings.subtitle != blank -%}
-        <p class="section-subhead" style="margin: 12px auto 0; text-align: center;">{{ section.settings.subtitle }}</p>
+        <p class="edm-quiz__sub">{{ section.settings.subtitle }}</p>
       {%- endif -%}
     </div>
 
@@ -55,7 +66,7 @@
       >
         <div
           style="
-            height: 100%; background: #9d7f32;
+            height: 100%; background: #FF88BB;
             border-radius: 40px; transition: width .4s ease;
           "
           :style="'width:' + Math.round(((step + 1) / {{ questions.size }}) * 100) + '%'"
@@ -206,7 +217,7 @@
                   style="
                     font-family: var(--font-heading-family, 'Cormorant Garamond', serif);
                     font-size: 1.75rem; font-weight: 600;
-                    color: #9d7f32; margin-bottom: 24px;
+                    color: #FF88BB; margin-bottom: 24px;
                   "
                 >
                   {{ rec_product.price | money }}
@@ -255,14 +266,62 @@
 </section>
 
 <style>
+  .edm-quiz__head {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .edm-quiz__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-family: 'Quicksand', system-ui, sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #FF88BB;
+    margin: 0 0 1.6rem;
+  }
+  .edm-quiz__eyebrow-spark { width: 1.2rem; height: 1.2rem; color: #FF9966; }
+  .edm-quiz__title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(4rem, 5vw, 6.6rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: #3D2330;
+    margin: 0 0 1.4rem;
+  }
+  .edm-quiz__title-script {
+    font-size: 1.2em;
+    display: inline-block;
+    margin-left: 0.18em;
+    transform: translateY(0.1em);
+    background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .edm-quiz__sub {
+    font-size: 1.6rem;
+    color: #7C5862;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .edm-quiz__option {
+    transition: border-color 0.2s, background 0.2s, transform 0.2s !important;
+  }
   .edm-quiz__option:hover {
-    border-color: #9d7f32 !important;
-    background: rgba(208,177,106,0.08) !important;
+    border-color: #FF88BB !important;
+    background: rgba(255,165,211,0.08) !important;
+    transform: translateY(-1px);
   }
   .edm-quiz__option--selected {
-    border-color: #9d7f32 !important;
-    background: rgba(208,177,106,0.08) !important;
-    color: #9d7f32;
+    border-color: #FF88BB !important;
+    background: linear-gradient(135deg, rgba(255,165,211,0.18) 0%, rgba(255,153,102,0.18) 100%) !important;
+    color: #FF88BB;
   }
   @media (max-width: 480px) {
     /* Opciones en columna única en móvil muy pequeño */
@@ -329,7 +388,14 @@
       "type": "text",
       "id": "title",
       "label": "Título del quiz",
-      "default": "¿Qué bronceador es para ti?"
+      "default": "¿Qué bronceador es para"
+    },
+    {
+      "type": "text",
+      "id": "title_script",
+      "label": "Palabra final (script)",
+      "default": "ti?",
+      "info": "Aparece en tipografía manuscrita con gradiente sunset."
     },
     {
       "type": "textarea",

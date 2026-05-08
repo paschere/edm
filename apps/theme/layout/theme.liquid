@@ -15,13 +15,113 @@
       <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
     {%- endunless -%}
 
-    {%- comment -%} Fuentes de marca: Cormorant Garamond (editorial serif) + Inter (body) {%- endcomment -%}
+    {%- comment -%} Fuentes de marca: Cormorant Garamond (titulares) + Quicksand (body) {%- endcomment -%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Quicksand:wght@300;400;500;600;700&family=Sacramento&family=Fredoka:wght@500;600;700&display=swap"
     >
+
+    <style>
+      :root {
+        --edm-pink-soft: #FFA5D3;
+        --edm-pink: #FF88BB;
+        --edm-tangerine: #FF9966;
+        --edm-peach: #FFCC99;
+        --edm-orange: #F8B450;
+        --edm-mimi: #FFD9E4;
+        --edm-lavander: #DDB6E8;
+        --edm-periwinkle: #CCCCFF;
+        --edm-indigo: #9999FF;
+        --edm-ice: #99FFFF;
+        --edm-cream: #FFF5EC;
+        --edm-blush-bg: #FFEAEF;
+        --edm-mauve-dark: #3D2330;
+        --edm-mauve-mid: #7C5862;
+        --edm-mauve-soft: #A88891;
+        --edm-grad-sunset: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+        --edm-grad-sunset-3: linear-gradient(135deg, #FFA5D3 0%, #FF9966 50%, #FFCC99 100%);
+        --edm-grad-blush: linear-gradient(135deg, #FFD9E4 0%, #FFA5D3 100%);
+        --edm-grad-tropic: linear-gradient(135deg, #FFA5D3 0%, #FFCC99 50%, #99FFFF 100%);
+      }
+      body { font-family: 'Quicksand', system-ui, sans-serif; }
+      .edm-script { font-family: 'Sacramento', cursive; font-weight: 400; }
+      .edm-display { font-family: 'Fredoka', system-ui, sans-serif; font-weight: 700; letter-spacing: 0.01em; }
+
+      @keyframes edmPalmSway {
+        0%, 100% { transform: rotate(-2.5deg); }
+        50%       { transform: rotate(2.5deg); }
+      }
+      @keyframes edmPalmSwayFlip {
+        0%, 100% { transform: scaleX(-1) rotate(-3deg); }
+        50%       { transform: scaleX(-1) rotate(3deg); }
+      }
+      @keyframes edmStarBob {
+        0%, 100% { transform: translateY(0) rotate(-4deg); }
+        50%       { transform: translateY(-10px) rotate(4deg); }
+      }
+      @keyframes edmStarSpin {
+        from { transform: rotate(0); }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes edmSparkTwinkle {
+        0%, 100% { opacity: 0.35; transform: scale(0.8) rotate(0); }
+        50%       { opacity: 1; transform: scale(1.15) rotate(45deg); }
+      }
+      @keyframes edmDrift {
+        0%   { transform: translate(0, 0); }
+        25%  { transform: translate(8px, -6px); }
+        50%  { transform: translate(0, -12px); }
+        75%  { transform: translate(-8px, -6px); }
+        100% { transform: translate(0, 0); }
+      }
+
+      .edm-anim-palm-sway   { transform-origin: bottom center; animation: edmPalmSway 5.5s ease-in-out infinite; }
+      .edm-anim-palm-sway-r { transform-origin: bottom center; animation: edmPalmSwayFlip 6s ease-in-out infinite; }
+      .edm-anim-star-bob    { animation: edmStarBob 6s ease-in-out infinite; transform-origin: center; }
+      .edm-anim-star-spin   { animation: edmStarSpin 32s linear infinite; transform-origin: center; }
+      .edm-anim-spark       { animation: edmSparkTwinkle 3s ease-in-out infinite; transform-origin: center; }
+      .edm-anim-drift       { animation: edmDrift 14s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .edm-anim-palm-sway, .edm-anim-palm-sway-r, .edm-anim-star-bob,
+        .edm-anim-star-spin, .edm-anim-spark, .edm-anim-drift { animation: none; }
+      }
+
+      .edm-decor {
+        position: absolute; inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: var(--decor-op, 0.55);
+        overflow: hidden;
+      }
+      .edm-decor__palm {
+        position: absolute;
+        width: 14rem; height: 28rem;
+        filter: drop-shadow(0 6px 18px rgba(255, 136, 187, 0.18));
+      }
+      .edm-decor__palm svg { width: 100%; height: 100%; display: block; }
+      .edm-decor__palm--tl { top: -3rem; left: -3rem; }
+      .edm-decor__palm--br { bottom: -3rem; right: -3rem; }
+      .edm-decor__star {
+        position: absolute;
+        filter: drop-shadow(0 4px 12px rgba(255, 136, 187, 0.3));
+      }
+      .edm-decor__star svg { width: 100%; height: 100%; display: block; }
+      .edm-decor__star--1 { top: 8%; right: 10%; width: 7rem; height: 7rem; }
+      .edm-decor__star--2 { bottom: 12%; left: 8%; width: 5rem; height: 5rem; opacity: 0.7; }
+      .edm-decor__spark { position: absolute; display: inline-block; }
+      .edm-decor__spark svg { width: 100%; height: 100%; display: block; }
+      .edm-decor__spark--1 { top: 18%; left: 22%; width: 1.6rem; height: 1.6rem; }
+      .edm-decor__spark--2 { top: 40%; right: 25%; width: 1.2rem; height: 1.2rem; }
+      .edm-decor__spark--3 { bottom: 25%; right: 18%; width: 1.4rem; height: 1.4rem; }
+      @media (max-width: 749px) {
+        .edm-decor__palm  { width: 9rem; height: 18rem; }
+        .edm-decor__star--1 { width: 5rem; height: 5rem; }
+        .edm-decor__star--2 { width: 3.5rem; height: 3.5rem; }
+      }
+    </style>
 
     <title>
       EDM | {{ page_title }}

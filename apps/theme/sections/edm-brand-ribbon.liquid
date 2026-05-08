@@ -1,0 +1,213 @@
+<section
+  class="edm-ribbon"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  aria-label="{{ section.settings.tagline | escape }}"
+>
+  {%- render 'edm-confetti', class: 'edm-ribbon__confetti' -%}
+
+  <div class="edm-ribbon__deco edm-ribbon__deco--left edm-anim-palm-sway" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-ribbon__palm' -%}
+  </div>
+  <div class="edm-ribbon__deco edm-ribbon__deco--right edm-anim-palm-sway-r" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-ribbon__palm edm-ribbon__palm--flip' -%}
+  </div>
+
+  <div class="edm-ribbon__inner">
+    <div class="edm-ribbon__star" aria-hidden="true">
+      {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.7)' -%}
+      {%- render 'edm-wave', class: 'edm-ribbon__wave' -%}
+    </div>
+
+    <h2 class="edm-ribbon__h2">
+      {{ section.settings.tagline_pre }}
+      <span class="edm-script edm-ribbon__h2-script">{{ section.settings.tagline_script }}</span>
+    </h2>
+
+    {%- if section.settings.subline != blank -%}
+      <p class="edm-ribbon__sub">{{ section.settings.subline }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.handle != blank or section.settings.url != blank -%}
+      <p class="edm-ribbon__meta">
+        {%- if section.settings.handle != blank -%}<span>{{ section.settings.handle }}</span>{%- endif -%}
+        {%- if section.settings.url != blank -%}<span>{{ section.settings.url }}</span>{%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-ribbon {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg, #FFA5D3 0%, #FF88BB 50%, #FF9966 100%);
+}
+.edm-ribbon__confetti {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  color: rgba(255,255,255,0.55);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.edm-ribbon__deco { position: absolute; pointer-events: none; }
+.edm-ribbon__deco--left  { top: -2rem; left: -3rem; }
+.edm-ribbon__deco--right { bottom: -2rem; right: -3rem; }
+.edm-ribbon__palm {
+  width: 14rem;
+  height: 28rem;
+  color: rgba(255,255,255,0.4);
+}
+.edm-ribbon__palm--flip { transform: scaleX(-1) rotate(15deg); }
+
+.edm-ribbon__inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 6.4rem 2.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.edm-ribbon__star {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 2rem;
+}
+.edm-ribbon__star > svg:first-child {
+  width: 6rem; height: 6rem;
+  color: #fff;
+  filter: drop-shadow(0 4px 16px rgba(255,153,102,0.45));
+  animation: edmRibbonFloat 5s ease-in-out infinite;
+}
+@keyframes edmRibbonFloat {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50%       { transform: translateY(-6px) rotate(-4deg); }
+}
+.edm-ribbon__wave {
+  width: 7rem;
+  height: 1rem;
+  color: #fff;
+  opacity: 0.85;
+}
+
+.edm-ribbon__h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4rem, 5.6vw, 7rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  color: #fff;
+  margin: 0 0 1.4rem;
+  text-shadow: 0 4px 20px rgba(255,136,187,0.4);
+}
+.edm-ribbon__h2-script {
+  font-size: 1.4em;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  color: #fff;
+  display: inline-block;
+  margin-left: 0.15em;
+  transform: translateY(0.12em);
+  text-shadow: 0 4px 24px rgba(255,153,102,0.5);
+}
+
+.edm-ribbon__sub {
+  font-size: 1.4rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  margin: 0 0 2rem;
+  font-weight: 600;
+}
+
+.edm-ribbon__meta {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+  flex-wrap: wrap;
+}
+.edm-ribbon__meta span + span::before {
+  content: '·';
+  margin-right: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+
+@media (max-width: 749px) {
+  .edm-ribbon__inner { padding: 4.4rem 2rem; }
+  .edm-ribbon__palm  { width: 9rem; height: 18rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand Ribbon",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "tagline_pre",
+      "label": "Texto principal",
+      "default": "Disfruta tus días bajo el"
+    },
+    {
+      "type": "text",
+      "id": "tagline_script",
+      "label": "Palabra final (script)",
+      "default": "sol"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Texto completo (accesibilidad)",
+      "default": "Disfruta tus días bajo el sol"
+    },
+    {
+      "type": "text",
+      "id": "subline",
+      "label": "Sublínea",
+      "default": "Always Tan Club · Estrella de Mar"
+    },
+    {
+      "type": "text",
+      "id": "handle",
+      "label": "Handle de redes",
+      "default": "@estrellademar.co"
+    },
+    {
+      "type": "text",
+      "id": "url",
+      "label": "URL",
+      "default": "www.estrellademar.co"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    { "name": "Brand Ribbon" }
+  ]
+}
+{% endschema %}

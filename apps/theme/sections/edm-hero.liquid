@@ -1,552 +1,558 @@
 {%- liquid
-  assign fp           = all_products[section.settings.featured_product]
-  assign raw_heading  = section.settings.heading | default: 'Bronceado dorado, nacido en el Caribe'
+  assign raw_heading   = section.settings.heading | default: 'Bronceado dorado, nacido en el Caribe'
   assign heading_words = raw_heading | split: ' '
-  assign gold_csv     = section.settings.heading_gold_words | downcase | strip
-  assign gold_list    = gold_csv | split: ','
-  assign widx         = 0
+  assign script_csv    = section.settings.heading_gold_words | downcase | strip
+  assign script_list   = script_csv | split: ','
+  assign widx          = 0
 -%}
 
+{%- liquid
+  assign has_video_file = false
+  assign has_video_url  = false
+  if section.settings.video != blank
+    assign has_video_file = true
+  endif
+  if section.settings.video_url != blank
+    assign has_video_url = true
+  endif
+  assign has_media = false
+  if has_video_file or has_video_url or section.settings.image != blank
+    assign has_media = true
+  endif
+-%}
+
+{%- assign overlay_pct = section.settings.overlay_strength | default: 65 -%}
+{%- assign overlay_dec = overlay_pct | times: 1.0 | divided_by: 100.0 -%}
+{%- assign media_opacity = 100 | minus: overlay_pct | times: 1.0 | divided_by: 100.0 -%}
+
 <section
-  class="edm-hero color-{{ section.settings.color_scheme }} gradient"
-  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  class="edm-hero{% if has_media %} edm-hero--has-img{% endif %}"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;--min-h:{{ section.settings.min_height }}px;--overlay:{{ overlay_dec }};--media-op:{{ media_opacity }};padding-top:var(--pt);padding-bottom:var(--pb);"
   aria-label="{{ raw_heading | escape }}"
 >
-  <div class="edm-hero__grid">
-
-    <div class="edm-hero__copy">
-
-      {%- if section.settings.eyebrow != blank -%}
-        <p class="edm-hero__eyebrow">{{ section.settings.eyebrow }}</p>
+  <div class="edm-hero__bg" aria-hidden="true">
+    {%- if has_video_file -%}
+      {{
+        section.settings.video
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          muted: true,
+          playsinline: true,
+          controls: false,
+          preload: 'auto',
+          image_size: '2400x',
+          class: 'edm-hero__bg-video'
+      }}
+    {%- elsif has_video_url -%}
+      {%- assign vu = section.settings.video_url -%}
+      {%- if vu.type == 'youtube' -%}
+        <iframe class="edm-hero__bg-iframe"
+          src="https://www.youtube.com/embed/{{ vu.id }}?autoplay=1&mute=1&loop=1&playlist={{ vu.id }}&controls=0&showinfo=0&modestbranding=1&playsinline=1&rel=0&wmode=opaque"
+          frameborder="0" allow="autoplay; encrypted-media" allowfullscreen aria-hidden="true" tabindex="-1"></iframe>
+      {%- elsif vu.type == 'vimeo' -%}
+        <iframe class="edm-hero__bg-iframe"
+          src="https://player.vimeo.com/video/{{ vu.id }}?autoplay=1&loop=1&muted=1&background=1&autopause=0"
+          frameborder="0" allow="autoplay; encrypted-media" allowfullscreen aria-hidden="true" tabindex="-1"></iframe>
       {%- endif -%}
+    {%- elsif section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 2400
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          width: 2400,
+          class: 'edm-hero__bg-img',
+          alt: ''
+      }}
+    {%- endif -%}
 
-      <h1 class="edm-hero__h1" aria-label="{{ raw_heading | escape }}">
-        {%- for w in heading_words -%}
-          {%- assign wc = w | remove: ',' | remove: '.' | remove: '!' | remove: '¡' | downcase -%}
-          {%- assign is_gold = false -%}
-          {%- for g in gold_list -%}
-            {%- if g == wc -%}{%- assign is_gold = true -%}{%- endif -%}
-          {%- endfor -%}
-          <span class="edm-word-mask"><span class="edm-word{% if is_gold %} edm-word--gold{% endif %}" style="--i:{{ widx }}">{{ w }}</span></span>
-          {%- assign widx = widx | plus: 1 -%}
-        {%- endfor -%}
-      </h1>
+  </div>
 
-      {%- if section.settings.lead != blank -%}
-        <p class="edm-hero__lead">{{ section.settings.lead }}</p>
-      {%- endif -%}
-
-      <div class="edm-hero__ctas">
-        {%- if section.settings.cta_primary_label != blank -%}
-          <a href="{{ section.settings.cta_primary_url | default: '#' }}" class="edm-hero__btn-primary">
-            <span>{{ section.settings.cta_primary_label }}</span>
-          </a>
-        {%- endif -%}
-        {%- if section.settings.cta_secondary_label != blank -%}
-          <a href="{{ section.settings.cta_secondary_url | default: '#' }}" class="edm-hero__btn-ghost">
-            {{ section.settings.cta_secondary_label }}
-          </a>
-        {%- endif -%}
-      </div>
-
-      {%- if section.blocks.size > 0 -%}
-        <div class="edm-hero__stats">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'stat' -%}
-              <div class="edm-hero__stat" {{ block.shopify_attributes }}>
-                <span class="edm-hero__stat-val">{{ block.settings.value }}</span>
-                <span class="edm-hero__stat-lbl">{{ block.settings.label }}</span>
-              </div>
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-
-      <div class="edm-hero__scroll" aria-hidden="true">
-        <span class="edm-hero__scroll-line"></span>
-        <span class="edm-hero__scroll-lbl">Scroll</span>
-      </div>
-
+  <div class="edm-hero__deco" aria-hidden="true">
+    {%- render 'edm-confetti', class: 'edm-hero__confetti' -%}
+    <div class="edm-hero__palm edm-hero__palm--l edm-anim-palm-sway">
+      {%- render 'edm-palm' -%}
     </div>
+    <div class="edm-hero__palm edm-hero__palm--r edm-anim-palm-sway-r">
+      {%- render 'edm-palm' -%}
+    </div>
+    <div class="edm-hero__star edm-hero__star--tl">{%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.55)' -%}</div>
+    <div class="edm-hero__star edm-hero__star--br">{%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.55)' -%}</div>
+    {%- render 'edm-sparkle', class: 'edm-hero__spark edm-hero__spark--1' -%}
+    {%- render 'edm-sparkle', class: 'edm-hero__spark edm-hero__spark--2' -%}
+    {%- render 'edm-sparkle', class: 'edm-hero__spark edm-hero__spark--3' -%}
+  </div>
 
-    <div class="edm-hero__media">
-      {%- if section.settings.image != blank -%}
-        {{
-          section.settings.image
-          | image_url: width: 1400
-          | image_tag:
-            loading: 'eager',
-            fetchpriority: 'high',
-            width: 1400,
-            class: 'edm-hero__img',
-            alt: section.settings.image.alt | default: 'Estrella de Mar'
-        }}
-      {%- else -%}
-        <div class="edm-hero__placeholder" aria-hidden="true">
-          <span class="edm-hero__placeholder-label">Estrella de Mar</span>
-        </div>
-      {%- endif -%}
+  <div class="edm-hero__inner">
 
-      <div class="edm-hero__wash" aria-hidden="true"></div>
-      <div class="edm-hero__vignette" aria-hidden="true"></div>
+    {%- if section.settings.mini_ribbon_pre != blank or section.settings.mini_ribbon_script != blank -%}
+      <div class="edm-hero__chip">
+        {%- render 'edm-starfish', class: 'edm-hero__chip-icon' -%}
+        <span>
+          {{ section.settings.mini_ribbon_pre }}
+          {%- if section.settings.mini_ribbon_script != blank -%}
+            <em class="edm-script edm-hero__chip-script">{{ section.settings.mini_ribbon_script }}</em>
+          {%- endif -%}
+        </span>
+        {%- render 'edm-sparkle', class: 'edm-hero__chip-icon edm-hero__chip-icon--spark' -%}
+      </div>
+    {%- endif -%}
 
-      {%- if section.settings.accent_text != blank -%}
-        <p class="edm-hero__accent" aria-hidden="true">
-          <span class="edm-hero__spark">✦</span>
-          {{ section.settings.accent_text }}
-        </p>
-      {%- endif -%}
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="edm-hero__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
 
-      {%- if fp != empty -%}
-        <a href="{{ fp.url }}" class="edm-hero__pf" aria-label="{{ fp.title | escape }}">
-          <div class="edm-hpf__media">
-            {%- if section.settings.featured_product_chip != blank -%}
-              <span class="edm-hpf__chip">{{ section.settings.featured_product_chip }}</span>
-            {%- endif -%}
-            {%- if fp.featured_image -%}
-              {{
-                fp.featured_image
-                | image_url: width: 400
-                | image_tag:
-                  loading: 'lazy',
-                  width: 400,
-                  class: 'edm-hpf__img',
-                  alt: fp.title
-              }}
-            {%- endif -%}
-          </div>
-          <div class="edm-hpf__body">
-            {%- if section.settings.featured_product_category != blank -%}
-              <p class="edm-hpf__cat">{{ section.settings.featured_product_category }}</p>
-            {%- endif -%}
-            <p class="edm-hpf__name">{{ fp.title }}</p>
-          </div>
-          <div class="edm-hpf__foot">
-            <span class="edm-hpf__price">{{ fp.price | money_without_trailing_zeros }}</span>
-            <span class="edm-hpf__shop">Comprar <span class="edm-hpf__arrow">→</span></span>
-          </div>
+    <h1 class="edm-hero__h1" aria-label="{{ raw_heading | escape }}">
+      {%- for w in heading_words -%}
+        {%- assign wc = w | remove: ',' | remove: '.' | remove: '!' | remove: '¡' | downcase -%}
+        {%- assign is_script = false -%}
+        {%- for g in script_list -%}
+          {%- if g == wc -%}{%- assign is_script = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if is_script -%}
+          <span class="edm-script edm-hero__word-script">{{ w }}</span>
+        {%- else -%}
+          {{ w }}
+        {%- endif -%}
+        {%- unless forloop.last %} {% endunless -%}
+      {%- endfor -%}
+    </h1>
+
+    {%- if section.settings.lead != blank -%}
+      <p class="edm-hero__lead">{{ section.settings.lead }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.show_rating -%}
+      <div class="edm-hero__rating" aria-label="Rating: {{ section.settings.rating_value }} de 5 estrellas">
+        <span class="edm-hero__rating-stars" aria-hidden="true">
+          {%- for i in (1..5) -%}
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.7 5.5 6 .9-4.4 4.2 1.1 6-5.4-2.8-5.4 2.8 1.1-6L1.3 7.9l6-.9z"/></svg>
+          {%- endfor -%}
+        </span>
+        <span class="edm-hero__rating-text">
+          <strong>{{ section.settings.rating_value | default: '4.9' }}</strong>
+          {{ section.settings.rating_label | default: 'de 5' }}
+          <span class="edm-hero__rating-sep">·</span>
+          {{ section.settings.rating_count | default: '+1.842 reseñas' }}
+        </span>
+      </div>
+    {%- endif -%}
+
+    <div class="edm-hero__ctas">
+      {%- if section.settings.cta_primary_label != blank -%}
+        <a href="{{ section.settings.cta_primary_url | default: '#' }}" class="edm-hero__btn-primary">
+          {{ section.settings.cta_primary_label }}
         </a>
       {%- endif -%}
-
+      {%- if section.settings.cta_secondary_label != blank -%}
+        <a href="{{ section.settings.cta_secondary_url | default: '#' }}" class="edm-hero__btn-ghost">
+          {{ section.settings.cta_secondary_label }}
+        </a>
+      {%- endif -%}
     </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="edm-hero__stats">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'stat' -%}
+            <div class="edm-hero__stat" {{ block.shopify_attributes }}>
+              <span class="edm-hero__stat-val">{{ block.settings.value }}</span>
+              <span class="edm-hero__stat-lbl">{{ block.settings.label }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
   </div>
 </section>
 
 {% stylesheet %}
-  .edm-hero { overflow: hidden; }
+.edm-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  text-align: center;
+  color: #fff;
+  background: #FF88BB;
+  min-height: calc(100vh - 13rem);
+  min-height: calc(100dvh - 13rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .edm-hero__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: min(95vh, 960px);
-  }
+.edm-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* Pink lives HERE as the wrapper background — the media on top is faded with opacity so the pink shows through. Bulletproof: works for <video>, <img>, <iframe> regardless of compositing layer. */
+  background: linear-gradient(135deg, #FFA5D3 0%, #FF88BB 45%, #FF9966 100%);
+}
+.edm-hero__bg-img,
+.edm-hero__bg-video,
+.edm-hero__bg-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  z-index: 1;
+}
+.edm-hero--has-img .edm-hero__bg-img,
+.edm-hero--has-img .edm-hero__bg-video,
+.edm-hero--has-img .edm-hero__bg-iframe {
+  opacity: var(--media-op, 0.35);
+}
+.edm-hero__bg-iframe { border: 0; }
+.edm-hero__bg-video > video,
+.edm-hero__bg-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (min-aspect-ratio: 16/9) {
+  .edm-hero__bg-iframe { height: 56.25vw; top: 50%; bottom: auto; transform: translateY(-50%); }
+}
+@media (max-aspect-ratio: 16/9) {
+  .edm-hero__bg-iframe { width: 177.78vh; left: 50%; right: auto; transform: translateX(-50%); }
+}
 
-  .edm-hero__copy {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 6rem 5rem 5rem 7%;
-  }
 
-  .edm-hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 1.2rem;
-    font-size: 1.3rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: #9d7f32;
-    font-weight: 600;
-    margin: 0 0 3rem;
-    animation: edmHeroFade 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-  }
-  .edm-hero__eyebrow::before {
-    content: '';
-    width: 36px;
-    height: 1px;
-    background: currentColor;
-    flex-shrink: 0;
-  }
+.edm-hero__deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  transform: translateZ(0);
+}
+.edm-hero__confetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: rgba(255,255,255,0.5);
+  opacity: 0.7;
+}
+.edm-hero__palm {
+  position: absolute;
+  width: 22rem;
+  height: 38rem;
+  color: rgba(255,255,255,0.55);
+  filter: drop-shadow(0 8px 22px rgba(255,136,187,0.45));
+  pointer-events: none;
+  z-index: 0;
+}
+.edm-hero__palm svg { width: 100%; height: 100%; }
+.edm-hero__palm--l {
+  top: -4rem;
+  left: -3rem;
+  transform-origin: top left;
+}
+.edm-hero__palm--r {
+  bottom: -5rem;
+  right: -3rem;
+  transform-origin: bottom right;
+  transform: scaleX(-1);
+}
 
-  @keyframes edmHeroFade {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+.edm-hero__star {
+  position: absolute;
+  width: 14rem;
+  height: 14rem;
+  color: rgba(255,255,255,0.5);
+  filter: drop-shadow(0 4px 16px rgba(255,136,187,0.4));
+}
+.edm-hero__star svg { width: 100%; height: 100%; }
+.edm-hero__star--tl {
+  top: 6%;
+  left: 5%;
+  transform: rotate(-15deg);
+  animation: edmHeroStarFloat 9s ease-in-out infinite;
+}
+.edm-hero__star--br {
+  bottom: 6%;
+  right: 5%;
+  transform: rotate(20deg);
+  width: 11rem;
+  height: 11rem;
+  animation: edmHeroStarFloat 11s ease-in-out infinite reverse;
+}
+@keyframes edmHeroStarFloat {
+  0%, 100% { transform: translateY(0) rotate(-15deg); }
+  50%       { transform: translateY(-10px) rotate(-10deg); }
+}
 
-  .edm-hero__h1 {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(6.4rem, 8vw, 12rem);
-    font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: -0.015em;
-    color: #0b0805;
-    margin: 0 0 3rem;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 0.22em;
-  }
+.edm-hero__spark {
+  position: absolute;
+  color: #fff;
+  filter: drop-shadow(0 2px 8px rgba(255,153,102,0.5));
+  animation: edmTwinkle 3s ease-in-out infinite;
+}
+.edm-hero__spark--1 {
+  top: 22%; left: 18%;
+  width: 1.8rem;
+  animation-delay: 0.2s;
+}
+.edm-hero__spark--2 {
+  top: 30%; right: 22%;
+  width: 1.4rem;
+  animation-delay: 1.1s;
+}
+.edm-hero__spark--3 {
+  bottom: 24%; left: 28%;
+  width: 1.5rem;
+  animation-delay: 2.0s;
+}
+@keyframes edmTwinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.85) rotate(0deg); }
+  50%       { opacity: 1; transform: scale(1.15) rotate(45deg); }
+}
 
-  .edm-word-mask {
-    display: block;
-    overflow: hidden;
-    line-height: inherit;
-    padding-bottom: 0.12em;
-  }
+.edm-hero__inner {
+  max-width: 860px;
+  padding: 8rem 2.4rem;
+  position: relative;
+  z-index: 7;
+  transform: translateZ(0);
+}
 
-  .edm-word {
-    display: inline-block;
-    transform: translateY(110%);
-    opacity: 0;
-    animation: edmWordUp 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    animation-delay: calc(0.15s + var(--i, 0) * 0.1s);
-  }
+.edm-hero__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 1.6rem 0.7rem 1.2rem;
+  background: rgba(255,255,255,0.96);
+  color: #FF88BB;
+  border-radius: 100px;
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 2rem;
+  box-shadow: 0 8px 22px -8px rgba(255,136,187,0.55);
+  animation: edmHeroFade 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.edm-hero__chip-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  color: #FF88BB;
+}
+.edm-hero__chip-icon--spark {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #FF9966;
+  animation: edmTwinkle 2.4s ease-in-out infinite 0.4s;
+}
+.edm-hero__chip-script {
+  font-style: normal;
+  text-transform: lowercase;
+  font-size: 1.45em;
+  letter-spacing: 0;
+  margin: 0 0.1em;
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(0.08em);
+  color: #FF9966;
+}
 
-  @keyframes edmWordUp {
-    0%   { transform: translateY(110%); opacity: 0; }
-    40%  { opacity: 1; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
+@keyframes edmHeroFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  .edm-word--gold {
-    font-style: italic;
-    font-weight: 500;
-    background: linear-gradient(100deg, #9d7f32 0%, #bb9a4c 25%, #e3c990 50%, #bb9a4c 75%, #9d7f32 100%);
-    background-size: 250% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    animation: edmWordUp 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards, edmGoldShine 5s ease-in-out infinite;
-    animation-delay: calc(0.15s + var(--i, 0) * 0.1s), calc(1.4s + var(--i, 0) * 0.3s);
-  }
+.edm-hero__eyebrow {
+  font-size: 1.2rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  font-weight: 600;
+  margin: 0 0 1.8rem;
+  text-shadow: 0 1px 8px rgba(255,136,187,0.35);
+  animation: edmHeroFade 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
 
-  @keyframes edmGoldShine {
-    0%, 100% { background-position: 0% 50%; }
-    50%       { background-position: 200% 50%; }
-  }
+.edm-hero__h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4.6rem, 7vw, 9rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #fff;
+  margin: 0 0 2.6rem;
+  text-shadow: 0 4px 24px rgba(255,136,187,0.4);
+  animation: edmHeroFade 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+.edm-hero__word-script {
+  font-size: 1.2em;
+  display: inline-block;
+  transform: translateY(0.08em);
+  margin: 0 0.05em;
+  text-shadow: 0 4px 24px rgba(255,153,102,0.5);
+}
 
-  .edm-hero__lead {
-    font-size: 1.8rem;
-    color: #4a3f2f;
-    max-width: 520px;
-    margin: 0 0 3.5rem;
-    line-height: 1.75;
-  }
+.edm-hero__lead {
+  font-size: 1.7rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.95);
+  max-width: 580px;
+  margin: 0 auto 2.4rem;
+  text-shadow: 0 1px 10px rgba(255,136,187,0.3);
+  animation: edmHeroFade 1s ease-out 0.4s both;
+}
 
-  .edm-hero__ctas {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin: 0 0 4rem;
-  }
+.edm-hero__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 auto 2.4rem;
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(255,136,187,0.3);
+  animation: edmHeroFade 1s ease-out 0.5s both;
+}
+.edm-hero__rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(255,136,187,0.45));
+}
+.edm-hero__rating-stars svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.edm-hero__rating-text {
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.edm-hero__rating-text strong {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.edm-hero__rating-sep {
+  margin: 0 0.4rem;
+  opacity: 0.7;
+}
 
-  .edm-hero__btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.6rem 3.2rem;
-    font-size: 1.25rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 700;
-    border-radius: 2px;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    position: relative;
-    overflow: hidden;
-    background: #0b0805;
-    color: #fbf8f1;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
-  }
-  .edm-hero__btn-primary span { position: relative; z-index: 1; transition: color 0.3s; }
-  .edm-hero__btn-primary::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, #d0b16a, #9d7f32);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .edm-hero__btn-primary:hover::after { opacity: 1; }
-  .edm-hero__btn-primary:hover span { color: #0b0805; }
-  .edm-hero__btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px -10px rgba(157, 127, 50, 0.5);
-  }
+.edm-hero__ctas {
+  display: flex;
+  gap: 1.4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 3.6rem;
+  animation: edmHeroFade 1s ease-out 0.55s both;
+}
 
-  .edm-hero__btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.6rem 3.2rem;
-    font-size: 1.25rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 700;
-    border-radius: 2px;
-    border: 1.5px solid #0b0805;
-    background: transparent;
-    color: #0b0805;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .edm-hero__btn-ghost:hover {
-    background: #0b0805;
-    color: #fbf8f1;
-    transform: translateY(-2px);
-  }
+.edm-hero__btn-primary,
+.edm-hero__btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 3.2rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.edm-hero__btn-primary {
+  background: #fff;
+  color: #FF88BB;
+  border: none;
+  box-shadow: 0 12px 30px -10px rgba(255,136,187,0.6);
+}
+.edm-hero__btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -10px rgba(255,136,187,0.7);
+}
+.edm-hero__btn-ghost {
+  border: 2px solid rgba(255,255,255,0.85);
+  background: transparent;
+  color: #fff;
+}
+.edm-hero__btn-ghost:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
+}
 
-  .edm-hero__stats {
-    display: flex;
-    gap: 3.5rem;
-    flex-wrap: wrap;
-    padding-top: 3rem;
-    border-top: 1px solid rgba(11, 8, 5, 0.1);
-  }
-  .edm-hero__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  .edm-hero__stat-val {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 4.2rem;
-    font-weight: 500;
-    font-style: italic;
-    color: #0b0805;
-    line-height: 1;
-  }
-  .edm-hero__stat-lbl {
-    font-size: 1.25rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #78695a;
-    font-weight: 500;
-  }
+.edm-hero__stats {
+  display: flex;
+  gap: 3.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 2.8rem;
+  border-top: 1px solid rgba(255,255,255,0.3);
+  animation: edmHeroFade 1s ease-out 0.7s both;
+}
+.edm-hero__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.edm-hero__stat-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.4rem;
+  font-weight: 500;
+  font-style: italic;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(255,136,187,0.3);
+}
+.edm-hero__stat-lbl {
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.78);
+  font-weight: 600;
+}
 
-  .edm-hero__media {
-    position: relative;
-    overflow: hidden;
-    background: #c8935a;
-  }
-
-  .edm-hero__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    animation: edmSlowZoom 18s ease-out infinite alternate;
-  }
-  @keyframes edmSlowZoom {
-    from { transform: scale(1); }
-    to   { transform: scale(1.06); }
-  }
-
-  .edm-hero__placeholder {
-    width: 100%;
-    height: 100%;
-    min-height: 480px;
-    background: linear-gradient(145deg, #d4954e 0%, #e8aa5c 20%, #c47830 50%, #a85e20 75%, #7a3e10 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .edm-hero__placeholder-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.4rem;
-    font-style: italic;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(251, 248, 241, 0.45);
-  }
-
-  .edm-hero__wash {
-    position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background: linear-gradient(120deg, rgba(244, 238, 225, 0.38) 0%, transparent 25%);
-  }
-  .edm-hero__vignette {
-    position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background:
-      linear-gradient(180deg, transparent 35%, rgba(11, 8, 5, 0.42) 100%),
-      radial-gradient(ellipse at 75% 95%, rgba(11, 8, 5, 0.38) 0%, transparent 52%);
-  }
-
-  .edm-hero__accent {
-    position: absolute; top: 2.5rem; left: 2.5rem; z-index: 3;
-    display: inline-flex; align-items: center; gap: 0.8rem;
-    margin: 0;
-    color: rgba(251, 248, 241, 0.9);
-    font-size: 1.1rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    font-weight: 600;
-    text-shadow: 0 1px 10px rgba(11, 8, 5, 0.5);
-    animation: edmHeroFade 1.2s ease-out 0.8s both;
-  }
-  .edm-hero__spark { color: #d0b16a; }
-
-  .edm-hero__pf {
-    position: absolute; bottom: 3rem; right: 3rem; z-index: 4;
-    width: 300px;
-    background: #fbf8f1;
-    border-radius: 4px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    color: #0b0805;
-    box-shadow: 0 2px 4px rgba(11, 8, 5, 0.08), 0 24px 56px -14px rgba(11, 8, 5, 0.5);
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
-    animation: edmWidgetEntry 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.2s both;
-  }
-  .edm-hero__pf:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 2px 4px rgba(11, 8, 5, 0.1), 0 36px 72px -14px rgba(11, 8, 5, 0.6);
-  }
-  @keyframes edmWidgetEntry {
-    from { opacity: 0; transform: translateY(28px) translateX(16px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  .edm-hpf__media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 5/4;
-    background: radial-gradient(circle at 50% 40%, #f9f1e0, #ede0c5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .edm-hpf__img {
-    max-width: 55%;
-    max-height: 85%;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-    filter: drop-shadow(0 8px 18px rgba(11, 8, 5, 0.2));
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    position: relative;
-    z-index: 1;
-  }
-  .edm-hero__pf:hover .edm-hpf__img { transform: scale(1.06); }
-
-  .edm-hpf__chip {
-    position: absolute; top: 1.2rem; left: 1.2rem; z-index: 2;
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 6px 12px;
-    background: rgba(11, 8, 5, 0.88);
-    color: #d0b16a;
-    font-size: 1rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    font-weight: 700;
-    border-radius: 50px;
-  }
-  .edm-hpf__chip::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: #d0b16a;
-    border-radius: 50%;
-    box-shadow: 0 0 5px #d0b16a;
-  }
-
-  .edm-hpf__body { padding: 1.6rem 1.8rem 1rem; }
-  .edm-hpf__cat {
-    font-size: 1rem; letter-spacing: 0.26em; text-transform: uppercase;
-    color: #9d7f32; font-weight: 600; margin: 0 0 0.4rem;
-  }
-  .edm-hpf__name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.4rem; font-weight: 500; font-style: italic;
-    color: #0b0805; line-height: 1.1; margin: 0;
-  }
-
-  .edm-hpf__foot {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.2rem 1.8rem 1.6rem;
-    border-top: 1px solid rgba(11, 8, 5, 0.08);
-    margin-top: 0.8rem;
-  }
-  .edm-hpf__price {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem; font-weight: 500; font-style: italic;
-    color: #0b0805; margin: 0;
-  }
-  .edm-hpf__shop {
-    font-size: 1.1rem; letter-spacing: 0.22em; text-transform: uppercase;
-    color: #0b0805; font-weight: 700;
-    position: relative; padding-bottom: 3px;
-    transition: color 0.25s;
-  }
-  .edm-hpf__shop::after {
-    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-    height: 1px; background: #0b0805; transition: background 0.25s;
-  }
-  .edm-hero__pf:hover .edm-hpf__shop { color: #9d7f32; }
-  .edm-hero__pf:hover .edm-hpf__shop::after { background: #9d7f32; }
-  .edm-hpf__arrow {
-    display: inline-block;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .edm-hero__pf:hover .edm-hpf__arrow { transform: translateX(3px); }
-
-  .edm-hero__scroll {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.2rem;
-    padding-top: 4rem;
-    animation: edmHeroFade 1s ease-out 2.2s both;
-  }
-  .edm-hero__scroll-line {
-    width: 1px;
-    height: 5.6rem;
-    background: linear-gradient(to bottom, #9d7f32, transparent);
-    animation: edmScrollPulse 2.2s ease-in-out 3s infinite;
-  }
-  @keyframes edmScrollPulse {
-    0%   { transform: scaleY(1) translateY(0); opacity: 1; }
-    60%  { transform: scaleY(0.4) translateY(60%); opacity: 0.3; }
-    100% { transform: scaleY(1) translateY(0); opacity: 1; }
-  }
-  .edm-hero__scroll-lbl {
-    font-size: 1.15rem;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: #78695a;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
-
-  @media (max-width: 749px) {
-    .edm-hero__grid {
-      grid-template-columns: 1fr;
-      min-height: auto;
-    }
-    .edm-hero__media {
-      height: 65vw;
-      min-height: 280px;
-      order: -1;
-    }
-    .edm-hero__copy { padding: 4rem 2.4rem 4rem; justify-content: flex-start; }
-    .edm-hero__h1 { font-size: clamp(5rem, 14vw, 8rem); gap: 0 0.2em; }
-    .edm-hero__lead { font-size: 1.6rem; }
-    .edm-hero__pf { display: none; }
-    .edm-hero__stats { gap: 2.5rem; }
-    .edm-hero__stat-val { font-size: 3.6rem; }
-    .edm-hero__scroll { display: none; }
-  }
+@media (max-width: 749px) {
+  .edm-hero__inner { padding: 5rem 2rem; }
+  .edm-hero__h1 { font-size: clamp(4.4rem, 12vw, 6.6rem); }
+  .edm-hero__lead { font-size: 1.55rem; }
+  .edm-hero__star--tl { width: 8rem; height: 8rem; top: 3%; left: 3%; }
+  .edm-hero__star--br { width: 6rem; height: 6rem; bottom: 3%; right: 3%; }
+  .edm-hero__palm { width: 14rem; height: 24rem; }
+  .edm-hero__palm--l { top: -2rem; left: -4rem; }
+  .edm-hero__palm--r { bottom: -3rem; right: -4rem; }
+  .edm-hero__stats { gap: 2rem; }
+  .edm-hero__stat-val { font-size: 2.8rem; }
+}
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Hero editorial",
+  "name": "Hero (sencillo · sunset)",
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Mini ribbon (chip blanco)"
+    },
+    {
+      "type": "text",
+      "id": "mini_ribbon_pre",
+      "label": "Texto del chip",
+      "default": "Disfruta tus días bajo el",
+      "info": "Pequeño chip blanco encima del titular. Vacío = se oculta."
+    },
+    {
+      "type": "text",
+      "id": "mini_ribbon_script",
+      "label": "Palabra final (script)",
+      "default": "sol"
+    },
     {
       "type": "header",
       "content": "Texto"
@@ -554,7 +560,7 @@
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Texto sobre el título",
+      "label": "Eyebrow (opcional)",
       "default": "The Colombian Tanning Ritual"
     },
     {
@@ -566,19 +572,48 @@
     {
       "type": "text",
       "id": "heading_gold_words",
-      "label": "Palabras en dorado (separar por coma)",
+      "label": "Palabras en script (separar por coma)",
       "default": "dorado,caribe",
-      "info": "Escribe las palabras del titular que deben aparecer en dorado. Ej: dorado,caribe"
+      "info": "Las palabras del titular que aparecerán en tipografía manuscrita."
     },
     {
       "type": "textarea",
       "id": "lead",
       "label": "Párrafo lead",
-      "default": "Aceites y bronceadores naturales formulados con zanahoria, coco y extractos del trópico colombiano. Un ritual solar pensado para honrar la piel y el mar."
+      "default": "Aceites y bronceadores naturales formulados con zanahoria, coco y extractos del trópico colombiano."
     },
     {
       "type": "header",
-      "content": "CTAs"
+      "content": "Social proof (rating)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Mostrar rating con estrellas",
+      "default": true,
+      "info": "Aparece entre el lead y los botones. Aumenta la conversión con prueba social."
+    },
+    {
+      "type": "text",
+      "id": "rating_value",
+      "label": "Valor del rating",
+      "default": "4.9"
+    },
+    {
+      "type": "text",
+      "id": "rating_label",
+      "label": "Etiqueta tras el rating",
+      "default": "de 5"
+    },
+    {
+      "type": "text",
+      "id": "rating_count",
+      "label": "Cantidad de reseñas",
+      "default": "+1.842 reseñas"
+    },
+    {
+      "type": "header",
+      "content": "Botones"
     },
     {
       "type": "text",
@@ -594,8 +629,7 @@
     {
       "type": "text",
       "id": "cta_secondary_label",
-      "label": "Botón secundario",
-      "default": "Nuestra historia"
+      "label": "Botón secundario"
     },
     {
       "type": "url",
@@ -604,54 +638,49 @@
     },
     {
       "type": "header",
-      "content": "Imagen"
+      "content": "Fondo (imagen o video)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Prioridad: video file → video URL → imagen. Si subes video, la imagen queda como fallback. Mute + loop + autoplay siempre."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video de fondo (subido)",
+      "info": "MP4 / MOV recomendado. Ideal: 2400 × 1200, 6-15 s, <8 MB."
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Video URL (YouTube / Vimeo)",
+      "accept": ["youtube", "vimeo"],
+      "info": "Alternativa al video subido. Se reproduce sin controles, en loop, mute."
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Imagen del hero"
+      "label": "Imagen de fondo (fallback)",
+      "info": "Aparece si no hay video. Recomendado: 2400 × 1200 px."
     },
     {
-      "type": "text",
-      "id": "accent_text",
-      "label": "Texto acento sobre la imagen",
-      "default": "Est. MMXX · Medellín"
-    },
-    {
-      "type": "header",
-      "content": "Producto destacado"
-    },
-    {
-      "type": "product",
-      "id": "featured_product",
-      "label": "Producto en tarjeta flotante"
-    },
-    {
-      "type": "text",
-      "id": "featured_product_category",
-      "label": "Categoría del producto",
-      "default": "Bronceador"
-    },
-    {
-      "type": "text",
-      "id": "featured_product_chip",
-      "label": "Chip del producto",
-      "default": "Best Seller"
+      "type": "range",
+      "id": "overlay_strength",
+      "label": "Intensidad del overlay rosado (%)",
+      "min": 10, "max": 100, "step": 5, "unit": "%",
+      "default": 65,
+      "info": "10 = imagen casi sin tinte rosado · 100 = solo gradient rosado"
     },
     {
       "type": "header",
       "content": "Diseño"
     },
     {
-      "type": "select",
-      "id": "color_scheme",
-      "label": "Esquema de color",
-      "options": [
-        { "value": "scheme-1", "label": "Bone / Ivory" },
-        { "value": "scheme-2", "label": "Sand" },
-        { "value": "scheme-3", "label": "Oscuro" }
-      ],
-      "default": "scheme-2"
+      "type": "range",
+      "id": "min_height",
+      "label": "Altura mínima",
+      "min": 400, "max": 900, "step": 20, "unit": "px",
+      "default": 680
     },
     {
       "type": "range",
@@ -674,24 +703,14 @@
       "name": "Dato / cifra",
       "limit": 4,
       "settings": [
-        {
-          "type": "text",
-          "id": "value",
-          "label": "Valor",
-          "default": "4.9 ★"
-        },
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Etiqueta",
-          "default": "1.842 reviews"
-        }
+        { "type": "text", "id": "value", "label": "Valor", "default": "4.9 ★" },
+        { "type": "text", "id": "label", "label": "Etiqueta", "default": "1.842 reviews" }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Hero editorial",
+      "name": "Hero (sencillo · sunset)",
       "blocks": [
         { "type": "stat", "settings": { "value": "4.9 ★", "label": "1.842 reviews" } },
         { "type": "stat", "settings": { "value": "100%", "label": "Natural · reef-safe" } },

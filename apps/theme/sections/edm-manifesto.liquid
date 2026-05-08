@@ -1,0 +1,274 @@
+{%- liquid
+  assign p1 = section.settings.paragraph_1
+  assign p2 = section.settings.paragraph_2
+  assign p3 = section.settings.paragraph_3
+-%}
+
+<section
+  class="edm-mani"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  aria-label="{{ section.settings.eyebrow | default: 'Manifesto' | escape }}"
+>
+  <div class="edm-mani__deco edm-mani__deco--tl edm-anim-palm-sway" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-mani__palm' -%}
+  </div>
+  <div class="edm-mani__deco edm-mani__deco--br edm-anim-palm-sway-r" aria-hidden="true">
+    {%- render 'edm-palm', class: 'edm-mani__palm edm-mani__palm--flip' -%}
+  </div>
+  <div class="edm-mani__deco edm-mani__deco--star" aria-hidden="true">
+    {%- render 'edm-starfish', class: 'edm-mani__star', stroke: 'rgba(255,255,255,0.5)' -%}
+  </div>
+  {%- render 'edm-confetti', class: 'edm-mani__confetti' -%}
+
+  <div class="edm-mani__inner">
+
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="edm-mani__eyebrow">
+        {%- render 'edm-sparkle', class: 'edm-mani__eyebrow-spark' -%}
+        <span>{{ section.settings.eyebrow }}</span>
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="edm-mani__h2">
+        {{ section.settings.heading }}
+        {%- if section.settings.heading_script != blank -%}
+          <span class="edm-script edm-mani__h2-script">{{ section.settings.heading_script }}</span>
+        {%- endif -%}
+      </h2>
+    {%- endif -%}
+
+    <div class="edm-mani__copy">
+      {%- if p1 != blank -%}<p>{{ p1 }}</p>{%- endif -%}
+      {%- if p2 != blank -%}<p>{{ p2 }}</p>{%- endif -%}
+      {%- if p3 != blank -%}<p>{{ p3 }}</p>{%- endif -%}
+    </div>
+
+    {%- if section.settings.signature != blank -%}
+      <p class="edm-mani__sig edm-script">{{ section.settings.signature }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank -%}
+      <a href="{{ section.settings.cta_url | default: '#' }}" class="edm-mani__cta">{{ section.settings.cta_label }}</a>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-mani {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,165,211,0.55) 0%, transparent 38%),
+    radial-gradient(circle at 82% 28%, rgba(255,217,228,0.5) 0%, transparent 42%),
+    radial-gradient(circle at 60% 100%, rgba(255,153,102,0.55) 0%, transparent 50%),
+    linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+}
+.edm-mani::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(0,0,0,0.10) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.10) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.edm-mani__confetti {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  color: rgba(255,255,255,0.55);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.edm-mani__deco { position: absolute; pointer-events: none; }
+.edm-mani__deco--tl { top: -3rem; left: -2rem; }
+.edm-mani__deco--br { bottom: -3rem; right: -2rem; }
+.edm-mani__palm {
+  width: 16rem;
+  height: 32rem;
+  color: rgba(255,255,255,0.55);
+}
+.edm-mani__palm--flip { transform: scaleX(-1) rotate(20deg); }
+.edm-mani__deco--star { top: 8%; right: 12%; }
+.edm-mani__star {
+  width: 6rem; height: 6rem;
+  color: rgba(255,255,255,0.7);
+  animation: edmManiSpin 28s linear infinite;
+  filter: drop-shadow(0 4px 12px rgba(255,136,187,0.4));
+}
+@keyframes edmManiSpin {
+  to { transform: rotate(360deg); }
+}
+
+.edm-mani__inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8rem 3rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.edm-mani__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #fff;
+  font-weight: 700;
+  margin: 0 0 2.4rem;
+  text-shadow: 0 1px 8px rgba(255,136,187,0.4);
+}
+.edm-mani__eyebrow-spark { width: 1.4rem; height: 1.4rem; color: #fff; }
+
+.edm-mani__h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(4.2rem, 5.4vw, 7.6rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: #fff;
+  margin: 0 0 4rem;
+  text-shadow: 0 4px 24px rgba(61,35,48,0.4), 0 2px 8px rgba(61,35,48,0.3);
+}
+.edm-mani__h2-script {
+  font-size: 1.15em;
+  color: #fff;
+  display: inline-block;
+  margin-left: 0.2em;
+  transform: translateY(0.1em);
+  text-shadow: 0 4px 24px rgba(255,153,102,0.5);
+}
+
+.edm-mani__copy {
+  font-size: 1.75rem;
+  line-height: 1.78;
+  color: #fff;
+  margin: 0 0 3.2rem;
+  font-weight: 500;
+}
+.edm-mani__copy p {
+  margin: 0 0 1.6rem;
+  text-shadow: 0 2px 14px rgba(61,35,48,0.45), 0 1px 4px rgba(61,35,48,0.35);
+}
+.edm-mani__copy p:last-child { margin-bottom: 0; }
+
+.edm-mani__sig {
+  font-size: 3.6rem;
+  color: #fff;
+  margin: 0 0 3rem;
+  line-height: 1;
+  text-shadow: 0 4px 16px rgba(255,153,102,0.4);
+}
+
+.edm-mani__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 3.4rem;
+  background: #fff;
+  color: #FF88BB;
+  border-radius: 100px;
+  font-size: 1.25rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: 0 12px 32px -10px rgba(255,136,187,0.6);
+}
+.edm-mani__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -10px rgba(255,136,187,0.7);
+}
+
+@media (max-width: 749px) {
+  .edm-mani__inner { padding: 5rem 2rem; }
+  .edm-mani__copy { font-size: 1.55rem; }
+  .edm-mani__palm { width: 11rem; height: 22rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Manifesto",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Nuestro Manifesto"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titular",
+      "default": "Disfruta tus días bajo el"
+    },
+    {
+      "type": "text",
+      "id": "heading_script",
+      "label": "Palabra en script (Sacramento)",
+      "default": "sol",
+      "info": "Aparece después del titular en tipografía manuscrita."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_1",
+      "label": "Párrafo 1",
+      "default": "Nacimos de un atardecer hace más de 8 años. Tomamos como inspiración nuestro amor por el mar y la playa para crear productos naturales que permitan disfrutar nuestro tiempo en el sol de una manera segura."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_2",
+      "label": "Párrafo 2",
+      "default": "Amamos ese color dorado que deja el sol en nuestra piel, como si nos hubiera regalado un poco de su brillo para hacernos sentir más seguras y vibrantes."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_3",
+      "label": "Párrafo 3",
+      "default": "Creamos productos para resaltar la belleza de cada persona, para aumentar su confianza y acompañarla mientras disfruta de un tiempo de desconexión del mundo y conexión consigo misma."
+    },
+    {
+      "type": "text",
+      "id": "signature",
+      "label": "Firma (script)",
+      "default": "— Estrella de Mar"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Botón",
+      "default": "Conoce el ritual"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Destino del botón"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0, "max": 80, "step": 4, "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    { "name": "Manifesto" }
+  ]
+}
+{% endschema %}

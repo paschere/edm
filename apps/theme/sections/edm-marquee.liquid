@@ -7,13 +7,17 @@
     <div class="edm-mq__inner">
       {%- for block in section.blocks -%}
         <span class="edm-mq__item" {{ block.shopify_attributes }}>
-          <span class="edm-mq__gem" aria-hidden="true">✦</span>
+          <span class="edm-mq__star edm-anim-star-spin" aria-hidden="true">
+            {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.6)' -%}
+          </span>
           <span class="edm-mq__txt">{{ block.settings.text }}</span>
         </span>
       {%- endfor -%}
       {%- for block in section.blocks -%}
         <span class="edm-mq__item" aria-hidden="true">
-          <span class="edm-mq__gem">✦</span>
+          <span class="edm-mq__star edm-anim-star-spin">
+            {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.6)' -%}
+          </span>
           <span class="edm-mq__txt">{{ block.settings.text }}</span>
         </span>
       {%- endfor -%}
@@ -24,15 +28,15 @@
 {% stylesheet %}
 .edm-mq {
   overflow: hidden;
-  background: #0b0805;
-  border-top: 1px solid rgba(208, 177, 106, 0.18);
-  border-bottom: 1px solid rgba(208, 177, 106, 0.18);
+  background: linear-gradient(135deg, #FFA5D3 0%, #FF88BB 50%, #FF9966 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 .edm-mq__track { overflow: hidden; }
 .edm-mq__inner {
   display: flex;
   width: max-content;
-  animation: edmMqScroll 34s linear infinite;
+  animation: edmMqScroll 38s linear infinite;
 }
 .edm-mq:hover .edm-mq__inner { animation-play-state: paused; }
 @keyframes edmMqScroll {
@@ -42,22 +46,27 @@
 .edm-mq__item {
   display: inline-flex;
   align-items: center;
-  gap: 2.4rem;
-  padding: 1.9rem 3.4rem;
+  gap: 2rem;
+  padding: 1.7rem 2.6rem;
   white-space: nowrap;
 }
-.edm-mq__gem {
-  color: #d0b16a;
-  font-size: 0.9rem;
+.edm-mq__star {
+  width: 2rem;
+  height: 2rem;
   flex-shrink: 0;
-  opacity: 0.8;
+  color: #ffffff;
+  display: inline-flex;
+  filter: drop-shadow(0 2px 6px rgba(255, 136, 187, 0.4));
 }
+.edm-mq__star svg { width: 100%; height: 100%; display: block; }
 .edm-mq__txt {
-  font-size: 1.3rem;
-  letter-spacing: 0.3em;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   font-weight: 600;
-  color: rgba(251, 248, 241, 0.58);
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(255, 136, 187, 0.3);
 }
 {% endstylesheet %}
 
@@ -100,12 +109,12 @@
     {
       "name": "Marquee de marca",
       "blocks": [
-        { "type": "phrase", "settings": { "text": "Bronceado Natural" } },
-        { "type": "phrase", "settings": { "text": "Hecho en Colombia" } },
-        { "type": "phrase", "settings": { "text": "Certificado INVIMA" } },
-        { "type": "phrase", "settings": { "text": "Reef Safe" } },
-        { "type": "phrase", "settings": { "text": "Ingredientes Naturales" } },
-        { "type": "phrase", "settings": { "text": "Dermatólogo Aprobado" } }
+        { "type": "phrase", "settings": { "text": "Disfruta tus días bajo el sol" } },
+        { "type": "phrase", "settings": { "text": "Bronceado es mi lenguaje del amor" } },
+        { "type": "phrase", "settings": { "text": "Hecho en Medellín · Colombia" } },
+        { "type": "phrase", "settings": { "text": "Always Tan Club" } },
+        { "type": "phrase", "settings": { "text": "Reef safe · Cruelty free" } },
+        { "type": "phrase", "settings": { "text": "Ingredientes naturales" } }
       ]
     }
   ]

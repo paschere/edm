@@ -1,6 +1,6 @@
 {%- if section.settings.before_image == blank and section.settings.after_image == blank -%}
   {%- if request.design_mode -%}
-    <div style="padding:4.8rem;text-align:center;background:#f4eee1;font-family:'Cormorant Garamond',serif;color:#78695a;">
+    <div style="padding:4.8rem;text-align:center;background:#f4eee1;font-family:'Cormorant Garamond',serif;color:#A88891;">
       <p style="font-size:2.4rem;margin:0 0 0.8rem;">Comparador antes/después</p>
       <p style="font-size:1.5rem;margin:0;">Agrega las imágenes "Antes" y "Después" en la configuración de esta sección para activarla.</p>
     </div>
@@ -8,9 +8,11 @@
 {%- else -%}
 <section
   class="edm-cmp color-{{ section.settings.color_scheme }} gradient"
-  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;position:relative;overflow:hidden;"
 >
-  <div class="page-width">
+  {%- render 'edm-brand-decor', variant: 'sparkles', tone: 'soft', opacity: '0.5' -%}
+
+  <div class="page-width" style="position:relative;z-index:1;">
     {%- if section.settings.title != blank -%}
       <div class="edm-cmp__head">
         {%- if section.settings.eyebrow != blank -%}
@@ -56,7 +58,7 @@
       <div class="edm-cmp__handle" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Deslizador de comparación">
         <div class="edm-cmp__line"></div>
         <div class="edm-cmp__knob" aria-hidden="true">
-          <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#fbf8f1" stroke="#d0b16a" stroke-width="1.5"/><path d="M14 20l-5 0M26 20l5 0M11 20l-3-3m3 3l-3 3M29 20l3-3m-3 3l3 3" stroke="#0b0805" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#fbf8f1" stroke="#FFCC99" stroke-width="1.5"/><path d="M14 20l-5 0M26 20l5 0M11 20l-3-3m3 3l-3 3M29 20l3-3m-3 3l3 3" stroke="#3D2330" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
       </div>
 
@@ -117,7 +119,7 @@
   letter-spacing: 0.26em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #9d7f32;
+  color: #FF88BB;
   margin: 0 0 1.4rem;
 }
 .edm-cmp__title {
@@ -125,12 +127,12 @@
   font-size: clamp(3.6rem, 4.5vw, 6rem);
   font-weight: 400;
   line-height: 1.06;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0 0 1.6rem;
 }
 .edm-cmp__sub {
   font-size: 1.7rem;
-  color: #78695a;
+  color: #A88891;
   line-height: 1.65;
   margin: 0;
 }
@@ -193,7 +195,7 @@
   top: 0; bottom: 0;
   left: 50%;
   width: 2px;
-  background: #d0b16a;
+  background: #FFCC99;
   transform: translateX(-50%);
 }
 .edm-cmp__knob {

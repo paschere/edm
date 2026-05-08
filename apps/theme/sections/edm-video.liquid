@@ -81,8 +81,20 @@
 
       {%- if has_overlay -%}
         <div class="edm-vid__overlay">
+          {%- if section.settings.overlay_eyebrow != blank -%}
+            <p class="edm-vid__overlay-eyebrow">
+              {%- render 'edm-sparkle', class: 'edm-vid__overlay-spark edm-anim-spark' -%}
+              <span>{{ section.settings.overlay_eyebrow }}</span>
+              {%- render 'edm-sparkle', class: 'edm-vid__overlay-spark edm-anim-spark' -%}
+            </p>
+          {%- endif -%}
           {%- if section.settings.overlay_text != blank -%}
-            <p class="edm-vid__overlay-text">{{ section.settings.overlay_text }}</p>
+            <p class="edm-vid__overlay-text">
+              {{ section.settings.overlay_text }}
+              {%- if section.settings.overlay_text_script != blank -%}
+                <span class="edm-script edm-vid__overlay-text-script">{{ section.settings.overlay_text_script }}</span>
+              {%- endif -%}
+            </p>
           {%- endif -%}
           {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
             <a href="{{ section.settings.cta_url }}" class="edm-vid__cta">{{ section.settings.cta_label }}</a>
@@ -104,7 +116,7 @@
   letter-spacing: 0.26em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #9d7f32;
+  color: #FF88BB;
   margin: 0 0 1.4rem;
 }
 .edm-vid__title {
@@ -112,7 +124,7 @@
   font-size: clamp(3.6rem, 4.5vw, 6rem);
   font-weight: 400;
   line-height: 1.06;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0;
 }
 
@@ -122,7 +134,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 8px;
-  background: #0b0805;
+  background: #3D2330;
 }
 .edm-vid__wrap--full .edm-vid__frame { border-radius: 0; }
 
@@ -141,7 +153,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 60% 40%, #2a1e0e 0%, #0b0805 65%);
+  background: radial-gradient(ellipse at 60% 40%, #2a1e0e 0%, #3D2330 65%);
 }
 .edm-vid__sun {
   width: clamp(14rem, 18vw, 24rem);
@@ -157,7 +169,9 @@
 .edm-vid__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(11,8,5,.7) 0%, transparent 60%);
+  background:
+    radial-gradient(ellipse at center, transparent 0%, rgba(61,35,48,0.35) 60%, rgba(61,35,48,0.7) 100%),
+    linear-gradient(to top, rgba(255,136,187,0.45) 0%, transparent 50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -166,32 +180,62 @@
   text-align: center;
 }
 
+.edm-vid__overlay-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 1.6rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+}
+.edm-vid__overlay-spark { width: 1.2rem; height: 1.2rem; color: #FFCC99; }
+
 .edm-vid__overlay-text {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(3.2rem, 4vw, 5.6rem);
-  font-style: italic;
+  font-size: clamp(3.6rem, 4.6vw, 6.4rem);
+  font-style: normal;
   font-weight: 400;
-  color: #fbf8f1;
-  margin: 0 0 2.4rem;
-  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 2.8rem;
+  line-height: 1.05;
   max-width: 72rem;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+.edm-vid__overlay-text-script {
+  font-size: 1.2em;
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.1em);
+  background: linear-gradient(135deg, #FFCC99 0%, #FFA5D3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 16px rgba(255,153,102,0.5));
 }
 
 .edm-vid__cta {
   display: inline-flex;
   align-items: center;
-  padding: 1.4rem 3.6rem;
-  background: #fbf8f1;
-  color: #0b0805;
-  font-size: 1.35rem;
+  padding: 1.6rem 3.4rem;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  color: #fff;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-size: 1.3rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   border-radius: 100px;
   text-decoration: none;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 12px 32px -10px rgba(255,136,187,0.55);
 }
-.edm-vid__cta:hover { background: #9d7f32; color: #fbf8f1; }
+.edm-vid__cta:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -10px rgba(255,136,187,0.7); }
 
 @media (max-width: 749px) {
   .edm-vid__overlay { padding: 2.4rem; }
@@ -249,8 +293,20 @@
     },
     {
       "type": "text",
+      "id": "overlay_eyebrow",
+      "label": "Eyebrow superpuesto",
+      "info": "Pequeño texto entre sparkles encima del título."
+    },
+    {
+      "type": "text",
       "id": "overlay_text",
       "label": "Texto sobre el video"
+    },
+    {
+      "type": "text",
+      "id": "overlay_text_script",
+      "label": "Palabra final (script)",
+      "info": "Aparece en tipografía manuscrita con gradiente sunset."
     },
     {
       "type": "text",

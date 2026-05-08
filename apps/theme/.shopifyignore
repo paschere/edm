@@ -6,3 +6,9 @@ postcss.config.cjs
 package.json
 pnpm-lock.yaml
 *.log
+
+# ─── Merchant-owned via theme editor — DO NOT overwrite from local ───
+templates/*.json
+config/settings_data.json
+sections/*-group.json
+locales/*.json

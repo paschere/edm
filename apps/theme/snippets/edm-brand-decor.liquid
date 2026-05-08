@@ -1,0 +1,68 @@
+{% doc %}
+Subtle brand decorations layer (palms swaying, starfish floating, sparkles twinkling).
+Drop into any section. Parent must be position:relative + overflow:hidden.
+
+@param {string} [variant] - 'corners' | 'starfish' | 'sparkles' | 'soft' | 'all'
+@param {string} [tone] - 'pink' | 'peach' | 'white' | 'soft'
+@param {string} [opacity] - Override opacity (0-1)
+
+@example
+{% render 'edm-brand-decor', variant: 'all', tone: 'soft' %}
+{% enddoc %}
+
+{%- liquid
+  assign v = variant | default: 'all'
+  assign t = tone | default: 'soft'
+  assign op = opacity | default: '0.55'
+
+  case t
+    when 'pink'
+      assign palm_color = '#FFA5D3'
+      assign star_color = '#FF88BB'
+      assign spark_color = '#FF9966'
+    when 'peach'
+      assign palm_color = '#FFCC99'
+      assign star_color = '#FF9966'
+      assign spark_color = '#FFA5D3'
+    when 'white'
+      assign palm_color = '#ffffff'
+      assign star_color = '#ffffff'
+      assign spark_color = '#ffffff'
+    else
+      assign palm_color = '#FFD9E4'
+      assign star_color = '#FFA5D3'
+      assign spark_color = '#FFCC99'
+  endcase
+-%}
+
+<div class="edm-decor edm-decor--{{ v }}" aria-hidden="true" style="--decor-op: {{ op }};">
+  {%- if v == 'all' or v == 'corners' or v == 'soft' -%}
+    <div class="edm-decor__palm edm-decor__palm--tl edm-anim-palm-sway" style="color: {{ palm_color }};">
+      {%- render 'edm-palm' -%}
+    </div>
+    <div class="edm-decor__palm edm-decor__palm--br edm-anim-palm-sway-r" style="color: {{ palm_color }};">
+      {%- render 'edm-palm' -%}
+    </div>
+  {%- endif -%}
+
+  {%- if v == 'all' or v == 'starfish' -%}
+    <div class="edm-decor__star edm-decor__star--1 edm-anim-star-bob" style="color: {{ star_color }};">
+      {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.55)' -%}
+    </div>
+    <div class="edm-decor__star edm-decor__star--2 edm-anim-star-spin" style="color: {{ star_color }};">
+      {%- render 'edm-starfish', stroke: 'rgba(255,255,255,0.5)' -%}
+    </div>
+  {%- endif -%}
+
+  {%- if v == 'all' or v == 'sparkles' or v == 'soft' -%}
+    <span class="edm-decor__spark edm-decor__spark--1 edm-anim-spark" style="color: {{ spark_color }};">
+      {%- render 'edm-sparkle' -%}
+    </span>
+    <span class="edm-decor__spark edm-decor__spark--2 edm-anim-spark" style="color: {{ spark_color }}; animation-delay: 1.2s;">
+      {%- render 'edm-sparkle' -%}
+    </span>
+    <span class="edm-decor__spark edm-decor__spark--3 edm-anim-spark" style="color: {{ spark_color }}; animation-delay: 2.4s;">
+      {%- render 'edm-sparkle' -%}
+    </span>
+  {%- endif -%}
+</div>

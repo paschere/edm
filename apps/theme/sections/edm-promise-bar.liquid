@@ -5,10 +5,12 @@
 
 <section
   class="edm-promise-bar"
-  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px; position:relative; overflow:hidden;"
   aria-label="Promesas de la marca"
 >
-  <div class="edm-promise-bar__inner page-width">
+  {%- render 'edm-brand-decor', variant: 'sparkles', tone: 'soft', opacity: '0.6' -%}
+
+  <div class="edm-promise-bar__inner page-width" style="position:relative;z-index:1;">
     {%- for block in section.blocks -%}
       {%- if block.type == 'item' -%}
         <div class="edm-promise-bar__item" {{ block.shopify_attributes }}>
@@ -33,7 +35,7 @@
 
 <style>
   .edm-promise-bar {
-    background: var(--edm-ink, #0b0805);
+    background: var(--edm-ink, #3D2330);
     color: var(--bone-50, #fbf8f1);
     position: relative;
     overflow: hidden;
@@ -77,7 +79,7 @@
     background: rgba(251,248,241,0.06);
     border: 1px solid rgba(208,177,106,0.25);
     display: flex; align-items: center; justify-content: center;
-    color: var(--edm-gold-300, #d0b16a);
+    color: var(--edm-gold-300, #FFCC99);
     transition: all 0.3s;
   }
   .edm-promise-bar__medal svg {
@@ -86,9 +88,9 @@
     fill: none; stroke-linecap: round; stroke-linejoin: round;
   }
   .edm-promise-bar__item:hover .edm-promise-bar__medal {
-    background: linear-gradient(135deg, var(--edm-gold-300, #d0b16a), var(--edm-gold-500, #9d7f32));
+    background: linear-gradient(135deg, var(--edm-gold-300, #FFCC99), var(--edm-gold-500, #FF88BB));
     border-color: transparent;
-    color: var(--edm-ink, #0b0805);
+    color: var(--edm-ink, #3D2330);
     box-shadow: 0 0 20px rgba(208,177,106,0.35);
   }
 

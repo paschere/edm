@@ -1,0 +1,10 @@
+{% doc %}
+Brand sparkle / 4-point twinkle icon.
+@param {string} [class] - CSS class
+@example
+{% render 'edm-sparkle', class: 'my-sparkle' %}
+{% enddoc %}
+
+<svg class="{{ class | default: 'edm-sparkle' }}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+  <path d="M12 0 L13.2 10.8 L24 12 L13.2 13.2 L12 24 L10.8 13.2 L0 12 L10.8 10.8 Z"/>
+</svg>

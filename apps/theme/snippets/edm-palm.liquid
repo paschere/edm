@@ -1,0 +1,22 @@
+{% doc %}
+Brand palm frond — used as decorative element on labels, banners.
+@param {string} [class] - CSS class
+@example
+{% render 'edm-palm', class: 'my-palm' %}
+{% enddoc %}
+
+<svg class="{{ class | default: 'edm-palm' }}" viewBox="0 0 60 200" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+  <line x1="30" y1="200" x2="30" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+  <ellipse cx="20" cy="178" rx="22" ry="3.5" transform="rotate(-25 20 178)"/>
+  <ellipse cx="14" cy="152" rx="24" ry="3.5" transform="rotate(-30 14 152)"/>
+  <ellipse cx="10" cy="122" rx="26" ry="3.8" transform="rotate(-35 10 122)"/>
+  <ellipse cx="8"  cy="92"  rx="26" ry="3.8" transform="rotate(-40 8 92)"/>
+  <ellipse cx="14" cy="62"  rx="22" ry="3.5" transform="rotate(-50 14 62)"/>
+  <ellipse cx="22" cy="36"  rx="16" ry="2.8" transform="rotate(-65 22 36)"/>
+  <ellipse cx="40" cy="178" rx="22" ry="3.5" transform="rotate(25 40 178)"/>
+  <ellipse cx="46" cy="152" rx="24" ry="3.5" transform="rotate(30 46 152)"/>
+  <ellipse cx="50" cy="122" rx="26" ry="3.8" transform="rotate(35 50 122)"/>
+  <ellipse cx="52" cy="92"  rx="26" ry="3.8" transform="rotate(40 52 92)"/>
+  <ellipse cx="46" cy="62"  rx="22" ry="3.5" transform="rotate(50 46 62)"/>
+  <ellipse cx="38" cy="36"  rx="16" ry="2.8" transform="rotate(65 38 36)"/>
+</svg>

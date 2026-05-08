@@ -1,0 +1,174 @@
+<section class="edm-404">
+  <div class="edm-404__deco edm-404__deco--star" aria-hidden="true">
+    {%- render 'edm-starfish', class: 'edm-404__star', stroke: 'rgba(255,255,255,0.55)' -%}
+  </div>
+  {%- render 'edm-confetti', class: 'edm-404__confetti' -%}
+
+  <div class="edm-404__inner">
+    <p class="edm-404__code">404</p>
+
+    <h1 class="edm-404__h1">
+      Sufro de <span class="edm-script edm-404__h1-script">opacarofilia</span>
+    </h1>
+
+    <p class="edm-404__lead">
+      …y la página que buscas también. Se nos perdió en algún atardecer del Caribe.
+      Pero tranquila, podemos volver al sol.
+    </p>
+
+    <div class="edm-404__ctas">
+      <a href="{{ routes.root_url }}" class="edm-404__cta-primary">Volver al inicio</a>
+      <a href="{{ routes.all_products_collection_url }}" class="edm-404__cta-ghost">Ver productos</a>
+    </div>
+
+    <p class="edm-404__hint">
+      <em>opa·ca·ro·fi·lia</em>&nbsp;·&nbsp;sustantivo femenino. Amor por los atardeceres.
+    </p>
+  </div>
+</section>
+
+{% stylesheet %}
+.edm-404 {
+  position: relative;
+  overflow: hidden;
+  min-height: min(85vh, 760px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255,165,211,0.6) 0%, transparent 45%),
+    radial-gradient(circle at 75% 80%, rgba(255,153,102,0.55) 0%, transparent 50%),
+    linear-gradient(160deg, #FFEAEF 0%, #FFD9E4 50%, #FFCC99 100%);
+}
+.edm-404__confetti {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.edm-404__deco--star {
+  position: absolute;
+  top: 6%; right: 8%;
+  pointer-events: none;
+}
+.edm-404__star {
+  width: 14rem; height: 14rem;
+  color: rgba(255,255,255,0.45);
+  filter: drop-shadow(0 4px 12px rgba(255,136,187,0.4));
+  animation: edm404Spin 24s linear infinite;
+}
+@keyframes edm404Spin { to { transform: rotate(360deg); } }
+
+.edm-404__inner {
+  max-width: 640px;
+  padding: 6rem 3rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.edm-404__code {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(8rem, 14vw, 14rem);
+  font-style: italic;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 1rem;
+  line-height: 1;
+  text-shadow: 0 8px 32px rgba(255,136,187,0.5);
+}
+
+.edm-404__h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 5vw, 6rem);
+  font-weight: 400;
+  color: #fff;
+  margin: 0 0 2rem;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(255,136,187,0.4);
+}
+.edm-404__h1-script {
+  font-size: 1.18em;
+  color: #fff;
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.08em);
+}
+
+.edm-404__lead {
+  font-size: 1.6rem;
+  color: rgba(255,255,255,0.95);
+  line-height: 1.7;
+  margin: 0 0 3.4rem;
+  text-shadow: 0 1px 8px rgba(255,136,187,0.3);
+}
+
+.edm-404__ctas {
+  display: flex;
+  gap: 1.4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 3.6rem;
+}
+.edm-404__cta-primary,
+.edm-404__cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 3rem;
+  border-radius: 100px;
+  font-size: 1.2rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.edm-404__cta-primary {
+  background: #fff;
+  color: #FF88BB;
+  box-shadow: 0 12px 32px -10px rgba(255,136,187,0.55);
+}
+.edm-404__cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -10px rgba(255,136,187,0.65);
+}
+.edm-404__cta-ghost {
+  border: 2px solid rgba(255,255,255,0.7);
+  color: #fff;
+  background: transparent;
+}
+.edm-404__cta-ghost:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
+}
+
+.edm-404__hint {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,0.75);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+.edm-404__hint em {
+  font-style: italic;
+  font-weight: 600;
+  color: #fff;
+}
+
+@media (max-width: 749px) {
+  .edm-404__star { width: 9rem; height: 9rem; }
+  .edm-404__inner { padding: 4rem 2rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "404 (Estrella de Mar)",
+  "tag": "section",
+  "class": "section",
+  "settings": [],
+  "presets": [
+    { "name": "404 brand" }
+  ]
+}
+{% endschema %}

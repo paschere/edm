@@ -1,6 +1,99 @@
 {{ 'component-slideshow.css' | asset_url | stylesheet_tag }}
 {{ 'component-slider.css' | asset_url | stylesheet_tag }}
 
+<style>
+  .announcement-bar-section .utility-bar {
+    background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%) !important;
+    background-image: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%) !important;
+    border-bottom: none !important;
+    padding-top: 0.9rem !important;
+    padding-bottom: 0.9rem !important;
+  }
+  .announcement-bar-section .utility-bar__grid {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    grid-template-columns: none !important;
+    gap: 0;
+  }
+  .announcement-bar-section .announcement-bar,
+  .announcement-bar-section .announcement-bar--one-announcement {
+    flex: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+  .announcement-bar-section .announcement-bar__message {
+    font-family: 'Quicksand', system-ui, sans-serif !important;
+    font-size: 1.18rem !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.9rem;
+  }
+  .announcement-bar-section .announcement-bar__message::before,
+  .announcement-bar-section .announcement-bar__message::after {
+    content: '✦';
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
+    animation: edmAnnTwinkle 3s ease-in-out infinite;
+  }
+  .announcement-bar-section .announcement-bar__message::after {
+    animation-delay: 1.5s;
+  }
+  @keyframes edmAnnTwinkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50%       { opacity: 1; transform: scale(1.1); }
+  }
+  .announcement-bar-section .announcement-bar__link {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    transition: opacity 0.2s ease;
+  }
+  .announcement-bar-section .announcement-bar__link:hover {
+    opacity: 0.85;
+  }
+  .announcement-bar-section .announcement-bar__link .icon-arrow {
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.6rem;
+    color: #ffffff;
+    transition: transform 0.25s ease;
+  }
+  .announcement-bar-section .announcement-bar__link:hover .icon-arrow {
+    transform: translateX(3px);
+  }
+  .announcement-bar-section .announcement-bar-slider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .announcement-bar-section .slider-button {
+    width: 2rem !important;
+    height: 2rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    opacity: 1;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    transition: color 0.2s ease;
+  }
+  .announcement-bar-section .slider-button:hover { color: #ffffff !important; }
+  .announcement-bar-section .slider-button .svg-wrapper svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  .announcement-bar-section .social-icons,
+  .announcement-bar-section .localization-wrapper {
+    display: none !important;
+  }
+</style>
+
 
 {%- liquid
   assign social_icons = true

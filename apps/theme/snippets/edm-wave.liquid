@@ -1,0 +1,10 @@
+{% doc %}
+Brand wave / squiggle line (the line beneath the starfish in the logo).
+@param {string} [class] - CSS class
+@example
+{% render 'edm-wave', class: 'my-wave' %}
+{% enddoc %}
+
+<svg class="{{ class | default: 'edm-wave' }}" viewBox="0 0 120 16" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
+  <path d="M2 8 C12 2, 22 2, 32 8 S52 14, 62 8 S82 2, 92 8 S112 14, 118 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>

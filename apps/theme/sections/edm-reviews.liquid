@@ -4,16 +4,23 @@
 
 <section
   class="edm-rv color-{{ section.settings.color_scheme }} gradient"
-  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);position:relative;overflow:hidden;"
 >
-  <div class="edm-rv__inner page-width">
+  {%- render 'edm-brand-decor', variant: 'sparkles', tone: 'soft', opacity: '0.55' -%}
+
+  <div class="edm-rv__inner page-width" style="position:relative;z-index:1;">
 
     <header class="edm-rv__head">
       <div class="edm-rv__head-left">
         {%- if section.settings.eyebrow != blank -%}
           <p class="edm-rv__eyebrow">{{ section.settings.eyebrow }}</p>
         {%- endif -%}
-        <h2 class="edm-rv__h2">{{ section.settings.title | default: 'Lo que dicen nuestras estrellas' }}</h2>
+        <h2 class="edm-rv__h2">
+          {{ section.settings.title | default: 'Lo que dicen nuestras' }}
+          {%- if section.settings.title_script != blank -%}
+            <span class="edm-script edm-rv__h2-script">{{ section.settings.title_script }}</span>
+          {%- endif -%}
+        </h2>
       </div>
       {%- if section.settings.avg_score != blank -%}
         <div class="edm-rv__score" aria-label="Calificación promedio {{ section.settings.avg_score }} de 5">
@@ -142,7 +149,7 @@
   letter-spacing: 0.32em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #9d7f32;
+  color: #FF88BB;
   margin: 0 0 2rem;
 }
 .edm-rv__eyebrow::before {
@@ -156,8 +163,19 @@
   font-size: clamp(3.8rem, 4vw, 6rem);
   font-weight: 400;
   line-height: 1.08;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0;
+}
+.edm-rv__h2-script {
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.12em);
+  font-size: 1.18em;
+  background: linear-gradient(100deg, #FF88BB 0%, #FF9966 50%, #FFCC99 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 .edm-rv__score {
   display: flex;
@@ -165,16 +183,20 @@
   gap: 2rem;
   flex-shrink: 0;
   padding: 2.4rem 3.2rem;
-  border: 1px solid rgba(208,177,106,.25);
-  border-radius: 8px;
-  background: rgba(208,177,106,.06);
+  border-radius: 100px;
+  background: linear-gradient(135deg, rgba(255,136,187,0.08) 0%, rgba(255,153,102,0.08) 100%);
+  border: 1.5px solid rgba(255, 136, 187, 0.28);
+  box-shadow: 0 8px 24px -10px rgba(255,136,187,0.2);
 }
 .edm-rv__score-num {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 5.6rem;
-  font-weight: 400;
+  font-weight: 500;
   font-style: italic;
-  color: #0b0805;
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   line-height: 1;
 }
 .edm-rv__score-stars {
@@ -182,12 +204,12 @@
   gap: 0.4rem;
   margin-bottom: 0.6rem;
 }
-.edm-rv__score-stars svg { width: 1.8rem; height: 1.8rem; color: #d0b16a; }
+.edm-rv__score-stars svg { width: 1.8rem; height: 1.8rem; color: #FF88BB; filter: drop-shadow(0 2px 4px rgba(255,136,187,0.35)); }
 .edm-rv__score-sub {
   font-size: 1.2rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #78695a;
+  color: #A88891;
   font-weight: 500;
   margin: 0;
 }
@@ -195,7 +217,7 @@
 /* ── Featured review ────────────────── */
 .edm-rv__featured {
   position: relative;
-  background: #0b0805;
+  background: #3D2330;
   border-radius: 8px;
   padding: 6.4rem 7.2rem;
   margin-bottom: 3.2rem;
@@ -219,7 +241,7 @@
   margin-bottom: 3.6rem;
 }
 .edm-rv__fstar { width: 2.2rem; height: 2.2rem; }
-.edm-rv__fstar--on { color: #d0b16a; }
+.edm-rv__fstar--on { color: #FFCC99; }
 .edm-rv__fstar--off { color: rgba(208,177,106,.2); }
 
 .edm-rv__feat-quote { margin: 0 0 4.4rem; }
@@ -243,7 +265,7 @@
 .edm-rv__feat-avatar {
   width: 5.2rem; height: 5.2rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  background: linear-gradient(135deg, #FFCC99, #FF88BB);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem;
   font-weight: 700;
@@ -275,7 +297,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #d0b16a;
+  color: #FFCC99;
   border: 1px solid rgba(208,177,106,.3);
   padding: 0.5rem 1.2rem;
   border-radius: 100px;
@@ -299,13 +321,13 @@
   transition: border-color .25s ease, box-shadow .25s ease;
 }
 .edm-rv__card:hover {
-  border-left-color: #d0b16a;
+  border-left-color: #FFCC99;
   box-shadow: 0 8px 32px -8px rgba(11,8,5,.1);
 }
 
 .edm-rv__stars { display: flex; gap: 0.4rem; }
 .edm-rv__star { width: 1.6rem; height: 1.6rem; }
-.edm-rv__star--on { color: #d0b16a; }
+.edm-rv__star--on { color: #FFCC99; }
 .edm-rv__star--off { color: rgba(208,177,106,.28); }
 
 .edm-rv__quote { flex: 1; margin: 0; }
@@ -314,7 +336,7 @@
   font-size: 2rem;
   font-style: italic;
   line-height: 1.62;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0;
 }
 
@@ -329,7 +351,7 @@
 .edm-rv__avatar {
   width: 4rem; height: 4rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  background: linear-gradient(135deg, #FFCC99, #FF88BB);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.25rem;
   font-weight: 700;
@@ -339,7 +361,7 @@
 .edm-rv__name {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0 0 0.2rem;
   line-height: 1.2;
 }
@@ -347,7 +369,7 @@
   font-size: 1.15rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #78695a;
+  color: #A88891;
   margin: 0;
   font-weight: 500;
 }
@@ -378,14 +400,14 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #0b0805;
+  color: #3D2330;
   text-decoration: none;
   padding-bottom: 0.4rem;
-  border-bottom: 1.5px solid #0b0805;
+  border-bottom: 1.5px solid #3D2330;
   transition: all .3s ease;
 }
 .edm-rv__cta svg { width: 1.8rem; height: 1.3rem; transition: transform .3s ease; }
-.edm-rv__cta:hover { color: #9d7f32; border-color: #9d7f32; }
+.edm-rv__cta:hover { color: #FF88BB; border-color: #FF88BB; }
 .edm-rv__cta:hover svg { transform: translateX(4px); }
 
 @media (max-width: 989px) {
@@ -411,7 +433,8 @@
   "class": "section",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Kicker", "default": "Reseñas" },
-    { "type": "text", "id": "title", "label": "Título", "default": "Lo que dicen nuestras estrellas" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Lo que dicen nuestras" },
+    { "type": "text", "id": "title_script", "label": "Palabra final (script)", "default": "estrellas" },
     { "type": "text", "id": "avg_score", "label": "Puntuación promedio", "default": "4.9" },
     { "type": "text", "id": "review_count", "label": "Número de reseñas", "default": "1.842" },
     { "type": "text", "id": "cta_label", "label": "Texto botón CTA" },

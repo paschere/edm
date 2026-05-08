@@ -1,13 +1,20 @@
 <section
   class="edm-ritual color-{{ section.settings.color_scheme }} gradient"
-  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);"
+  style="--pt:{{ section.settings.padding_top }}px;--pb:{{ section.settings.padding_bottom }}px;padding-top:var(--pt);padding-bottom:var(--pb);position:relative;"
 >
-  <div class="edm-ritual__hd page-width">
+  {%- render 'edm-brand-decor', variant: 'corners', tone: 'soft', opacity: '0.35' -%}
+
+  <div class="edm-ritual__hd page-width" style="position:relative;z-index:1;">
     {%- if section.settings.eyebrow != blank -%}
       <p class="edm-ritual__eyebrow">{{ section.settings.eyebrow }}</p>
     {%- endif -%}
     {%- if section.settings.title != blank -%}
-      <h2 class="edm-ritual__h2">{{ section.settings.title }}</h2>
+      <h2 class="edm-ritual__h2">
+        {{ section.settings.title }}
+        {%- if section.settings.title_script != blank -%}
+          <span class="edm-script edm-ritual__h2-script">{{ section.settings.title_script }}</span>
+        {%- endif -%}
+      </h2>
     {%- endif -%}
     {%- if section.settings.subtitle != blank -%}
       <p class="edm-ritual__sub">{{ section.settings.subtitle }}</p>
@@ -52,7 +59,7 @@
   letter-spacing: 0.32em;
   text-transform: uppercase;
   font-weight: 600;
-  color: #9d7f32;
+  color: #FF88BB;
   margin: 0 0 2.4rem;
 }
 .edm-ritual__eyebrow::before,
@@ -70,13 +77,24 @@
   font-weight: 400;
   line-height: 1.06;
   letter-spacing: -0.01em;
-  color: #0b0805;
+  color: #3D2330;
   margin: 0 0 2.4rem;
+}
+.edm-ritual__h2-script {
+  font-size: 1.2em;
+  display: inline-block;
+  margin-left: 0.18em;
+  transform: translateY(0.1em);
+  background: linear-gradient(135deg, #FF88BB 0%, #FF9966 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .edm-ritual__sub {
   font-size: 1.7rem;
-  color: #4a3f2f;
+  color: #7C5862;
   line-height: 1.72;
   margin: 0;
 }
@@ -128,7 +146,7 @@
 .edm-ritual__icon svg {
   width: 2.8rem;
   height: 2.8rem;
-  stroke: #9d7f32;
+  stroke: #FF88BB;
   fill: none;
   stroke-width: 1.5;
   stroke-linecap: round;
@@ -136,7 +154,7 @@
   transition: stroke 0.4s;
 }
 .edm-ritual__card:hover .edm-ritual__icon {
-  background: linear-gradient(135deg, #d0b16a, #9d7f32);
+  background: linear-gradient(135deg, #FFCC99, #FF88BB);
   border-color: transparent;
   box-shadow: 0 8px 24px -6px rgba(157, 127, 50, 0.4);
 }
@@ -150,7 +168,7 @@
   letter-spacing: 0.26em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #9d7f32;
+  color: #FF88BB;
   margin-bottom: 1.2rem;
 }
 
@@ -159,14 +177,14 @@
   font-size: 3.6rem;
   font-weight: 500;
   font-style: italic;
-  color: #0b0805;
+  color: #3D2330;
   line-height: 1.08;
   margin: 0 0 2rem;
 }
 
 .edm-ritual__desc {
   font-size: 1.6rem;
-  color: #4a3f2f;
+  color: #7C5862;
   line-height: 1.72;
   margin: 0;
 }
@@ -196,7 +214,13 @@
       "type": "text",
       "id": "title",
       "label": "Título",
-      "default": "El poder del trópico"
+      "default": "El poder del"
+    },
+    {
+      "type": "text",
+      "id": "title_script",
+      "label": "Palabra final (script)",
+      "default": "trópico"
     },
     {
       "type": "textarea",
